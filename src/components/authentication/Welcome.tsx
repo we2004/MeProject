@@ -1,4 +1,5 @@
 import { Compass, LogIn, UserPlus } from "lucide-react"
+import { Link } from "react-router-dom"
 import logo from "../../assets/logo.svg"
 function Welcome() {
   return (
@@ -27,13 +28,13 @@ function Welcome() {
 
           </button>
 
-          <button className="group flex w-full items-center justify-between rounded-2xl border border-primary/15 bg-white px-5 py-4 font-body font-medium text-primary-font shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-md">
+          <Link to={'/home'} className="group flex w-full items-center justify-between rounded-2xl border border-primary/15 bg-white px-5 py-4 font-body font-medium text-primary-font shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-md">
             <span className="flex items-center gap-3">
               <Compass className="h-5 w-5 text-primary" />
               Explore App
             </span>
 
-          </button>
+          </Link>
         </div>
 
         {/* Login */}
