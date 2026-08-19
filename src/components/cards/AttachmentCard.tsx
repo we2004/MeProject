@@ -1,21 +1,21 @@
 import { Download, File, FileText, Image } from "lucide-react"
 import { type AttachmentCardProps } from "../../types/attachments"
 
-function AttachmentCard({ fileName, mimeType }: AttachmentCardProps) {
+function AttachmentCard({ name, type }: AttachmentCardProps) {
   return (
     <div className="flex items-center justify-between rounded-2xl border border-primary/15 bg-white p-4 shadow-sm transition-all duration-300 hover:border-primary/50 hover:shadow-md">
       <div className="flex items-center gap-3">
         <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
-          {mimeType === "png" || mimeType === "jpg" || mimeType === "svg" ? (
+          {type === "png" || type === "jpg" || type === "svg" ? (
             <Image className="h-5 w-5" />
-          ) : mimeType === "pdf" || mimeType === "md" || mimeType === "txt" ? (
+          ) : type === "pdf" || type === "md" || type === "txt" ? (
             <FileText className="h-5 w-5" />
           ) : (
             <File className="h-5 w-5" />
           )}
         </div>
 
-        <span className="font-body text-primary-font">{fileName}</span>
+        <span className="font-body text-primary-font">{name}</span>
       </div>
 
       <div className="flex items-center gap-2">

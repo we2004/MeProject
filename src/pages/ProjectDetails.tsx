@@ -29,7 +29,7 @@ import {
 } from "../api/projects"
 import TechStackSection from "../sections/TechStackSection"
 import { createNote } from "../api/notes"
-import { getAttachments } from "../api/attachments"
+import { createAttachment, getAttachments } from "../api/attachments"
 import type { AttachmentApiResponse } from "../types/attachments"
 
 function ProjectsDetails({ token }: { token: string }) {
@@ -81,11 +81,12 @@ function ProjectsDetails({ token }: { token: string }) {
       const projectsData = await getProjects(token, "all", "asc")
       setProjects(projectsData)
       const attachmentsData = await getAttachments(Number(projectId), token)
+      console.log('apit response', attachmentsData)
       setAttachments(attachmentsData)
     }
 
     start()
-  }, [token])
+  }, [token, projectId])
 
   const handleUpdateProject = async (
     field: string,
@@ -161,6 +162,19 @@ function ProjectsDetails({ token }: { token: string }) {
     setProjectTasks(updatedTasks)
   }
 
+  const handleAddAttachment = async (files: File[]) => {
+    for (const file of files) {
+      await createAttachment(token, {
+        file: file,
+        projectId: Number(projectId)
+      })
+    }
+
+    const updatedAttachments = await getAttachments(Number(projectId), token)
+
+    setAttachments(updatedAttachments)
+  }
+
   const handleDeleteTask = async (taskId: number) => {
     await deleteTask(Number(taskId), token)
 
@@ -189,7 +203,10 @@ function ProjectsDetails({ token }: { token: string }) {
         )}
 
         {isAttachmentModalOpen && (
-          <AddAttachmentModal onClose={() => setIsAttachmentModalOpen(false)} />
+          <AddAttachmentModal
+            onClose={() => setIsAttachmentModalOpen(false)}
+            onSubmit={handleAddAttachment}
+          />
         )}
         <div className="rounded-3xl border border-primary/15 bg-white p-6 shadow-sm">
           <div className="flex flex-col gap-6">

@@ -2,14 +2,18 @@
 export type AttachemntsTypes = "png" | "jpg" | "jpeg" |"svg" | "pdf" | "md" | "txt"
 
 export type AttachmentCardProps = {
-  mimeType: AttachemntsTypes
-  fileName: string
+  type: AttachemntsTypes
+  name: string
 }
 
 export type AttachmentApiResponse = {
     id: number
-    fileName: string
-    mimeType: AttachemntsTypes
+    name: string
     projectId: number
-    sizeBytes: number
+    type: AttachemntsTypes
+}
+
+export type CreateAttachment = {
+  file: File
+  projectId: number
 }
