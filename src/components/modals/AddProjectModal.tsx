@@ -6,11 +6,11 @@ import { type Project } from "../../types/projects"
 import TechStackSection from "../../sections/TechStackSection"
 type AddProjectModalProps = {
   onClose: () => void
-  onSubmit: (newItem: Project) => void
+  onSubmit: (newItem: Project, file:File[]) => void
 }
 
 function AddProjectModal({ onClose, onSubmit }: AddProjectModalProps) {
-  const files: string[] = []
+  const [files, setFiles] = useState<File[]>([])
 
   const [projectName, setProjectName] = useState("")
   const [projectDescription, setProjectDescription] = useState("")
@@ -28,6 +28,14 @@ function AddProjectModal({ onClose, onSubmit }: AddProjectModalProps) {
     setTechStack(newTechStack)
   }
 
+  const handleAddAttachment = (newFiles: File[]) => {
+    setFiles((current) => [...current, ...newFiles])
+  }
+
+  const handleDeleteFile = (file: File) => {
+    setFiles((current) => current.filter((currentFile) => currentFile !== file))
+  }
+
   return (
     <Modal
       modalTitle="Create Project"
@@ -41,7 +49,7 @@ function AddProjectModal({ onClose, onSubmit }: AddProjectModalProps) {
           cancelled: false,
           techStack: techStack
         }
-        onSubmit(newProject)
+        onSubmit(newProject, files)
         onClose()
       }}
     >
@@ -145,7 +153,7 @@ function AddProjectModal({ onClose, onSubmit }: AddProjectModalProps) {
               Attachments
             </label>
 
-            <AttachmentSection files={files} />
+            <AttachmentSection files={files} onAddAttachment={handleAddAttachment} onDeleteAttachment={handleDeleteFile}/>
           </div>
         </div>
       </div>

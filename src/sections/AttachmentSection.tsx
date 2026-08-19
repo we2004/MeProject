@@ -1,7 +1,13 @@
 import { Paperclip } from "lucide-react"
 import ModalAttachmentCard from "../components/cards/ModalAttachmentCard"
 
-function AttachmentSection({ files }: { files: string[] }) {
+type AttachmentSectionProps = {
+  files: File[]
+  onAddAttachment: (files: File[]) => void
+  onDeleteAttachment: (file: File) =>void
+}
+
+function AttachmentSection({ files, onAddAttachment, onDeleteAttachment }: AttachmentSectionProps) {
   return (
     <>
       <label className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-primary/25 bg-primary/5 px-6 py-8 text-center transition-all duration-300 hover:border-primary/60 hover:bg-primary/10">
@@ -24,16 +30,22 @@ function AttachmentSection({ files }: { files: string[] }) {
           className="hidden"
           multiple
           accept=".jpg,.jpeg,.png,.pdf,.svg,.txt,.md"
+          onChange={(e) => {
+            if (e.target.files) {
+              onAddAttachment(Array.from(e.target.files))
+            }
+          }}
         />
       </label>
 
       {/* Mock Attachment */}
 
       <div className="flex flex-col gap-1">
-        {files.map((file) => (
+        {files.map((file,idx) => (
           <ModalAttachmentCard
-            key={file}
-            fileName={file}
+            key={`${file.name}-${idx}`}
+            file={file}
+            onDelete={onDeleteAttachment}
           />
         ))}
       </div>

@@ -15,8 +15,7 @@ import SortByDateButton from "../components/buttons/SortByDateButton"
 import AddProjectModal from "../components/modals/AddProjectModal"
 import { createProject } from "../api/projects"
 import { getProjects } from "../api/projects"
-
-
+import { createAttachment } from "../api/attachments"
 function Projects({ token }: { token: string }) {
   const [searchParams, setSearchParams] = useSearchParams()
   const [projects, setProjects] = useState<ProjectApiResponse[]>([])
@@ -50,8 +49,6 @@ function Projects({ token }: { token: string }) {
     })
   }
 
-
-
   useEffect(() => {
     const start = async () => {
       const projectsData = await getProjects(token, filter, order)
@@ -61,10 +58,17 @@ function Projects({ token }: { token: string }) {
     start()
   }, [token, filter, order])
 
-  const handleAddProject = async (newProject: Project) => {
-
-    await createProject(token, newProject)
+  const handleAddProject = async (newProject: Project, files: File[]) => {
+    const response = await createProject(token, newProject)
     const projectsData = await getProjects(token, filter, order)
+
+    for (const file of files) {
+      await createAttachment(token, {
+        file: file,
+        projectId: Number(response.id)
+      })
+    }
+
     setProjects(projectsData)
   }
 

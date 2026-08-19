@@ -12,7 +12,6 @@ import StatusBadge from "../components/badges/StatusBadge"
 import TechBadge from "../components/badges/TechBadge"
 import PrimaryButton from "../components/buttons/PrimaryButton"
 import AttachmentCard from "../components/cards/AttachmentCard"
-import { attachments } from "../data/projects"
 import { useParams, Link, useNavigate } from "react-router-dom"
 import { useState, useEffect } from "react"
 import { calculateProgress } from "../utils/projects"
@@ -30,6 +29,13 @@ import {
 } from "../api/projects"
 import TechStackSection from "../sections/TechStackSection"
 import { createNote } from "../api/notes"
+import {
+  createAttachment,
+  deleteAttachment,
+  getAttachments,
+  downloadAttachment
+} from "../api/attachments"
+import type { AttachmentApiResponse } from "../types/attachments"
 
 function ProjectsDetails({ token }: { token: string }) {
   const { projectId } = useParams()
@@ -38,6 +44,7 @@ function ProjectsDetails({ token }: { token: string }) {
   const [projects, setProjects] = useState<ProjectApiResponse[] | null>(null)
   const [project, setProject] = useState<ProjectApiResponse | null>(null)
   const [projectTasks, setProjectTasks] = useState<TaskApiResponse | null>(null)
+  const [attachments, setAttachments] = useState<AttachmentApiResponse[]>([])
   const [isEditName, setIsEditName] = useState(false)
   const [projectName, setProjectName] = useState("")
   const [isEditDescription, setIsEditDescription] = useState(false)
@@ -78,10 +85,13 @@ function ProjectsDetails({ token }: { token: string }) {
     const start = async () => {
       const projectsData = await getProjects(token, "all", "asc")
       setProjects(projectsData)
+      const attachmentsData = await getAttachments(Number(projectId), token)
+      console.log("apit response", attachmentsData)
+      setAttachments(attachmentsData)
     }
 
     start()
-  }, [token])
+  }, [token, projectId])
 
   const handleUpdateProject = async (
     field: string,
@@ -157,6 +167,19 @@ function ProjectsDetails({ token }: { token: string }) {
     setProjectTasks(updatedTasks)
   }
 
+  const handleAddAttachment = async (files: File[]) => {
+    for (const file of files) {
+      await createAttachment(token, {
+        file: file,
+        projectId: Number(projectId)
+      })
+    }
+
+    const updatedAttachments = await getAttachments(Number(projectId), token)
+
+    setAttachments(updatedAttachments)
+  }
+
   const handleDeleteTask = async (taskId: number) => {
     await deleteTask(Number(taskId), token)
 
@@ -168,6 +191,29 @@ function ProjectsDetails({ token }: { token: string }) {
       "asc"
     )
     setProjectTasks(updatedTasks)
+  }
+
+  const handleDeleteAttachment = async (fileId: number) => {
+    await deleteAttachment(token, fileId)
+
+    const updatedAttachments = await getAttachments(Number(projectId), token)
+    setAttachments(updatedAttachments)
+  }
+
+  const handleDownloadAttachment = async (
+    attachmentId: number,
+    fileName: string
+  ) => {
+    const file = await downloadAttachment(token, attachmentId)
+
+    const url = URL.createObjectURL(file)
+
+    const link = document.createElement("a")
+    link.href = url
+    link.download = fileName
+    link.click()
+
+    URL.revokeObjectURL(url)
   }
 
   const progress = calculateProgress(Number(projectId), projectTasks?.data)
@@ -185,7 +231,10 @@ function ProjectsDetails({ token }: { token: string }) {
         )}
 
         {isAttachmentModalOpen && (
-          <AddAttachmentModal onClose={() => setIsAttachmentModalOpen(false)} />
+          <AddAttachmentModal
+            onClose={() => setIsAttachmentModalOpen(false)}
+            onSubmit={handleAddAttachment}
+          />
         )}
         <div className="rounded-3xl border border-primary/15 bg-white p-6 shadow-sm">
           <div className="flex flex-col gap-6">
@@ -422,10 +471,13 @@ function ProjectsDetails({ token }: { token: string }) {
                 className="flex items-center gap-3"
               >
                 <div className="flex-1">
-                  <AttachmentCard {...attachment} />
+                  <AttachmentCard {...attachment} onDownload={handleDownloadAttachment}/>
                 </div>
 
-                <button className="flex h-12 w-12 items-center justify-center rounded-2xl border border-primary/15 bg-white text-primary-font shadow-sm transition-all duration-300 hover:bg-redT hover:text-white">
+                <button
+                  onClick={() => handleDeleteAttachment(attachment.id)}
+                  className="flex h-12 w-12 items-center justify-center rounded-2xl border border-primary/15 bg-white text-primary-font shadow-sm transition-all duration-300 hover:bg-redT hover:text-white"
+                >
                   <Trash2 className="h-5 w-5" />
                 </button>
               </div>

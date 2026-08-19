@@ -1,14 +1,22 @@
 
-export type AttachemntsTypes = "png" | "jpg" | "svg" | "pdf" | "md" | "txt" | "link"
+export type AttachemntsTypes = "png" | "jpg" | "jpeg" |"svg" | "pdf" | "md" | "txt"
 
 export type AttachmentCardProps = {
+  id: number
   type: AttachemntsTypes
   name: string
+  onDownload: (attachmentId: number,
+    fileName: string) => void
 }
 
-export type Attachment = {
+export type AttachmentApiResponse = {
     id: number
     name: string
-    type: AttachemntsTypes
     projectId: number
+    type: AttachemntsTypes
+}
+
+export type CreateAttachment = {
+  file: File
+  projectId: number
 }
