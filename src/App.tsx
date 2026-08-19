@@ -1,19 +1,19 @@
 import { Routes, Route } from "react-router-dom"
 import Projects from "./pages/Projects"
 import Home from "./pages/Home"
-import AppLayout from "./layouts/AppLayout"
 import Tasks from "./pages/Tasks"
 import ProjectsDetails from "./pages/ProjectDetails"
 import TaskDetails from "./pages/TaskDetails"
 import Settings from "./pages/Settings"
 import { useState, useEffect } from "react"
+import AppLayout from "./layouts/AppLayout"
+import AuthLayout from "./layouts/AuthLayout"
+import Welcome from "./components/authentication/Welcome"
 import axios from "axios"
 const BASE_URL = import.meta.env.VITE_BASE_URL
 
 function App() {
-
-
-  const [token, setToken] = useState<string>('')
+  const [token, setToken] = useState<string>("")
   useEffect(() => {
     const startExplore = async () => {
       const response = await axios.post(`${BASE_URL}/auth/explore`)
@@ -23,30 +23,39 @@ function App() {
 
     startExplore()
   }, [])
+
   return (
     <Routes>
-      <Route element={<AppLayout />}>
+      <Route element={<AuthLayout />}>
         <Route
           index
-          element={<Home token={token}/>}
+          element={<Welcome />}
+        />
+        
+      </Route>
+
+      <Route element={<AppLayout />}>
+        <Route
+          path="home"
+          element={<Home token={token} />}
         />
         <Route
           path="projects"
-          element={<Projects token={token}/>}
+          element={<Projects token={token} />}
         />
         <Route
           path="tasks"
-          element={<Tasks token={token}/>}
+          element={<Tasks token={token} />}
         />
 
         <Route
           path="projectDetails/:projectId"
-          element={<ProjectsDetails token={token}/>}
+          element={<ProjectsDetails token={token} />}
         />
 
         <Route
           path="taskDetails/:taskId"
-          element={<TaskDetails token={token}/>}
+          element={<TaskDetails token={token} />}
         />
 
         <Route
