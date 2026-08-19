@@ -1,0 +1,22 @@
+import  { type LucideIcon } from "lucide-react";
+import { NavLink } from "react-router-dom"
+type SidebarButtonProps = {
+  Icon: LucideIcon
+  text: string
+  path: string
+}
+
+function SidebarButton({ Icon, text, path }: SidebarButtonProps) {
+  return (
+    <NavLink
+    to={path}
+      className='group flex flex-col h-15 w-17 items-center justify-center rounded-2xl  text-primary-font transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/15 hover:bg-primary/80 hover:text-white hover:shadow-md text-center'
+    >
+      <Icon className="h-6 w-6 shrink-0 transition-colors duration-300 text-primary group-hover:text-white" />
+
+      <p className="text-sm mt-1 font-heading font-semibold">{text}</p>
+    </NavLink>
+  )
+}
+
+export default SidebarButton

@@ -1,0 +1,106 @@
+import {
+  CheckCircle2,
+  Clock3,
+  AlertTriangle,
+  Play,
+  CircleX,
+  ChevronDown
+} from "lucide-react"
+import { useState } from "react"
+import type { TaskStatus } from "../../types/tasks"
+import type { ProjectStatus } from "../../types/projects"
+
+type StatusBadgeProps = {
+  status: TaskStatus | ProjectStatus
+  interactive?: boolean
+  onStatusChange?: (newStatus: TaskStatus) => void
+}
+
+function StatusBadge({ status, interactive = false, onStatusChange }: StatusBadgeProps) {
+  const [isOpen, setIsOpen] = useState(false)
+
+  let statusStyle = ""
+
+  switch (status) {
+    case "active":
+    case "open":
+      statusStyle = "bg-blueT/25"
+      break
+
+    case "completed":
+      statusStyle = "bg-greenT/25"
+      break
+
+    case "overdue":
+      statusStyle = "bg-redT/45"
+      break
+
+    case "cancelled":
+      statusStyle = "bg-secondary/15"
+      break
+  }
+
+  const nextStatus = status === "completed" ? "open" : "completed"
+
+  const handleBadgeClick = (event: React.MouseEvent) => {
+    event.preventDefault()
+    event.stopPropagation()
+
+    if (interactive) {
+      setIsOpen(!isOpen)
+    }
+  }
+
+  return (
+    <div className="relative">
+      <button
+        type="button"
+        disabled={!interactive}
+        onClick={handleBadgeClick}
+        className={`${statusStyle} flex items-center gap-2 rounded-full px-4 py-2 font-body text-sm font-medium capitalize text-primary-font transition-all duration-200 ${
+          interactive ? "cursor-pointer hover:opacity-80" : "cursor-default"
+        }`}
+      >
+        {status === "completed" && <CheckCircle2 className="h-4 w-4" />}
+
+        {status === "open" && <Clock3 className="h-4 w-4" />}
+
+        {status === "overdue" && <AlertTriangle className="h-4 w-4" />}
+
+        {status === "active" && <Play className="h-4 w-4" />}
+
+        {status === "cancelled" && <CircleX className="h-4 w-4" />}
+
+        {status}
+
+        {interactive && (
+          <ChevronDown
+            className={`h-4 w-4 transition-transform duration-200 ${
+              isOpen ? "rotate-180" : ""
+            }`}
+          />
+        )}
+      </button>
+
+      {interactive && isOpen && (
+        <div className="absolute left-0 top-full z-20 mt-2 w-36 rounded-2xl border border-primary/15 bg-white p-2 shadow-lg">
+          <button
+            type="button"
+            onClick={(event) => {
+              event.preventDefault()
+              event.stopPropagation()
+
+              onStatusChange?.(nextStatus)
+              setIsOpen(false)
+            }}
+            className="w-full rounded-xl px-3 py-2 text-left font-body text-sm capitalize text-primary-font transition-colors duration-200 hover:bg-primary hover:text-white"
+          >
+            {nextStatus}
+          </button>
+        </div>
+      )}
+    </div>
+  )
+}
+
+export default StatusBadge
