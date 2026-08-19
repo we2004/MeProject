@@ -12,7 +12,6 @@ import StatusBadge from "../components/badges/StatusBadge"
 import TechBadge from "../components/badges/TechBadge"
 import PrimaryButton from "../components/buttons/PrimaryButton"
 import AttachmentCard from "../components/cards/AttachmentCard"
-import { attachments } from "../data/projects"
 import { useParams, Link, useNavigate } from "react-router-dom"
 import { useState, useEffect } from "react"
 import { calculateProgress } from "../utils/projects"
@@ -30,6 +29,8 @@ import {
 } from "../api/projects"
 import TechStackSection from "../sections/TechStackSection"
 import { createNote } from "../api/notes"
+import { getAttachments } from "../api/attachments"
+import type { AttachmentApiResponse } from "../types/attachments"
 
 function ProjectsDetails({ token }: { token: string }) {
   const { projectId } = useParams()
@@ -38,6 +39,7 @@ function ProjectsDetails({ token }: { token: string }) {
   const [projects, setProjects] = useState<ProjectApiResponse[] | null>(null)
   const [project, setProject] = useState<ProjectApiResponse | null>(null)
   const [projectTasks, setProjectTasks] = useState<TaskApiResponse | null>(null)
+  const [attachments, setAttachments] = useState<AttachmentApiResponse[]>([])
   const [isEditName, setIsEditName] = useState(false)
   const [projectName, setProjectName] = useState("")
   const [isEditDescription, setIsEditDescription] = useState(false)
@@ -78,6 +80,8 @@ function ProjectsDetails({ token }: { token: string }) {
     const start = async () => {
       const projectsData = await getProjects(token, "all", "asc")
       setProjects(projectsData)
+      const attachmentsData = await getAttachments(Number(projectId), token)
+      setAttachments(attachmentsData)
     }
 
     start()
