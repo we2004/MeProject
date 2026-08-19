@@ -29,7 +29,12 @@ import {
 } from "../api/projects"
 import TechStackSection from "../sections/TechStackSection"
 import { createNote } from "../api/notes"
-import { createAttachment, getAttachments } from "../api/attachments"
+import {
+  createAttachment,
+  deleteAttachment,
+  getAttachments,
+  downloadAttachment
+} from "../api/attachments"
 import type { AttachmentApiResponse } from "../types/attachments"
 
 function ProjectsDetails({ token }: { token: string }) {
@@ -81,7 +86,7 @@ function ProjectsDetails({ token }: { token: string }) {
       const projectsData = await getProjects(token, "all", "asc")
       setProjects(projectsData)
       const attachmentsData = await getAttachments(Number(projectId), token)
-      console.log('apit response', attachmentsData)
+      console.log("apit response", attachmentsData)
       setAttachments(attachmentsData)
     }
 
@@ -186,6 +191,29 @@ function ProjectsDetails({ token }: { token: string }) {
       "asc"
     )
     setProjectTasks(updatedTasks)
+  }
+
+  const handleDeleteAttachment = async (fileId: number) => {
+    await deleteAttachment(token, fileId)
+
+    const updatedAttachments = await getAttachments(Number(projectId), token)
+    setAttachments(updatedAttachments)
+  }
+
+  const handleDownloadAttachment = async (
+    attachmentId: number,
+    fileName: string
+  ) => {
+    const file = await downloadAttachment(token, attachmentId)
+
+    const url = URL.createObjectURL(file)
+
+    const link = document.createElement("a")
+    link.href = url
+    link.download = fileName
+    link.click()
+
+    URL.revokeObjectURL(url)
   }
 
   const progress = calculateProgress(Number(projectId), projectTasks?.data)
@@ -443,10 +471,13 @@ function ProjectsDetails({ token }: { token: string }) {
                 className="flex items-center gap-3"
               >
                 <div className="flex-1">
-                  <AttachmentCard {...attachment} />
+                  <AttachmentCard {...attachment} onDownload={handleDownloadAttachment}/>
                 </div>
 
-                <button className="flex h-12 w-12 items-center justify-center rounded-2xl border border-primary/15 bg-white text-primary-font shadow-sm transition-all duration-300 hover:bg-redT hover:text-white">
+                <button
+                  onClick={() => handleDeleteAttachment(attachment.id)}
+                  className="flex h-12 w-12 items-center justify-center rounded-2xl border border-primary/15 bg-white text-primary-font shadow-sm transition-all duration-300 hover:bg-redT hover:text-white"
+                >
                   <Trash2 className="h-5 w-5" />
                 </button>
               </div>

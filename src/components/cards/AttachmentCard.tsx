@@ -1,7 +1,7 @@
 import { Download, File, FileText, Image } from "lucide-react"
 import { type AttachmentCardProps } from "../../types/attachments"
 
-function AttachmentCard({ name, type }: AttachmentCardProps) {
+function AttachmentCard({ id, name, type, onDownload }: AttachmentCardProps) {
   return (
     <div className="flex items-center justify-between rounded-2xl border border-primary/15 bg-white p-4 shadow-sm transition-all duration-300 hover:border-primary/50 hover:shadow-md">
       <div className="flex items-center gap-3">
@@ -19,7 +19,7 @@ function AttachmentCard({ name, type }: AttachmentCardProps) {
       </div>
 
       <div className="flex items-center gap-2">
-        <button className="rounded-xl p-2 text-primary-font/70 transition-all duration-300 hover:bg-primary/10 hover:text-primary">
+        <button onClick={() => {onDownload(id, name)}} className="rounded-xl p-2 text-primary-font/70 transition-all duration-300 hover:bg-primary/10 hover:text-primary">
           <Download className="h-5 w-5" />
         </button>
       </div>
