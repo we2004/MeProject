@@ -49,9 +49,9 @@ function Login() {
                 Password
               </label>
 
-              <button className="font-body text-xs font-medium text-primary transition-colors duration-300 hover:text-primary-font">
+              <Link to="/forgot-password" className="font-body text-xs font-medium text-primary transition-colors duration-300 hover:text-primary-font">
                 Forgot password?
-              </button>
+              </Link>
             </div>
 
             <div className="relative">
