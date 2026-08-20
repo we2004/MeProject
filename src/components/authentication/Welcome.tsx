@@ -45,10 +45,10 @@ function Welcome() {
         <div className="mt-10 flex items-center justify-center gap-1.5 font-body text-sm text-primary-font/60">
           <span>Already have an account?</span>
 
-          <button className="flex items-center gap-1 font-medium text-primary transition-colors duration-300 hover:text-primary-font">
+          <Link to={'/login'} className="flex items-center gap-1 font-medium text-primary transition-colors duration-300 hover:text-primary-font">
             Log In
             <LogIn className="h-4 w-4" />
-          </button>
+          </Link>
         </div>
       </div>
     </div>
