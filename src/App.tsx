@@ -10,6 +10,10 @@ import AppLayout from "./layouts/AppLayout"
 import AuthLayout from "./layouts/AuthLayout"
 import Welcome from "./components/authentication/Welcome"
 import axios from "axios"
+import Register from "./components/authentication/Register"
+import Login from "./components/authentication/Login"
+import ForgotPassword from "./components/authentication/ForgotPassword"
+import Recovery from "./components/authentication/Recovery"
 const BASE_URL = import.meta.env.VITE_BASE_URL
 
 function App() {
@@ -31,8 +35,27 @@ function App() {
           index
           element={<Welcome />}
         />
-        
+
+        <Route
+          path="register"
+          element={<Register />}
+        />
+
+        <Route
+          path="login"
+          element={<Login />}
+        />
       </Route>
+
+      <Route
+        path="forgot-password"
+        element={<ForgotPassword />}
+      />
+
+      <Route
+        path="recovery"
+        element={<Recovery />}
+      />
 
       <Route element={<AppLayout />}>
         <Route

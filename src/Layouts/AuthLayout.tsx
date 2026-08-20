@@ -8,7 +8,7 @@ function AuthLayout() {
         <img
           src={hero}
           alt="Project management workspace"
-          className="h-166 w-280 object-cover opacity-95"
+          className="h-166 w-280 object-cover"
         />
       </div>
 

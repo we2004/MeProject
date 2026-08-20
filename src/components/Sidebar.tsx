@@ -12,7 +12,7 @@ function Sidebar() {
     {
       Icon: LayoutDashboard,
       text: "Home",
-      path: "/"
+      path: "home"
     },
     {
       Icon: FolderKanban,
