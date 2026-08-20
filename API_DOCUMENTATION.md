@@ -8,7 +8,9 @@ All endpoints (except `/auth/register`, `/auth/login`, and `/auth/explore`) requ
 
 ### 1. Register Account
 **POST /auth/register**
-- Body: `{ "username": "user1", "password": "password123" }`
+- Body: `{ "name": "Wesal", "username": "user1", "password": "password123" }`
+  - `name`, `username`, and `password` are required.
+  - `password` must be at least 6 characters.
 - Response (201): `{ "message": "...", "recoveryKey": "..." }`
 
 ### 2. Login
@@ -23,11 +25,37 @@ All endpoints (except `/auth/register`, `/auth/login`, and `/auth/explore`) requ
 
 ### 4. Get Current User
 **GET /auth/me**
-- Response (200): `{ "id": 1, "username": "user1", "isDemo": false }`
+- Response (200): `{ "id": 1, "name": "Wesal", "username": "user1", "isDemo": false }`
 
-### 5. Logout
+### 5. Update Profile
+**PATCH /auth/me**
+- Body: `{ "name": "New Name" }`
+- Response (200): `{ "message": "Profile updated successfully", "name": "New Name" }`
+
+### 6. Delete Account
+**DELETE /auth/me**
+- Response (200): `{ "message": "Account deleted successfully" }`
+
+### 7. Reset Password
+**POST /auth/reset-password**
+- Body: `{ "username": "user1", "recoveryKey": "the-recovery-key", "newPassword": "newpassword" }`
+  - Validates that `newPassword` is at least 6 characters.
+- Response (200): `{ "message": "Password reset successfully" }`
+- Error (401): Invalid username or recovery key.
+- Note: This endpoint does NOT require a JWT token.
+
+### 8. Logout
 **POST /auth/logout**
 - Response (200): `{ "message": "..." }`
+
+### User Data Structure
+The User model in the database has the following schema:
+- `id` (INTEGER PRIMARY KEY)
+- `name` (TEXT)
+- `username` (TEXT)
+- `password` (TEXT, hashed via bcrypt, not returned to client)
+- `recoveryKey` (TEXT, only exposed upon registration)
+- `isDemo` (BOOLEAN)
 
 ---
 
