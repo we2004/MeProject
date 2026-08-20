@@ -10,6 +10,7 @@ import AppLayout from "./layouts/AppLayout"
 import AuthLayout from "./layouts/AuthLayout"
 import Welcome from "./components/authentication/Welcome"
 import axios from "axios"
+import Register from "./components/authentication/Register"
 const BASE_URL = import.meta.env.VITE_BASE_URL
 
 function App() {
@@ -30,6 +31,11 @@ function App() {
         <Route
           index
           element={<Welcome />}
+        />
+
+        <Route
+          path="register"
+          element={<Register />}
         />
         
       </Route>
