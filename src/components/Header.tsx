@@ -1,11 +1,11 @@
 import { Search, UserRound } from "lucide-react"
-import logo from "../assets/logo.svg"
+import logo from "../assets/logo2.png"
 function Header() {
   return (
     <header className="border border-primary/15 px-4 py-3 shadow-sm backdrop-blur-sm sticky top-0 z-40">
       <div className="mx-auto flex items-center gap-3 ">
         <div className="flex items-center gap-1 ">
-          <img src={logo} className="flex h-15 w-15 items-center justify-center" />
+          <img src={logo} className="flex h-12 w-12 items-center justify-center" />
            
           <div className="hidden sm:flex sm:flex-col ">
             <span className="font-heading text-lg font-semibold tracking-tight text-primary-font ">

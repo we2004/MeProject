@@ -8,12 +8,12 @@ import Settings from "./pages/Settings"
 import { useState, useEffect } from "react"
 import AppLayout from "./layouts/AppLayout"
 import AuthLayout from "./layouts/AuthLayout"
-import Welcome from "./components/authentication/Welcome"
+import Welcome from "./authentication/Welcome"
 import axios from "axios"
-import Register from "./components/authentication/Register"
-import Login from "./components/authentication/Login"
-import ForgotPassword from "./components/authentication/ForgotPassword"
-import Recovery from "./components/authentication/Recovery"
+import Register from "./authentication/Register"
+import Login from "./authentication/Login"
+import ForgotPassword from "./authentication/ForgotPassword"
+import Recovery from "./authentication/Recovery"
 const BASE_URL = import.meta.env.VITE_BASE_URL
 
 function App() {
