@@ -8,10 +8,10 @@ import { authenticate, AuthRequest, JWT_SECRET } from '../middleware/auth';
 const router = Router();
 
 router.post('/register', async (req, res) => {
-  const { username, password } = req.body;
+  const { name, username, password } = req.body;
 
-  if (!username || !password) {
-    return res.status(400).json({ error: 'Username and password are required' });
+  if (!name || !username || !password) {
+    return res.status(400).json({ error: 'Name, username, and password are required' });
   }
 
   if (password.length < 6) {
@@ -30,8 +30,8 @@ router.post('/register', async (req, res) => {
     const recoveryKey = crypto.randomBytes(16).toString('hex');
 
     const result = await db.run(
-      'INSERT INTO users (username, password, recoveryKey, isDemo) VALUES (?, ?, ?, 0)',
-      [username, hashedPassword, recoveryKey]
+      'INSERT INTO users (name, username, password, recoveryKey, isDemo) VALUES (?, ?, ?, ?, 0)',
+      [name, username, hashedPassword, recoveryKey]
     );
 
     res.status(201).json({
@@ -101,9 +101,71 @@ router.post('/logout', authenticate, (req, res) => {
 router.get('/me', authenticate, (req: AuthRequest, res) => {
   res.json({
     id: req.user?.id,
+    name: req.user?.name,
     username: req.user?.username,
     isDemo: req.user?.isDemo
   });
+});
+
+router.patch('/me', authenticate, async (req: AuthRequest, res) => {
+  const { name } = req.body;
+  if (!name || typeof name !== 'string' || name.trim() === '') {
+    return res.status(400).json({ error: 'Name is required' });
+  }
+
+  const db = getDb();
+  try {
+    await db.run('UPDATE users SET name = ? WHERE id = ?', [name.trim(), req.user?.id]);
+    res.json({ message: 'Profile updated successfully', name: name.trim() });
+  } catch (error) {
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+router.delete('/me', authenticate, async (req: AuthRequest, res) => {
+  const db = getDb();
+  const userId = req.user?.id;
+  try {
+    // Delete related data manually since ON DELETE CASCADE is not set for userId
+    await db.run('DELETE FROM attachments WHERE userId = ?', [userId]);
+    await db.run('DELETE FROM notes WHERE userId = ?', [userId]);
+    await db.run('DELETE FROM tasks WHERE userId = ?', [userId]);
+    await db.run('DELETE FROM projects WHERE userId = ?', [userId]);
+    
+    await db.run('DELETE FROM users WHERE id = ?', [userId]);
+    res.json({ message: 'Account deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+router.post('/reset-password', async (req, res) => {
+  const { username, recoveryKey, newPassword } = req.body;
+  
+  if (!username || !recoveryKey || !newPassword) {
+    return res.status(400).json({ error: 'Username, recovery key, and new password are required' });
+  }
+
+  if (newPassword.length < 6) {
+    return res.status(400).json({ error: 'Password must be at least 6 characters long' });
+  }
+
+  const db = getDb();
+  
+  try {
+    const user = await db.get('SELECT id, recoveryKey FROM users WHERE username = ?', [username]);
+    
+    if (!user || user.recoveryKey !== recoveryKey) {
+      return res.status(401).json({ error: 'Invalid username or recovery key' });
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    await db.run('UPDATE users SET password = ? WHERE id = ?', [hashedPassword, user.id]);
+
+    res.json({ message: 'Password reset successfully' });
+  } catch (error) {
+    res.status(500).json({ error: 'Internal server error' });
+  }
 });
 
 export default router;

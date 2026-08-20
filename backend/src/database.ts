@@ -17,6 +17,7 @@ export async function initDb() {
   await db.exec(`
     CREATE TABLE IF NOT EXISTS users (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
       username TEXT UNIQUE NOT NULL,
       password TEXT NOT NULL,
       recoveryKey TEXT NOT NULL,
@@ -69,6 +70,13 @@ export async function initDb() {
     );
   `);
 
+  // Handle migration for existing databases: add 'name' column if it doesn't exist
+  const tableInfo = await db.all("PRAGMA table_info(users)");
+  const hasNameColumn = tableInfo.some((col: any) => col.name === 'name');
+  if (!hasNameColumn) {
+    await db.exec(`ALTER TABLE users ADD COLUMN name TEXT NOT NULL DEFAULT 'User'`);
+  }
+
   // Create or reset Demo User
   await db.exec(`DELETE FROM users WHERE isDemo = 1`);
   
@@ -84,8 +92,8 @@ export async function initDb() {
   
   const demoHashedPassword = await bcrypt.hash('demo', 10);
   const demoResult = await db.run(
-    'INSERT INTO users (username, password, recoveryKey, isDemo) VALUES (?, ?, ?, ?)',
-    ['demo_user', demoHashedPassword, 'demo_recovery_key', 1]
+    'INSERT INTO users (name, username, password, recoveryKey, isDemo) VALUES (?, ?, ?, ?, ?)',
+    ['Demo User', 'demo_user', demoHashedPassword, 'demo_recovery_key', 1]
   );
   
   const demoUserId = demoResult.lastID;
