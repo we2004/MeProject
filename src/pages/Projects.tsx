@@ -16,9 +16,7 @@ import AddProjectModal from "../components/modals/AddProjectModal"
 import { createProject } from "../api/projects"
 import { getProjects } from "../api/projects"
 import { createAttachment } from "../api/attachments"
-import { useAuth } from "../context/useAuth"
-function Projects() {
-  const {token} = useAuth()
+function Projects({ token }: { token: string }) {
   const [searchParams, setSearchParams] = useSearchParams()
   const [projects, setProjects] = useState<ProjectApiResponse[]>([])
   const [openMenu, setOpenMenu] = useState<MenuType | null>(null)

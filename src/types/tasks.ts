@@ -35,6 +35,7 @@ export type TaskCardProps = {
   dueDate: string
   priority: TaskPriority
   onStatusChange?: (taskId: number, newStatus: TaskStatus) => void
+  token?: string | undefined
 }
 
 export type TaskStatus = "open" | "completed"

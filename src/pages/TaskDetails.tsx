@@ -21,10 +21,8 @@ import { type ProjectApiResponse } from "../types/projects"
 import { getProjectById } from "../api/projects"
 import { createNote, deleteNote, getNotesByTask } from "../api/notes"
 import { type NoteApiResonse } from "../types/notes"
-import { useAuth } from "../context/useAuth"
 
-function TaskDetails() {
-  const {token} = useAuth()
+function TaskDetails({ token }: { token: string }) {
   const { taskId } = useParams()
   const [isNoteModalOpen, setIsNoteModalOpen] = useState(false)
   const [task, setTask] = useState<Task | null>(null)

@@ -18,9 +18,7 @@ import { createTask, getTasks, getTasksByProject } from "../api/tasks"
 import { type ProjectApiResponse } from "../types/projects"
 import { getProjects } from "../api/projects"
 import { createNote } from "../api/notes"
-import { useAuth } from "../context/useAuth"
-function Tasks() {
-  const {token} = useAuth()
+function Tasks({ token }: { token: string }) {
   const [searchParams, setSearchParams] = useSearchParams()
 
   const [openMenu, setOpenMenu] = useState<MenuType | null>(null)
