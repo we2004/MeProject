@@ -16,8 +16,9 @@ import { type ProjectApiResponse } from "../types/projects"
 import { type Task, type TaskStatus } from "../types/tasks"
 import { getProjects } from "../api/projects"
 import { getTasks } from "../api/tasks"
-
-function Home({ token }: { token: string }) {
+import { useAuth } from "../context/useAuth"
+function Home() {
+  const {token} = useAuth()
   const [projects, setProjects] = useState<ProjectApiResponse[] | null>(null)
   const [tasks, setTasks] = useState<Task[] | null>(null)
 
@@ -90,7 +91,6 @@ function Home({ token }: { token: string }) {
               key={project.id}
               {...project}
               showDaysLeft={false}
-              token={token}
             />
           ))}
         </div>
@@ -121,7 +121,6 @@ function Home({ token }: { token: string }) {
                 projects.find((project) => project.id == task.projectId)?.name
               }
               onStatusChange={handleTaskStatusChange}
-              token={token}
             />
           ))}
         </div>
