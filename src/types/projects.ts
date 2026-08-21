@@ -19,7 +19,6 @@ export type ProjectCardProps = {
   description: string
   dueDate: string
   showDaysLeft?: boolean
-  token?: string
   derivedStatus: ProjectStatus
 }
 

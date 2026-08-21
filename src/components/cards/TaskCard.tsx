@@ -7,6 +7,7 @@ import { Link } from "react-router-dom"
 import { updateTaskData } from "../../api/tasks"
 import { useState } from "react"
 import dayjs from "dayjs"
+import { useAuth } from "../../context/useAuth"
 function TaskCard({
   id,
   name,
@@ -14,9 +15,9 @@ function TaskCard({
   status,
   dueDate,
   priority,
-  onStatusChange,
-  token
+  onStatusChange
 }: TaskCardProps) {
+  const {token} = useAuth()
   const [displayedStatus, setDisplayedStatus] = useState(status)
 
   const handleStatusChange = async (newStatus: TaskStatus) => {
