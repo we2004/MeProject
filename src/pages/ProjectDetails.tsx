@@ -36,8 +36,11 @@ import {
   downloadAttachment
 } from "../api/attachments"
 import type { AttachmentApiResponse } from "../types/attachments"
+import { useAuth } from "../context/useAuth"
 
-function ProjectsDetails({ token }: { token: string }) {
+function ProjectsDetails() {
+  const {token} = useAuth()
+
   const { projectId } = useParams()
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false)
   const [isAttachmentModalOpen, setIsAttachmentModalOpen] = useState(false)

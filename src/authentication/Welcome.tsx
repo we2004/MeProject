@@ -1,7 +1,27 @@
 import { Compass, LogIn, UserPlus } from "lucide-react"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import logo from "../assets/logo2.png"
+import { useContext } from "react"
+import { AuthContext } from "../context/AuthContext"
+import { explore } from "../api/auth"
+
 function Welcome() {
+
+  const navigate = useNavigate()
+  const auth = useContext(AuthContext)
+
+  if(!auth) 
+    throw Error("AuthContext is missing")
+
+  const {setToken} = auth
+
+  const handleExploreMode = async () => {
+    const response = await explore()
+    setToken(response.token)
+    navigate("/home")
+  }
+
+
   return (
     <div className="flex w-full items-center justify-center px-6 py-12 lg:w-1/2">
       <div className="flex  items-center w-full max-w-md flex-col">
@@ -30,15 +50,15 @@ function Welcome() {
             </span>
           </Link>
 
-          <Link
-            to={"/home"}
+          <button
+            onClick={handleExploreMode}
             className="group flex items-center gap-2 rounded-2xl border border-primary/15 bg-white px-4 py-3 font-body text-primary-font shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/60 hover:shadow-md hover:bg-secondary hover:text-white"
           >
             <span className="flex items-center gap-3">
               <Compass className="h-5 w-5 text-primary group-hover:text-white transition-all duration-300" />
               Explore App
             </span>
-          </Link>
+          </button>
         </div>
 
         {/* Login */}
