@@ -1,8 +1,13 @@
 import { CheckCircle2, ShieldAlert } from "lucide-react"
-import { Link } from "react-router-dom"
+import { Link, useLocation } from "react-router-dom"
+
 
 
 function Recovery() {
+
+  const location = useLocation()
+  const recoveryKey = location.state?.recoveryKey
+
   return (
     <main className="flex min-h-screen items-center justify-center bg-lightBodyBackground px-4 py-8">
       <div className="w-full max-w-md rounded-3xl border border-primary/15 bg-white p-6 shadow-lg sm:p-8">
@@ -29,7 +34,7 @@ function Recovery() {
           <input
             id="recovery-key"
             type="text"
-            value="MP-7K4X-92QF-8L2M"
+            value={recoveryKey}
             disabled
             readOnly
             className="w-full rounded-2xl border border-primary/15 bg-primary/5 py-3.5 px-4 font-body text-sm font-medium tracking-wider text-primary-font disabled:opacity-100"
@@ -49,7 +54,7 @@ function Recovery() {
         {/* OK */}
 
         <div className="w-full flex justify-center mt-8">
-          <Link to='/home' className="w-30 rounded-2xl border border-primary/15 bg-white px-4 py-3 font-body text-primary-font text-center shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/60 hover:shadow-md hover:bg-secondary hover:text-white">
+          <Link to='/login' className="w-30 rounded-2xl border border-primary/15 bg-white px-4 py-3 font-body text-primary-font text-center shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/60 hover:shadow-md hover:bg-secondary hover:text-white">
             OK
           </Link>
         </div>
