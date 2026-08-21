@@ -7,16 +7,15 @@ import StatusBadge from "../badges/StatusBadge"
 import { useEffect, useState } from "react"
 import type { TaskApiResponse } from "../../types/tasks"
 import { getTasksByProject } from "../../api/tasks"
-import { useAuth } from "../../context/useAuth"
 function ProjectCard({
   id,
   name,
   description,
   dueDate,
   showDaysLeft = true,
+  token,
   derivedStatus
 }: ProjectCardProps) {
-  const {token} = useAuth()
   const [tasks, setTasks] = useState<TaskApiResponse | null>(null)
   useEffect(() => {
     const start = async () => {
