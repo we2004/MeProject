@@ -1,4 +1,9 @@
-
+export type User = {
+    id: number
+    name: string
+    userName: string
+    isDemo: boolean
+}
 
 export type NewUser = {
     name: string

@@ -10,19 +10,36 @@ import {
 } from "lucide-react"
 import SecondaryButton from "../components/buttons/SecondaryButton"
 import { useAuth } from "../context/useAuth"
-import { logout } from "../api/auth"
+import { getUser, logout } from "../api/auth"
 import { useNavigate } from "react-router-dom"
+import { useState, useEffect } from "react"
+import type { User } from "../types/auth"
 
 function Settings() {
   const { token, setToken } = useAuth()
   const navigate = useNavigate()
+  const [currentUser, setCurrentUser] = useState<User | undefined>(undefined)
+
   const handleLogout = async () => {
     const response = await logout(token)
     console.log(response)
     localStorage.removeItem("token")
     setToken("")
-    navigate('/')
+    navigate("/")
   }
+
+  useEffect(() => {
+    const start = async () => {
+      const user = await getUser(token)
+
+      setCurrentUser(user)
+    }
+
+    start()
+  })
+
+  if(!currentUser)
+    return <p>user not found</p>
   return (
     <section className="flex flex-col gap-8">
       {/* Header */}
@@ -56,7 +73,7 @@ function Settings() {
                 <p className="font-body font-medium text-primary-font">Name</p>
 
                 <p className="mt-1 font-body text-sm text-primary-font/60">
-                  Wesal Ismail
+                  {currentUser.isDemo? "Guest" : currentUser.name}
                 </p>
               </div>
             </div>
