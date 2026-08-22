@@ -59,3 +59,13 @@ export async function deleteAccount(token: string) {
 
   return response.data
 }
+
+export async function updateName(token: string, newName:string) {
+  const response = await axios.patch(`${BASE_URL}/auth/me`, {name: newName}, {
+    headers : {
+      Authorization: `Bearer ${token}`
+    }
+  })
+
+  return response.data
+}

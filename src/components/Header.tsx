@@ -60,7 +60,7 @@ function Header() {
             </div>
             <div className="hidden md:flex md:flex-col md:text-left">
               <p className="font-heading text-sm font-semibold text-primary-font">
-               {currentUser.isDemo? "Guest" : currentUser.name}
+               {currentUser.name}
               </p>
             
             </div>

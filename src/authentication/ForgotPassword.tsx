@@ -1,5 +1,5 @@
 import { LockKeyhole, Eye, EyeClosed, CircleAlert } from "lucide-react"
-import { useState } from "react"
+import {  useState } from "react"
 import { useNavigate } from "react-router-dom"
 import type { ChangePassword } from "../types/auth"
 import { changePassword } from "../api/auth"
@@ -23,8 +23,7 @@ function ForgotPassword() {
   }
 
   const handleChangePassword = async () => {
-    if (username.length < 1 || recoveryKey.length < 1 || password.length < 1
-    ) {
+    if (username.length < 1 || recoveryKey.length < 1 || password.length < 1) {
       showMessage("Please Enter all Empty Fields")
       return
     }
@@ -52,7 +51,7 @@ function ForgotPassword() {
 
         <div className="mb-8 relative">
           <h1 className="font-heading text-3xl font-bold text-primary-font sm:text-4xl">
-           Change Password
+            Change Password
           </h1>
 
           {message && (
@@ -141,7 +140,8 @@ function ForgotPassword() {
           </div>
 
           {/* Change Password */}
-          <button onClick={handleChangePassword}
+          <button
+            onClick={handleChangePassword}
             className="mt-3 flex w-full items-center gap-2 rounded-2xl border border-primary/15 bg-primary px-4 py-3 font-body text-white shadow-sm transition-all text-center duration-300 hover:-translate-y-0.5 hover:shadow-md hover:bg-secondary"
           >
             <LockKeyhole className="h-5 w-5 mr-2" />
