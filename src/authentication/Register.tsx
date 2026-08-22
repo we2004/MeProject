@@ -69,7 +69,7 @@ function Register() {
         </div>
 
         {/* Form */}
-        <div className="flex flex-col gap-5 mt-4">
+        <div className="flex flex-col gap-5 mt-10">
           {/* name */}
           <div className="flex flex-col gap-2">
             <label

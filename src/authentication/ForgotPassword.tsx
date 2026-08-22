@@ -1,22 +1,70 @@
-import { LockKeyhole, Eye, EyeClosed } from "lucide-react"
+import { LockKeyhole, Eye, EyeClosed, CircleAlert } from "lucide-react"
 import { useState } from "react"
-import { Link } from "react-router-dom"
-
+import { useNavigate } from "react-router-dom"
+import type { ChangePassword } from "../types/auth"
+import { changePassword } from "../api/auth"
+import { useAuth } from "../context/useAuth"
 
 function ForgotPassword() {
+  const { setToken } = useAuth()
+  const navigate = useNavigate()
   const [showPassword, setShowPassword] = useState(false)
+  const [username, setUsername] = useState("")
+  const [recoveryKey, setRecoveryKey] = useState("")
+  const [password, setPassword] = useState("")
+  const [message, setMessage] = useState("")
+
+  const showMessage = (message: string) => {
+    setMessage(message)
+
+    setTimeout(() => {
+      setMessage("")
+    }, 3500)
+  }
+
+  const handleChangePassword = async () => {
+    if (username.length < 1 || recoveryKey.length < 1 || password.length < 1
+    ) {
+      showMessage("Please Enter all Empty Fields")
+      return
+    }
+
+    const data: ChangePassword = {
+      newPassword: password,
+      username: username,
+      recoveryKey: recoveryKey
+    }
+    try {
+      const response = await changePassword(data)
+
+      setToken(response.token)
+      navigate("/login")
+    } catch (error) {
+      showMessage("Incorrect username or Recovery Key")
+      console.log(error)
+    }
+  }
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-lightBodyBackground px-4 py-8">
       <div className="w-full max-w-md rounded-3xl border border-primary/15 bg-white p-6 shadow-lg sm:p-8">
         {/* Header */}
 
-        <h1 className="font-heading text-3xl font-bold text-primary-font mb-4">
-          Change Password
-        </h1>
+        <div className="mb-8 relative">
+          <h1 className="font-heading text-3xl font-bold text-primary-font sm:text-4xl">
+           Change Password
+          </h1>
+
+          {message && (
+            <div className="absolute text-xs left-0 top-full mt-2 flex w-fit items-center gap-1 rounded-xl bg-redT/15 px-3 py-0.5">
+              <CircleAlert className="h-4 w-4 text-redT" />
+              <p className="font-body text-sm text-redT">{message}</p>
+            </div>
+          )}
+        </div>
 
         {/* Form */}
-        <div className="flex flex-col gap-5">
+        <div className="flex flex-col gap-5 mt-10">
           {/* Username */}
           <div className="flex flex-col gap-2">
             <label
@@ -28,6 +76,8 @@ function ForgotPassword() {
 
             <input
               id="username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
               type="text"
               placeholder="Enter your username"
               className="w-full rounded-2xl border border-primary/15 bg-white py-3.5 px-4 font-body text-sm text-primary-font outline-none transition-all duration-300 placeholder:text-primary-font/40 focus:border-primary focus:ring-2 focus:ring-primary/10"
@@ -45,6 +95,8 @@ function ForgotPassword() {
 
             <input
               id="recovery-key"
+              value={recoveryKey}
+              onChange={(e) => setRecoveryKey(e.target.value)}
               type="text"
               placeholder="Enter your recovery key"
               className="w-full rounded-2xl border border-primary/15 bg-white py-3.5 px-4 font-body text-sm text-primary-font outline-none transition-all duration-300 placeholder:text-primary-font/40 focus:border-primary focus:ring-2 focus:ring-primary/10"
@@ -63,7 +115,9 @@ function ForgotPassword() {
             <div className="relative">
               <input
                 id="password"
-                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                type={showPassword ? "text" : "password"}
                 minLength={6}
                 placeholder="Enter your new password"
                 className="w-full rounded-2xl border border-primary/15 bg-white py-3.5 px-4 font-body text-sm text-primary-font outline-none transition-all duration-300 placeholder:text-primary-font/40 focus:border-primary focus:ring-2 focus:ring-primary/10"
@@ -87,10 +141,12 @@ function ForgotPassword() {
           </div>
 
           {/* Change Password */}
-          <Link to='/login' className="mt-3 flex w-full items-center gap-2 rounded-2xl border border-primary/15 bg-primary px-4 py-3 font-body text-white shadow-sm transition-all text-center duration-300 hover:-translate-y-0.5 hover:shadow-md hover:bg-secondary">
+          <button onClick={handleChangePassword}
+            className="mt-3 flex w-full items-center gap-2 rounded-2xl border border-primary/15 bg-primary px-4 py-3 font-body text-white shadow-sm transition-all text-center duration-300 hover:-translate-y-0.5 hover:shadow-md hover:bg-secondary"
+          >
             <LockKeyhole className="h-5 w-5 mr-2" />
             Change Password
-          </Link>
+          </button>
         </div>
       </div>
     </main>

@@ -62,7 +62,7 @@ function Login() {
         </div>
 
         {/* Form */}
-        <div className="flex flex-col gap-5">
+        <div className="flex flex-col gap-5 mt-10">
           {/* Username */}
           <div className="flex flex-col gap-2">
             <label

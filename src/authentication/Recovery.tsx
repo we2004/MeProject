@@ -55,7 +55,7 @@ function Recovery() {
 
         <div className="w-full flex justify-center mt-8">
           <Link to='/login' className="w-30 rounded-2xl border border-primary/15 bg-white px-4 py-3 font-body text-primary-font text-center shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/60 hover:shadow-md hover:bg-secondary hover:text-white">
-            OK
+            Log In
           </Link>
         </div>
       </div>
