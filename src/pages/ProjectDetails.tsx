@@ -73,7 +73,7 @@ function ProjectsDetails() {
   const [projectDuedate, setProjectDuedate] = useState("")
 
   const [isEditTechStack, setIsEditTechStack] = useState(false)
-  const [projectTechStack, setProjectTechStack] = useState<string[]>([])
+  
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
 
   useEffect(() => {
@@ -95,15 +95,19 @@ function ProjectsDetails() {
   }
 
   const handleDeleteTech = async (tech: string) => {
-    const newTechStack = projectTechStack.filter((item) => item !== tech)
+    if(!project)
+      return
+    const newTechStack = project.techStack.filter((item) => item !== tech)
 
     await updateProject("techStack", newTechStack)
-    setProjectTechStack(newTechStack)
   }
 
-  const handleAddTech = (tech: string) => {
-    if (!tech.trim()) return
-    setProjectTechStack([...projectTechStack, tech])
+  const handleAddTech = async (tech: string) => {
+    if (!tech.trim() || !project) return
+
+    const newTechStack = [...project.techStack, tech]
+
+    await updateProject("techStack", newTechStack)
   }
 
   const handleDeleteProject = async () => {
@@ -299,7 +303,7 @@ function ProjectsDetails() {
         </div>
 
         <div className="flex flex-wrap items-center gap-3 mt-5">
-          {projectTechStack.map((tech) => (
+          {project.techStack.map((tech) => (
             <TechBadge
               key={tech}
               tech={tech}
@@ -315,21 +319,12 @@ function ProjectsDetails() {
           )}
 
           {isEditTechStack ? (
-            <button
-              onClick={async () =>
-                await handleUpdateProject(
-                  "techStack",
-                  projectTechStack,
-                  setIsEditTechStack
-                )
-              }
-            >
+            <button onClick={() => setIsEditTechStack(false)}>
               <Check className="h-5 w-5 mr-5 ml-1 text-primary cursor-pointer hover:text-primary/40 transition-all duration-300" />
             </button>
           ) : (
             <button
               onClick={() => {
-                setProjectTechStack(project.techStack)
                 setIsEditTechStack(true)
               }}
             >
