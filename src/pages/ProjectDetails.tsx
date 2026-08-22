@@ -21,17 +21,14 @@ import AddAttachmentModal from "../components/modals/AddAttachmentModal"
 import type { ProjectApiResponse } from "../types/projects"
 import { getProjects } from "../api/projects"
 import TechStackSection from "../sections/TechStackSection"
-import {
-  createAttachment,
-  deleteAttachment,
-  getAttachments,
-  downloadAttachment
-} from "../api/attachments"
-import type { AttachmentApiResponse } from "../types/attachments"
+import { downloadAttachment } from "../api/attachments"
 import { useAuth } from "../context/useAuth"
 import DeleteModal from "../components/modals/DeleteModal"
 import useProject from "../hooks/useProject"
 import useProjectTasks from "../hooks/useProjectTasks"
+import useAttachments from "../hooks/useAttachments"
+
+
 function ProjectsDetails() {
   const { token } = useAuth()
   const { projectId } = useParams()
@@ -42,6 +39,7 @@ function ProjectsDetails() {
     updateProject,
     deleteCurrentProject
   } = useProject(token, Number(projectId))
+
   const {
     projectTasks,
     loading: taskLoading,
@@ -51,11 +49,17 @@ function ProjectsDetails() {
     removeTask
   } = useProjectTasks(token, Number(projectId))
 
+  const {
+    attachments,
+    loading: attachmentLoading,
+    error: attachmentError,
+    addAttachment,
+    removeAttachment
+  } = useAttachments(token, Number(projectId))
+
   const navigate = useNavigate()
 
   const [projects, setProjects] = useState<ProjectApiResponse[] | null>(null)
-
-  const [attachments, setAttachments] = useState<AttachmentApiResponse[]>([])
 
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false)
   const [isAttachmentModalOpen, setIsAttachmentModalOpen] = useState(false)
@@ -89,9 +93,6 @@ function ProjectsDetails() {
     const start = async () => {
       const projectsData = await getProjects(token, "all", "asc")
       setProjects(projectsData)
-      const attachmentsData = await getAttachments(Number(projectId), token)
-      console.log("apit response", attachmentsData)
-      setAttachments(attachmentsData)
     }
 
     start()
@@ -120,29 +121,7 @@ function ProjectsDetails() {
 
   const handleDeleteProject = async () => {
     const success = await deleteCurrentProject()
-    if(success)
-      navigate("/projects")
-  }
-
-  const handleAddAttachment = async (files: File[]) => {
-    for (const file of files) {
-      await createAttachment(token, {
-        file: file,
-        projectId: Number(projectId)
-      })
-    }
-
-    const updatedAttachments = await getAttachments(Number(projectId), token)
-
-    setAttachments(updatedAttachments)
-  }
-
-
-  const handleDeleteAttachment = async (fileId: number) => {
-    await deleteAttachment(token, fileId)
-
-    const updatedAttachments = await getAttachments(Number(projectId), token)
-    setAttachments(updatedAttachments)
+    if (success) navigate("/projects")
   }
 
   const handleDownloadAttachment = async (
@@ -192,7 +171,7 @@ function ProjectsDetails() {
       {isAttachmentModalOpen && (
         <AddAttachmentModal
           onClose={() => setIsAttachmentModalOpen(false)}
-          onSubmit={handleAddAttachment}
+          onSubmit={addAttachment}
         />
       )}
       <div className="rounded-3xl border border-primary/15 bg-white p-6 shadow-sm">
@@ -432,7 +411,7 @@ function ProjectsDetails() {
               </div>
 
               <button
-                onClick={() => handleDeleteAttachment(attachment.id)}
+                onClick={() => removeAttachment(attachment.id)}
                 className="flex h-12 w-12 items-center justify-center rounded-2xl border border-primary/15 bg-white text-primary-font shadow-sm transition-all duration-300 hover:bg-redT hover:text-white"
               >
                 <Trash2 className="h-5 w-5" />
