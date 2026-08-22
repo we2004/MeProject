@@ -23,3 +23,9 @@ dist-ssr
 *.sln
 *.sw?
 .env
+
+# Local database
+database.sqlite
+
+# Uploaded files
+uploads/
