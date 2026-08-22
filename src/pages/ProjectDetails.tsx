@@ -28,7 +28,6 @@ import useProject from "../hooks/useProject"
 import useProjectTasks from "../hooks/useProjectTasks"
 import useAttachments from "../hooks/useAttachments"
 
-
 function ProjectsDetails() {
   const { token } = useAuth()
   const { projectId } = useParams()
@@ -66,28 +65,16 @@ function ProjectsDetails() {
 
   const [isEditName, setIsEditName] = useState(false)
   const [projectName, setProjectName] = useState("")
+
   const [isEditDescription, setIsEditDescription] = useState(false)
   const [projectDescription, setProjectDescription] = useState("")
+
   const [isEditDuedate, setIsEditDuedate] = useState(false)
   const [projectDuedate, setProjectDuedate] = useState("")
+
   const [isEditTechStack, setIsEditTechStack] = useState(false)
   const [projectTechStack, setProjectTechStack] = useState<string[]>([])
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
-
-  useEffect(() => {
-    const start = async () => {
-      if (!project || !token) {
-        return
-      }
-
-      setProjectName(project.name)
-      setProjectDescription(project.description)
-      setProjectDuedate(project.dueDate)
-      setProjectTechStack(project.techStack)
-    }
-
-    start()
-  }, [project, token])
 
   useEffect(() => {
     const start = async () => {
@@ -201,7 +188,12 @@ function ProjectsDetails() {
                 <Check className="h-5 w-5 mr-5 ml-1 text-primary cursor-pointer hover:text-primary/40 transition-all duration-300" />
               </button>
             ) : (
-              <button onClick={() => setIsEditName(true)}>
+              <button
+                onClick={() => {
+                  setProjectName(project.name)
+                  setIsEditName(true)
+                }}
+              >
                 <Edit3 className="h-4 w-4 mr-5 ml-1 text-primary cursor-pointer hover:text-primary/40 transition-all duration-300" />
               </button>
             )}
@@ -238,7 +230,12 @@ function ProjectsDetails() {
                 <Check className="h-5 w-5 mr-5 ml-1 text-primary cursor-pointer hover:text-primary/40 transition-all duration-300" />
               </button>
             ) : (
-              <button onClick={() => setIsEditDescription(true)}>
+              <button
+                onClick={() => {
+                  setProjectDescription(project.description)
+                  setIsEditDescription(true)
+                }}
+              >
                 <Edit3 className="h-4 w-4 mr-5 ml-1 text-primary cursor-pointer hover:text-primary/40 transition-all duration-300" />
               </button>
             )}
@@ -275,7 +272,12 @@ function ProjectsDetails() {
                 <Check className="h-5 w-5 mr-5 ml-1 text-primary cursor-pointer hover:text-primary/40 transition-all duration-300" />
               </button>
             ) : (
-              <button onClick={() => setIsEditDuedate(true)}>
+              <button
+                onClick={() => {
+                  setProjectDuedate(project.dueDate)
+                  setIsEditDuedate(true)
+                }}
+              >
                 <Edit3 className="h-4 w-4 mr-5 ml-1 text-primary cursor-pointer hover:text-primary/40 transition-all duration-300" />
               </button>
             )}
@@ -325,7 +327,12 @@ function ProjectsDetails() {
               <Check className="h-5 w-5 mr-5 ml-1 text-primary cursor-pointer hover:text-primary/40 transition-all duration-300" />
             </button>
           ) : (
-            <button onClick={() => setIsEditTechStack(true)}>
+            <button
+              onClick={() => {
+                setProjectTechStack(project.techStack)
+                setIsEditTechStack(true)
+              }}
+            >
               <Edit3 className="h-4 w-4 mr-5 ml-1 text-primary cursor-pointer hover:text-primary/40 transition-all duration-300" />
             </button>
           )}
