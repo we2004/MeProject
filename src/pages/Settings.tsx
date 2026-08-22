@@ -6,7 +6,7 @@ import {
   Trash2,
   UserRound,
   LogOut,
-  Check,
+  Check
 } from "lucide-react"
 import SecondaryButton from "../components/buttons/SecondaryButton"
 import { useAuth } from "../context/useAuth"
@@ -202,11 +202,7 @@ function Settings() {
           </div>
 
           <button className="flex min-w-28 shrink-0 items-center justify-between gap-3 rounded-2xl border border-primary/15 bg-white px-4 py-3 font-body text-sm font-medium text-primary-font shadow-sm transition-all duration-300 hover:border-primary/60 hover:shadow-md">
-            <div className="flex items-center gap-2">
-              <Sun className="h-4 w-4 text-primary" />
-              Light
-            </div>
-
+            Light
             <ChevronDown className="h-4 w-4 text-primary-font/50" />
           </button>
         </div>
@@ -236,7 +232,6 @@ function Settings() {
           </div>
 
           <SecondaryButton
-            Icon={LogOut}
             bgHoverColor="hover:bg-redT"
             onClickFun={handleLogout}
           >
@@ -262,7 +257,6 @@ function Settings() {
           </div>
 
           <SecondaryButton
-            Icon={Trash2}
             bgHoverColor="hover:bg-redT"
             onClickFun={() => setIsDeleteModalOpen(true)}
           >
