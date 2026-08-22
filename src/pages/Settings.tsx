@@ -9,8 +9,20 @@ import {
   LogOut
 } from "lucide-react"
 import SecondaryButton from "../components/buttons/SecondaryButton"
+import { useAuth } from "../context/useAuth"
+import { logout } from "../api/auth"
+import { useNavigate } from "react-router-dom"
 
 function Settings() {
+  const { token, setToken } = useAuth()
+  const navigate = useNavigate()
+  const handleLogout = async () => {
+    const response = await logout(token)
+    console.log(response)
+    localStorage.removeItem("token")
+    setToken("")
+    navigate('/')
+  }
   return (
     <section className="flex flex-col gap-8">
       {/* Header */}
@@ -128,6 +140,7 @@ function Settings() {
           <SecondaryButton
             Icon={LogOut}
             bgHoverColor="hover:bg-redT"
+            onClickFun={handleLogout}
           >
             Log out
           </SecondaryButton>

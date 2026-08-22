@@ -8,7 +8,7 @@ export async function register(newUser: NewUser) {
   return response.data
 }
 
-export async function login(logUser:LogUser) {
+export async function login(logUser: LogUser) {
   const response = await axios.post(`${BASE_URL}/auth/login`, logUser)
 
   return response.data
@@ -20,8 +20,22 @@ export async function explore() {
   return response.data
 }
 
-export async function changePassword(data:ChangePassword) {
+export async function changePassword(data: ChangePassword) {
   const response = await axios.post(`${BASE_URL}/auth/reset-password`, data)
+
+  return response.data
+}
+
+export async function logout(token: string) {
+  const response = await axios.post(
+    `${BASE_URL}/auth/logout`,
+    {},
+    {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    }
+  )
 
   return response.data
 }
