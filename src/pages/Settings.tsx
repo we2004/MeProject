@@ -6,23 +6,37 @@ import {
   Sun,
   Trash2,
   UserRound,
-  LogOut
+  LogOut,
+  Delete
 } from "lucide-react"
 import SecondaryButton from "../components/buttons/SecondaryButton"
 import { useAuth } from "../context/useAuth"
-import { getUser, logout } from "../api/auth"
+import { deleteAccount, getUser, logout } from "../api/auth"
 import { useNavigate } from "react-router-dom"
 import { useState, useEffect } from "react"
 import type { User } from "../types/auth"
+import DeleteAccountModal from "../components/modals/DeleteAccountModal"
 
 function Settings() {
   const { token, setToken } = useAuth()
   const navigate = useNavigate()
   const [currentUser, setCurrentUser] = useState<User | undefined>(undefined)
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
 
   const handleLogout = async () => {
-    const response = await logout(token)
-    console.log(response)
+    await logout(token)
+    localStorage.removeItem("token")
+    setToken("")
+    navigate("/")
+  }
+
+  const handleDeleteAccount = async () => {
+    if(currentUser?.isDemo) {
+      alert("Can't Delete an Explore Account")
+      return
+    }
+      
+    await deleteAccount(token)
     localStorage.removeItem("token")
     setToken("")
     navigate("/")
@@ -36,12 +50,17 @@ function Settings() {
     }
 
     start()
-  })
+  }, [token])
 
-  if(!currentUser)
-    return <p>user not found</p>
+  if (!currentUser) return <p>user not found</p>
   return (
     <section className="flex flex-col gap-8">
+      {isDeleteModalOpen && (
+        <DeleteAccountModal
+          onCancel={() => setIsDeleteModalOpen(false)}
+          onDelete={handleDeleteAccount}
+        />
+      )}
       {/* Header */}
       <div>
         <h1 className="font-heading text-3xl font-bold text-primary-font">
@@ -73,7 +92,7 @@ function Settings() {
                 <p className="font-body font-medium text-primary-font">Name</p>
 
                 <p className="mt-1 font-body text-sm text-primary-font/60">
-                  {currentUser.isDemo? "Guest" : currentUser.name}
+                  {currentUser.isDemo ? "Guest" : currentUser.name}
                 </p>
               </div>
             </div>
@@ -183,6 +202,7 @@ function Settings() {
           <SecondaryButton
             Icon={Trash2}
             bgHoverColor="hover:bg-redT"
+            onClickFun={() => setIsDeleteModalOpen(true)}
           >
             Delete Account
           </SecondaryButton>

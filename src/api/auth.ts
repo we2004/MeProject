@@ -40,8 +40,18 @@ export async function logout(token: string) {
   return response.data
 }
 
-export async function getUser(token:string) {
+export async function getUser(token: string) {
   const response = await axios.get(`${BASE_URL}/auth/me`, {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  })
+
+  return response.data
+}
+
+export async function deleteAccount(token: string) {
+  const response = await axios.delete(`${BASE_URL}/auth/me`, {
     headers: {
       Authorization: `Bearer ${token}`
     }
