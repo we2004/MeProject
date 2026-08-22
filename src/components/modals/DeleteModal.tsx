@@ -1,12 +1,15 @@
-import { AlertTriangle, Trash2} from "lucide-react"
+import { AlertTriangle, Trash2 } from "lucide-react"
 import SecondaryButton from "../buttons/SecondaryButton"
 
-type DeleteAccountModalProps = {
+type DeleteModalProps = {
   onCancel: () => void
-  onDelete:  () => Promise<void>
+  onDelete: () => Promise<void>
+  title: string
+  message: string
+  btnText:string
 }
 
-function DeleteAccountModal({ onCancel, onDelete }: DeleteAccountModalProps) {
+function DeleteModal({ onCancel, onDelete,title, message, btnText }: DeleteModalProps) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-primary-font/30 px-4 backdrop-blur-sm">
       <div className="w-full max-w-md rounded-3xl border border-red-900/10 bg-white p-6 shadow-xl">
@@ -18,22 +21,16 @@ function DeleteAccountModal({ onCancel, onDelete }: DeleteAccountModalProps) {
             </div>
 
             <h2 className="font-heading text-xl font-bold text-primary-font">
-              Delete Account
+            {title}
             </h2>
           </div>
         </div>
 
         {/* Message */}
-        <div className="mt-6">
-          <p className="font-body leading-6 text-primary-font/70">
-            Are you sure you want to delete your account?
-          </p>
 
-          <p className="mt-2 font-body text-sm leading-6 text-primary-font/60">
-            This action cannot be undone. Your account and all associated
-            projects, tasks, notes, and attachments will be permanently deleted.
-          </p>
-        </div>
+        <p className="mt-8 font-body text-sm leading-6 text-primary-font/60">
+         {message}
+        </p>
 
         {/* Actions */}
         <div className="mt-7 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
@@ -45,7 +42,7 @@ function DeleteAccountModal({ onCancel, onDelete }: DeleteAccountModalProps) {
             bgHoverColor="bg-redT"
             onClickFun={onDelete}
           >
-            Delete Account
+            {btnText}
           </SecondaryButton>
         </div>
       </div>
@@ -53,4 +50,4 @@ function DeleteAccountModal({ onCancel, onDelete }: DeleteAccountModalProps) {
   )
 }
 
-export default DeleteAccountModal
+export default DeleteModal

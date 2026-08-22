@@ -37,8 +37,9 @@ import {
 } from "../api/attachments"
 import type { AttachmentApiResponse } from "../types/attachments"
 import { useAuth } from "../context/useAuth"
+import DeleteModal from "../components/modals/DeleteModal"
 function ProjectsDetails() {
-  const {token} = useAuth()
+  const { token } = useAuth()
 
   const { projectId } = useParams()
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false)
@@ -55,6 +56,7 @@ function ProjectsDetails() {
   const [projectDuedate, setProjectDuedate] = useState("")
   const [isEditTechStack, setIsEditTechStack] = useState(false)
   const [projectTechStack, setProjectTechStack] = useState<string[]>([])
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -223,6 +225,15 @@ function ProjectsDetails() {
   return (
     project && (
       <section className="flex flex-col gap-15">
+        {isDeleteModalOpen && (
+          <DeleteModal
+            onCancel={() => setIsDeleteModalOpen(false)}
+            onDelete={handleDeleteProject}
+            btnText="Delete Project"
+            message=" This action cannot be undone. Your Project and all associated tasks, notes, and attachments will be permanently deleted."
+            title="Delete Project"
+          />
+        )}
         {isTaskModalOpen && (
           <AddTaskModal
             onClose={() => setIsTaskModalOpen(false)}
@@ -472,7 +483,10 @@ function ProjectsDetails() {
                 className="flex items-center gap-3"
               >
                 <div className="flex-1">
-                  <AttachmentCard {...attachment} onDownload={handleDownloadAttachment}/>
+                  <AttachmentCard
+                    {...attachment}
+                    onDownload={handleDownloadAttachment}
+                  />
                 </div>
 
                 <button
@@ -487,11 +501,13 @@ function ProjectsDetails() {
         </div>
 
         <button
-          className="border-2 border-redT rounded-[15px] text-md font-body py-3 hover:bg-redT hover:text-white transition-all duration-300 cursor-pointer"
-          onClick={handleDeleteProject}
+          className="bg-redT rounded-[15px] text-md font-body py-3 text-white transition-all duration-300 cursor-pointer hover:shadow-md hover:-translate-y-0.5"
+          onClick={() => setIsDeleteModalOpen(true)}
         >
-          Delete Project
+          DeleteProject{" "}
         </button>
+
+      
       </section>
     )
   )

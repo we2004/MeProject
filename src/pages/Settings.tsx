@@ -1,14 +1,12 @@
 import {
   ChevronDown,
   LockKeyhole,
-  Moon,
   Pencil,
   Sun,
   Trash2,
   UserRound,
   LogOut,
   Check,
-  Edit3
 } from "lucide-react"
 import SecondaryButton from "../components/buttons/SecondaryButton"
 import { useAuth } from "../context/useAuth"
@@ -16,7 +14,7 @@ import { deleteAccount, getUser, logout, updateName } from "../api/auth"
 import { useNavigate } from "react-router-dom"
 import { useState, useEffect } from "react"
 import type { User } from "../types/auth"
-import DeleteAccountModal from "../components/modals/DeleteAccountModal"
+import DeleteModal from "../components/modals/DeleteModal"
 
 function Settings() {
   const { token, setToken } = useAuth()
@@ -88,9 +86,13 @@ function Settings() {
   return (
     <section className="flex flex-col gap-8">
       {isDeleteModalOpen && (
-        <DeleteAccountModal
+        <DeleteModal
           onCancel={() => setIsDeleteModalOpen(false)}
           onDelete={handleDeleteAccount}
+          btnText="Delete Account"
+          message=" This action cannot be undone. Your account and all associated
+          projects, tasks, notes, and attachments will be permanently deleted."
+          title="Delete Account"
         />
       )}
       {/* Header */}

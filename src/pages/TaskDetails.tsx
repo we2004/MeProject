@@ -24,7 +24,7 @@ import { type NoteApiResonse } from "../types/notes"
 import { useAuth } from "../context/useAuth"
 
 function TaskDetails() {
-  const {token} = useAuth()
+  const { token } = useAuth()
   const { taskId } = useParams()
   const [isNoteModalOpen, setIsNoteModalOpen] = useState(false)
   const [task, setTask] = useState<Task | null>(null)
@@ -114,19 +114,19 @@ function TaskDetails() {
 
   const handleAddNote = async (notes: string[]) => {
     for (const content of notes) {
-      await createNote(token, {content:content, taskId:task.id})
+      await createNote(token, { content: content, taskId: task.id })
     }
 
     const updatedNotes = await getNotesByTask(Number(taskId), token)
     setNotes(updatedNotes)
   }
 
-   const handleDeleteNote = async (noteId: number) => {
-      await deleteNote(token, noteId)
-  
-      const updatedNotes = await getNotesByTask(task.id, token)
-      setNotes(updatedNotes)
-    }  
+  const handleDeleteNote = async (noteId: number) => {
+    await deleteNote(token, noteId)
+
+    const updatedNotes = await getNotesByTask(task.id, token)
+    setNotes(updatedNotes)
+  }
 
   if (!notes) return <p>something is wrong</p>
 
@@ -290,7 +290,10 @@ function TaskDetails() {
                 <NoteCard {...note} />
               </div>
 
-              <button onClick={() => handleDeleteNote(note.id)} className="flex h-12 w-12 items-center justify-center rounded-2xl border border-primary/15 bg-white text-primary-font shadow-sm transition-all duration-300 hover:bg-redT hover:text-white">
+              <button
+                onClick={() => handleDeleteNote(note.id)}
+                className="flex h-12 w-12 items-center justify-center rounded-2xl border border-primary/15 bg-white text-primary-font shadow-sm transition-all duration-300 hover:bg-redT hover:text-white"
+              >
                 <Trash2 className="h-5 w-5" />
               </button>
             </div>
@@ -299,10 +302,10 @@ function TaskDetails() {
       </div>
 
       <button
-        className="border-2 border-redT rounded-[15px] text-md font-body py-3 hover:bg-redT hover:text-white transition-all duration-300 cursor-pointer"
+        className="bg-redT rounded-[15px] text-md font-body py-3 text-white transition-all duration-300 cursor-pointer hover:shadow-md hover:-translate-y-0.5"
         onClick={handleDeleteTask}
       >
-        Delete Task
+        DeleteProject{" "}
       </button>
     </section>
   )
