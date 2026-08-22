@@ -38,16 +38,23 @@ import {
 import type { AttachmentApiResponse } from "../types/attachments"
 import { useAuth } from "../context/useAuth"
 import DeleteModal from "../components/modals/DeleteModal"
+import useProject from "../hooks/useProject"
 function ProjectsDetails() {
   const { token } = useAuth()
-
   const { projectId } = useParams()
-  const [isTaskModalOpen, setIsTaskModalOpen] = useState(false)
-  const [isAttachmentModalOpen, setIsAttachmentModalOpen] = useState(false)
+  const { project, loading, error } = useProject(token, Number(projectId))
+
+
+  const navigate = useNavigate()
+
   const [projects, setProjects] = useState<ProjectApiResponse[] | null>(null)
-  const [project, setProject] = useState<ProjectApiResponse | null>(null)
+
   const [projectTasks, setProjectTasks] = useState<TaskApiResponse | null>(null)
   const [attachments, setAttachments] = useState<AttachmentApiResponse[]>([])
+
+  const [isTaskModalOpen, setIsTaskModalOpen] = useState(false)
+  const [isAttachmentModalOpen, setIsAttachmentModalOpen] = useState(false)
+
   const [isEditName, setIsEditName] = useState(false)
   const [projectName, setProjectName] = useState("")
   const [isEditDescription, setIsEditDescription] = useState(false)
@@ -57,7 +64,6 @@ function ProjectsDetails() {
   const [isEditTechStack, setIsEditTechStack] = useState(false)
   const [projectTechStack, setProjectTechStack] = useState<string[]>([])
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
-  const navigate = useNavigate()
 
   useEffect(() => {
     const start = async () => {
@@ -65,8 +71,6 @@ function ProjectsDetails() {
         return
       }
 
-      const projectData = await getProjectById(Number(projectId), token)
-      setProject(projectData)
       setProjectName(projectData.name)
       setProjectDescription(projectData.description)
       setProjectDuedate(projectData.dueDate)
@@ -222,8 +226,17 @@ function ProjectsDetails() {
 
   const progress = calculateProgress(Number(projectId), projectTasks?.data)
 
+  if(error)
+    return <p>{error}</p>
+  
+  if(loading)
+    return <p>is loading...</p>
+
+  if(!project)
+    return <p>No project found</p>
+
   return (
-    project && (
+     (
       <section className="flex flex-col gap-15">
         {isDeleteModalOpen && (
           <DeleteModal
@@ -506,8 +519,6 @@ function ProjectsDetails() {
         >
           Delete Project{" "}
         </button>
-
-      
       </section>
     )
   )
