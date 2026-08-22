@@ -305,7 +305,7 @@ function TaskDetails() {
         className="bg-redT rounded-[15px] text-md font-body py-3 text-white transition-all duration-300 cursor-pointer hover:shadow-md hover:-translate-y-0.5"
         onClick={handleDeleteTask}
       >
-        DeleteProject{" "}
+        Delete Task{" "}
       </button>
     </section>
   )
