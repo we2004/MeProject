@@ -1,6 +1,10 @@
 import { useState, useEffect } from "react"
-import type { ProjectApiResponse } from "../types/projects"
-import { getProjectById, updateProjectData, deleteProject } from "../api/projects"
+import type { ProjectApiResponse, ProjectFields } from "../types/projects"
+import {
+  getProjectById,
+  updateProjectData,
+  deleteProject
+} from "../api/projects"
 
 function useProject(token: string, projectId: number) {
   const [project, setProject] = useState<ProjectApiResponse | undefined>(
@@ -28,7 +32,10 @@ function useProject(token: string, projectId: number) {
     handleFetchProject()
   }, [token, projectId])
 
-  const updateProject = async (field: string, data: string | number | string[]) => {
+  const updateProject = async (
+    field: ProjectFields,
+    data: string | boolean | string[]
+  ) => {
     try {
       setLoading(true)
       await updateProjectData(projectId, field, data, token)
@@ -49,17 +56,16 @@ function useProject(token: string, projectId: number) {
   }
 
   const deleteCurrentProject = async () => {
-  try {
-    setLoading(true)
-    await deleteProject(projectId, token)
-  } catch (e) {
-    setError("Failed to delete project")
-    return false
-  } finally {
-    setLoading(false)
+    try {
+      setLoading(true)
+      await deleteProject(projectId, token)
+    } catch (e) {
+      setError("Failed to delete project")
+      return false
+    } finally {
+      setLoading(false)
+    }
   }
-}
-
 
   return { project, loading, error, updateProject, deleteCurrentProject }
 }

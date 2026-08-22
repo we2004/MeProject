@@ -23,6 +23,6 @@ export type ProjectCardProps = {
 }
 
 export type ProjectStatus = 'cancelled' | 'overdue' | 'active' | 'completed'
-
+export type ProjectFields = 'name' | 'description' | 'dueDate' | 'cancelled' | 'techStack'
 
 export type ProjectStatusFilter = ProjectStatus | 'all'
