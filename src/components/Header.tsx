@@ -18,7 +18,7 @@ function Header() {
     }
 
     start()
-  })
+  }, [token])
 
   if (!currentUser) return <p>no user found</p>
 
