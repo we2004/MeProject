@@ -26,26 +26,15 @@ function StatusBadge({
 }: StatusBadgeProps) {
   const [isOpen, setIsOpen] = useState(false)
 
-  let statusStyle = ""
 
-  switch (status) {
-    case "active":
-    case "open":
-      statusStyle = "bg-blueT/25"
-      break
-
-    case "completed":
-      statusStyle = "bg-greenT/25"
-      break
-
-    case "overdue":
-      statusStyle = "bg-redT/45"
-      break
-
-    case "cancelled":
-      statusStyle = "bg-secondary/15"
-      break
+  const statusStyle =  {
+    active: 'bg-blueT/25',
+    open: 'bg-blueT/25',
+    completed: 'bg-greenT/25',
+    overdue: 'bg-redT/45',
+    cancelled: 'bg-secondary/15'
   }
+
 
   const nextStatus = status === "completed" ? "open" : "completed"
 
@@ -64,7 +53,7 @@ function StatusBadge({
         type="button"
         disabled={!interactive}
         onClick={handleBadgeClick}
-        className={`${statusStyle} flex items-center gap-2 rounded-full px-4 py-2 font-body text-sm font-medium capitalize text-primary-font transition-all duration-200 ${
+        className={`${statusStyle[status]} flex items-center gap-2 rounded-full px-4 py-2 font-body text-sm font-medium capitalize text-primary-font transition-all duration-200 ${
           interactive ? "cursor-pointer hover:opacity-80" : "cursor-default"
         }`}
       >
