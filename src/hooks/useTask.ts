@@ -11,9 +11,9 @@ function useTask(token: string, taskId: number) {
   useEffect(() => {
     const handleFetchTask = async () => {
       try {
+        setLoading(true)
         const taskData = await getTaskById(taskId, token)
         setTask(taskData)
-        setLoading(true)
       } catch (e) {
         setError("Failed to fetch task")
         console.log(e)
@@ -49,27 +49,7 @@ function useTask(token: string, taskId: number) {
     }
   }
 
-  const updateTaskStatus = async (newStatus: TaskStatus) => {
-    try {
-      setLoading(true)
-      await updateTaskData(taskId, "status", newStatus, token)
-
-      setTask((current) => {
-        if (!current) return current
-        return {
-          ...current,
-          status: newStatus
-        }
-      })
-    } catch (e) {
-      setError("Failed to update task")
-      console.log(e)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  return { task, loading, error, updateTask, updateTaskStatus }
+  return { task, loading, error, updateTask }
 }
 
 export default useTask

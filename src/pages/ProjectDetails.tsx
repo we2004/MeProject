@@ -30,8 +30,6 @@ function ProjectsDetails() {
 
   const {
     tasks: projectTasks,
-    loading: taskLoading,
-    error: taskError,
     updateTaskStatus,
     addTask,
     removeTask
@@ -41,8 +39,6 @@ function ProjectsDetails() {
 
   const {
     attachments,
-    loading: attachmentLoading,
-    error: attachmentError,
     addAttachment,
     removeAttachment
   } = useAttachments(token, Number(projectId))
