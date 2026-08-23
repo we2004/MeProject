@@ -23,7 +23,8 @@ function Register() {
     }, 3500)
   }
 
-  const handleCreateAccount = async () => {
+  const handleCreateAccount = async (e: React.SubmitEvent) => {
+    e.preventDefault()
     if (username.length < 1 || name.length < 1) {
       showMessage("Please Enter all Empty Fields")
       return
@@ -69,7 +70,10 @@ function Register() {
         </div>
 
         {/* Form */}
-        <div className="flex flex-col gap-5 mt-10">
+        <form
+          className="flex flex-col gap-5 mt-10"
+          onSubmit={handleCreateAccount}
+        >
           {/* name */}
           <div className="flex flex-col gap-2">
             <label
@@ -80,6 +84,7 @@ function Register() {
             </label>
 
             <input
+              required
               id="name"
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -99,6 +104,7 @@ function Register() {
             </label>
 
             <input
+              required
               id="username"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
@@ -119,6 +125,7 @@ function Register() {
 
             <div className="relative">
               <input
+                required
                 id="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -156,6 +163,7 @@ function Register() {
 
             <div className="relative">
               <input
+                required
                 id="confirm-password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
@@ -180,13 +188,13 @@ function Register() {
 
           {/* Create Account */}
           <button
-            onClick={handleCreateAccount}
+            type="submit"
             className="mt-3 flex w-full items-center gap-2 rounded-2xl border border-primary/15 bg-primary px-4 py-3 font-body text-white shadow-sm transition-all text-center duration-300 hover:-translate-y-0.5 hover:shadow-md hover:bg-secondary"
           >
             <UserPlus className="h-5 w-5" />
             Create Account
           </button>
-        </div>
+        </form>
       </div>
     </div>
   )

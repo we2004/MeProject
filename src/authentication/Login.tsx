@@ -22,7 +22,8 @@ function Login() {
     }, 3500)
   }
 
-  const handleLogin = async () => {
+  const handleLogin = async (e: React.SubmitEvent) => {
+    e.preventDefault()
     const user: LogUser = {
       password: password,
       username: username
@@ -41,8 +42,6 @@ function Login() {
   return (
     <div className="flex w-full items-center justify-center px-6 py-12 lg:w-1/2">
       <div className="w-full max-w-md">
-        {/* Logo */}
-
         {/* Heading */}
         <div className="mb-8 relative">
           <h1 className="font-heading text-3xl font-bold text-primary-font sm:text-4xl">
@@ -62,7 +61,10 @@ function Login() {
         </div>
 
         {/* Form */}
-        <div className="flex flex-col gap-5 mt-10">
+        <form
+          className="flex flex-col gap-5 mt-10"
+          onSubmit={handleLogin}
+        >
           {/* Username */}
           <div className="flex flex-col gap-2">
             <label
@@ -102,6 +104,7 @@ function Login() {
 
             <div className="relative">
               <input
+                required
                 id="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -130,13 +133,13 @@ function Login() {
 
           {/* Login */}
           <button
-            onClick={handleLogin}
+            type="submit"
             className="mt-3 flex w-full items-center gap-2 rounded-2xl border border-primary/15 bg-primary px-4 py-3 font-body text-white shadow-sm transition-all text-center duration-300 hover:-translate-y-0.5 hover:shadow-md hover:bg-secondary"
           >
             <LogIn className="h-5 w-5 mr-2" />
             Log In
           </button>
-        </div>
+        </form>
 
         {/* Register */}
         <div className="mt-8 flex items-center justify-center gap-1.5 font-body text-sm text-primary-font/60">
