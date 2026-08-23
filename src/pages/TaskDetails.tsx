@@ -15,19 +15,26 @@ import NoteCard from "../components/cards/NoteCard"
 import PrimaryButton from "../components/buttons/PrimaryButton"
 import AddNoteModal from "../components/modals/AddNoteModal"
 import { useEffect, useState } from "react"
-import type { Task, TaskStatus } from "../types/tasks"
-import { deleteTask, getTaskById, updateTaskData } from "../api/tasks"
+import { deleteTask } from "../api/tasks"
 import { type ProjectApiResponse } from "../types/projects"
 import { getProjectById } from "../api/projects"
 import { createNote, deleteNote, getNotesByTask } from "../api/notes"
 import { type NoteApiResonse } from "../types/notes"
 import { useAuth } from "../context/useAuth"
+import useTask from "../hooks/useTask"
 
 function TaskDetails() {
   const { token } = useAuth()
   const { taskId } = useParams()
   const [isNoteModalOpen, setIsNoteModalOpen] = useState(false)
-  const [task, setTask] = useState<Task | null>(null)
+  const {
+    task,
+    loading: taskLoading,
+    error: taskError,
+    updateTask,
+    updateTaskStatus
+  } = useTask(token, Number(taskId))
+
   const [project, setProject] = useState<ProjectApiResponse | null>(null)
   const [notes, setNotes] = useState<NoteApiResonse[] | null>(null)
 
@@ -42,10 +49,8 @@ function TaskDetails() {
 
   useEffect(() => {
     const start = async () => {
-      const taskData = await getTaskById(Number(taskId), token)
       const taskNotes = await getNotesByTask(taskData.id, token)
 
-      setTask(taskData)
       setNotes(taskNotes)
 
       setTaskName(taskData.name)
@@ -75,42 +80,11 @@ function TaskDetails() {
       ? "overdue"
       : task.status
 
-  const handleUpdateTask = async (
-    field: string,
-    data: unknown,
-    setter: React.Dispatch<React.SetStateAction<boolean>>
-  ) => {
-    await updateTaskData(Number(taskId), field, data, token)
-
-    setTask((currentTask) => {
-      if (!currentTask) return currentTask
-
-      return {
-        ...currentTask,
-        [field]: data
-      }
-    })
-
-    setter(false)
-  }
-
   const handleDeleteTask = async () => {
     await deleteTask(Number(taskId), token)
     navigate("/tasks")
   }
 
-  const handleTaskStatusChange = async (newStatus: TaskStatus) => {
-    await updateTaskData(Number(taskId), "status", newStatus, token)
-
-    setTask((current) => {
-      if (!current) return current
-
-      return {
-        ...current,
-        status: newStatus
-      }
-    })
-  }
 
   const handleAddNote = async (notes: string[]) => {
     for (const content of notes) {
@@ -163,7 +137,7 @@ function TaskDetails() {
             {isEditName ? (
               <button
                 onClick={async () =>
-                  await handleUpdateTask("name", taskName, setIsEditName)
+                  await updateTask("name", taskName, setIsEditName)
                 }
               >
                 <Check className="h-5 w-5 mr-5 ml-1 text-primary cursor-pointer hover:text-primary/40 transition-all duration-300" />
@@ -177,7 +151,7 @@ function TaskDetails() {
             <StatusBadge
               status={displayStatus}
               interactive
-              onStatusChange={handleTaskStatusChange}
+              onStatusChange={updateTaskStatus}
             />
             <PriorityBadge priority={task.priority} />
           </div>
@@ -202,7 +176,7 @@ function TaskDetails() {
             {isEditDescription ? (
               <button
                 onClick={async () =>
-                  await handleUpdateTask(
+                  await updateTask(
                     "description",
                     taskDescription,
                     setIsEditDescription
@@ -240,7 +214,7 @@ function TaskDetails() {
             {isEditDuedate ? (
               <button
                 onClick={async () =>
-                  await handleUpdateTask(
+                  await updateTask(
                     "dueDate",
                     taskDuedate,
                     setIsEditDuedate
