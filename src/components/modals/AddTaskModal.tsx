@@ -8,7 +8,7 @@ import type { CreateTask, TaskStatus, TaskPriority } from "../../types/tasks"
 type AddTaskModalProps = {
   onClose: () => void
   projects: ProjectApiResponse[]
-  onSubmit: (newItem: CreateTask, notes:string[]) => void
+  onSubmit: (newItem: CreateTask, notes: string[]) => Promise<void>
   currentProjectId?: number
 }
 
@@ -21,7 +21,7 @@ function AddTaskModal({
   const [taskTitle, setTaskTitle] = useState("")
   const [projectOption, setProjectOption] = useState<number | "">("")
   const [dueDate, setDueDate] = useState("")
-  const [priority, setPriority] = useState<TaskPriority | string>()
+  const [priority, setPriority] = useState<TaskPriority>()
   const [description, setDescription] = useState("")
   const [notes, setNotes] = useState<string[]>([])
   const status: TaskStatus = "open"
@@ -56,7 +56,7 @@ function AddTaskModal({
           description
         }
 
-        onSubmit(newTask, notes)
+        await onSubmit(newTask, notes)
         onClose()
       }}
     >
@@ -180,7 +180,7 @@ function AddTaskModal({
             <select
               id="task-priority"
               value={priority}
-              onChange={(e) => setPriority(e.target.value)}
+              onChange={(e) => setPriority(e.target.value as TaskPriority)}
               className="w-full appearance-none rounded-2xl border border-primary/15 bg-white px-4 py-3 pr-11 font-body text-sm text-primary-font outline-none transition-all duration-300 focus:border-primary focus:ring-2 focus:ring-primary/10"
             >
               <option

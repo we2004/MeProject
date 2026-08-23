@@ -3,7 +3,7 @@ import AttachmentSection from "../../sections/AttachmentSection"
 import { useState } from "react"
 type AddAttachmentModalProps = {
   onClose: () => void
-  onSubmit: (files: File[]) => void
+  onSubmit: (files: File[]) => Promise<void>
 }
 function AddAttachmentModal({ onClose, onSubmit }: AddAttachmentModalProps) {
   const [files, setFiles] = useState<File[]>([])

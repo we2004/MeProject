@@ -40,9 +40,9 @@ function TechStackSection({
       {/* Mock Tech Stack */}
       <div className="mt-2 flex flex-wrap gap-2">
         {techStack &&
-          techStack.map((tech) => (
+          techStack.map((tech, idx) => (
             <TechBadge
-              key={tech}
+              key={`${tech} - ${idx}`}
               tech={tech}
               onDelete={() => onDeleteTech(tech)}
             />

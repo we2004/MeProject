@@ -23,10 +23,10 @@ function NoteSection({ onAddNote, notes, onDeleteNote }: NoteSectionProps) {
 
       {/* Notes */}
       <div className="mt-2 flex flex-col gap-2 items-center justify-between ">
-        {notes.map((note) => (
+        {notes.map((note, idx) => (
           <ModalNoteCard
             note={note}
-            key={note}
+            key={`${note} - ${idx}`}
             onDelete={onDeleteNote}
           />
         ))}
