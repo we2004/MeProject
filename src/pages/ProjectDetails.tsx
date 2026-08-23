@@ -8,7 +8,7 @@ import { useState, useEffect } from "react"
 import { calculateProgress } from "../utils/projects"
 import AddTaskModal from "../components/modals/AddTaskModal"
 import AddAttachmentModal from "../components/modals/AddAttachmentModal"
-import type { ProjectApiResponse, ProjectFields} from "../types/projects"
+import type { ProjectApiResponse} from "../types/projects"
 import { getProjects } from "../api/projects"
 import { downloadAttachment } from "../api/attachments"
 import { useAuth } from "../context/useAuth"
@@ -62,13 +62,8 @@ function ProjectsDetails() {
     }
 
     start()
-  }, [token, projectId])
+  }, [token])
 
-  const handleUpdateProject = async (
-    field: ProjectFields, data: string | boolean | string[]
-  ) => {
-    await updateProject(field, data)
-  }
 
   const handleDeleteTech = async (tech: string) => {
     if (!project) return
@@ -143,7 +138,7 @@ function ProjectsDetails() {
 
       <ProjectInfoSection
         project={project}
-        onUpdate={handleUpdateProject}
+        onUpdate={updateProject}
         progress={progress}
         onDeleteTech={handleDeleteTech}
         onAddTech={handleAddTech}
