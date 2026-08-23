@@ -11,42 +11,16 @@ import {
   getCompletedTasks,
   getOpenTasks
 } from "../utils/tasks"
-import { useEffect, useState } from "react"
-import { type ProjectApiResponse } from "../types/projects"
-import { type Task, type TaskStatus } from "../types/tasks"
-import { getProjects } from "../api/projects"
-import { getTasks } from "../api/tasks"
 import { useAuth } from "../context/useAuth"
+import useProjects from "../hooks/useProjects"
+import useTasks from "../hooks/useTasks"
 function Home() {
-  const {token} = useAuth()
-  const [projects, setProjects] = useState<ProjectApiResponse[] | null>(null)
-  const [tasks, setTasks] = useState<Task[] | null>(null)
-
-  useEffect(() => {
-    const start = async () => {
-      const projectsData = await getProjects(token, "all", "asc")
-      const tasksData = await getTasks(token, "all", "all", "asc")
-      setProjects(projectsData)
-      setTasks(tasksData.data)
-    }
-
-    start()
-  }, [token])
-
-  if (!tasks || !projects) return <p> no tasks or projects available</p>
+  const { token } = useAuth()
+  const { projects } = useProjects(token, "all", "asc")
+  const { tasks, updateTaskStatus } = useTasks(token, "all", "all", "asc")
 
   const ongoingProjects = getOngoingProjects(projects, tasks).slice(0, 4)
   const ongoingTasks = getOngoingTasks(tasks).slice(0, 3)
-
-  const handleTaskStatusChange = (taskId: number, newStatus: TaskStatus) => {
-    setTasks((current) => {
-      if (!current) return current
-
-      return current.map((task) =>
-        task.id === taskId ? { ...task, status: newStatus } : task
-      )
-    })
-  }
 
   return (
     <section className="flex flex-col gap-10">
@@ -120,7 +94,7 @@ function Home() {
               projectName={
                 projects.find((project) => project.id == task.projectId)?.name
               }
-              onStatusChange={handleTaskStatusChange}
+              onStatusChange={updateTaskStatus}
             />
           ))}
         </div>
