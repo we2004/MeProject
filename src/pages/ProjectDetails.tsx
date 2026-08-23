@@ -12,10 +12,10 @@ import { downloadAttachment } from "../api/attachments"
 import { useAuth } from "../context/useAuth"
 import DeleteModal from "../components/modals/DeleteModal"
 import useProject from "../hooks/useProject"
-import useProjectTasks from "../hooks/useProjectTasks"
 import useAttachments from "../hooks/useAttachments"
 import ProjectInfoSection from "../sections/ProjectInfoSection"
 import useProjects from "../hooks/useProjects"
+import useTasks from "../hooks/useTasks"
 
 function ProjectsDetails() {
   const { token } = useAuth()
@@ -29,13 +29,13 @@ function ProjectsDetails() {
   } = useProject(token, Number(projectId))
 
   const {
-    projectTasks,
+    tasks: projectTasks,
     loading: taskLoading,
     error: taskError,
     updateTaskStatus,
     addTask,
     removeTask
-  } = useProjectTasks(token, Number(projectId))
+  } = useTasks(token, 'all', 'all', 'asc', Number(projectId))
 
   const {projects} = useProjects(token, 'all', 'asc')
 
@@ -92,7 +92,7 @@ function ProjectsDetails() {
     URL.revokeObjectURL(url)
   }
 
-  const progress = calculateProgress(Number(projectId), projectTasks?.data)
+  const progress = calculateProgress(Number(projectId), projectTasks)
 
   if (projectError) return <p>{projectError}</p>
 
@@ -151,7 +151,7 @@ function ProjectsDetails() {
         </div>
 
         <div className="flex flex-col items-center justify-center gap-5">
-          {projectTasks?.data.slice(0, 3).map((task) => (
+          {projectTasks.slice(0, 3).map((task) => (
             <div
               key={task.id}
               className="flex items-center w-full gap-3"
@@ -173,12 +173,12 @@ function ProjectsDetails() {
             </div>
           ))}
 
-          {(projectTasks?.data.length ?? 0) > 3 && (
+          {(projectTasks.length ?? 0) > 3 && (
             <Link
               className="flex items-center gap-2 font-body font-medium text-primary transition-colors duration-300 hover:text-primary-font"
               to={`/tasks?projectId=${project.id}`}
             >
-              See All {projectTasks?.data.length} Tasks
+              See All {projectTasks.length} Tasks
               <ArrowRight className="h-4 w-4" />
             </Link>
           )}

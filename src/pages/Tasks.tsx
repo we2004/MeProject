@@ -2,69 +2,41 @@ import { CirclePlus, Flag, SlidersHorizontal } from "lucide-react"
 import PrimaryButton from "../components/buttons/PrimaryButton"
 import TaskCard from "../components/cards/TaskCard"
 import { useSearchParams } from "react-router-dom"
-import {
-  type TaskStatusFilter,
-  type TaskPriorityFilter,
-  type Task,
-  type CreateTask
-} from "../types/tasks"
-import { getTaskFilter } from "../utils/tasks"
+import { type TaskStatusFilter, type TaskPriorityFilter } from "../types/tasks"
+import { getTaskFilter, getTaskPriority } from "../utils/tasks"
 import { type MenuType, type SortOrder } from "../types/common"
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import SortByDateButton from "../components/buttons/SortByDateButton"
 import DropdownButton from "../components/buttons/DropdownButton"
 import AddTaskModal from "../components/modals/AddTaskModal"
-import { createTask, getTasks, getTasksByProject } from "../api/tasks"
-import { type ProjectApiResponse } from "../types/projects"
-import { getProjects } from "../api/projects"
-import { createNote } from "../api/notes"
 import { useAuth } from "../context/useAuth"
+import useTasks from "../hooks/useTasks"
+import useProjects from "../hooks/useProjects"
+
+
 function Tasks() {
-  const {token} = useAuth()
+  const { token } = useAuth()
   const [searchParams, setSearchParams] = useSearchParams()
+  const projectId = searchParams.get("projectId")
+  const order: SortOrder = searchParams.get("order") === "desc" ? "desc" : "asc"
+  const filter: TaskStatusFilter = getTaskFilter(searchParams.get("filter"))
+  const priority: TaskPriorityFilter = getTaskPriority(
+    searchParams.get("priority")
+  )
+  const {
+    tasks,
+    loading: tasksLoading,
+    error: tasksError,
+    addTask
+  } = useTasks(token, filter, priority, order, Number(projectId))
+  const { projects } = useProjects(token, "all", "asc")
 
   const [openMenu, setOpenMenu] = useState<MenuType | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [tasks, setTasks] = useState<Task[] | null>(null)
-  const [projects, setProjects] = useState<ProjectApiResponse[] | null>(null)
-
-  const order: SortOrder = searchParams.get("order") === "desc" ? "desc" : "asc"
-  const filter: TaskStatusFilter = getTaskFilter(searchParams.get("filter"))
-  const priority: TaskPriorityFilter =
-    (searchParams.get("priority") as TaskPriorityFilter) ?? "all"
-  const projectId = searchParams.get("projectId") ?? undefined
 
   const filters: TaskStatusFilter[] = ["all", "open", "completed", "overdue"]
   const priorities: TaskPriorityFilter[] = ["all", "high", "medium", "low"]
   const nextOrder = order === "asc" ? "desc" : "asc"
-
-  useEffect(() => {
-    const start = async () => {
-      if (projectId) {
-        const response = await getTasksByProject(
-          Number(projectId),
-          token,
-          filter,
-          priority,
-          order
-        )
-        setTasks(response.data)
-      } else {
-        const response = await getTasks(token, filter, priority, order)
-        setTasks(response.data)
-      }
-    }
-    start()
-  }, [token, filter, priority, order, projectId])
-
-  useEffect(() => {
-    const start = async () => {
-      const projectsData = await getProjects(token, "all", "asc")
-      setProjects(projectsData)
-    }
-
-    start()
-  }, [token])
 
   const handleFilterSelect = (newFilter: TaskStatusFilter) => {
     if (projectId) {
@@ -117,35 +89,12 @@ function Tasks() {
     }
   }
 
-  const handleAddTask = async (newTask: CreateTask, notes: string[]) => {
-    const response = await createTask(token, newTask)
-    for (const content of notes) {
-      await createNote(token, { content: content, taskId: response.id })
-    }
-
-    if (projectId) {
-      const response = await getTasksByProject(
-        Number(projectId),
-        token,
-        filter,
-        priority,
-        order
-      )
-
-      setTasks(response.data)
-    } else {
-      const response = await getTasks(token, filter, priority, order)
-
-      setTasks(response.data)
-    }
-  }
-
   return (
     <section className="flex flex-col gap-8">
       {isModalOpen && (
         <AddTaskModal
           onClose={() => setIsModalOpen(false)}
-          onSubmit={handleAddTask}
+          onSubmit={addTask}
           projects={projects!}
         />
       )}

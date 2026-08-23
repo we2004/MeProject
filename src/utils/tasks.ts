@@ -52,6 +52,18 @@ export function getTaskFilter(value: string | null): TaskStatusFilter {
   }
 }
 
+export function getTaskPriority(value: string | null): TaskPriorityFilter {
+  switch (value) {
+    case "high":
+    case "low":
+    case "medium":
+      return value
+
+    default:
+      return "all"
+  }
+}
+
 export function filterTasksByStat(tasks: Task[], filter: TaskStatusFilter) {
   switch (filter) {
     case "open":
@@ -74,8 +86,15 @@ export function filterTasksByPriority(
   return tasks.filter((task) => task.priority === priority)
 }
 
-export function getTasksByProjectId(tasks: Task[], projectId: string | null | undefined, order:SortOrder='asc') {
-  return sortTasksByDueDate(tasks.filter((task) => task.projectId === Number(projectId)), order)
+export function getTasksByProjectId(
+  tasks: Task[],
+  projectId: string | null | undefined,
+  order: SortOrder = "asc"
+) {
+  return sortTasksByDueDate(
+    tasks.filter((task) => task.projectId === Number(projectId)),
+    order
+  )
 }
 
 export function getPageTasks(
