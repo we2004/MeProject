@@ -4,12 +4,10 @@ import TaskCard from "../components/cards/TaskCard"
 import PrimaryButton from "../components/buttons/PrimaryButton"
 import AttachmentCard from "../components/cards/AttachmentCard"
 import { useParams, Link, useNavigate } from "react-router-dom"
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { calculateProgress } from "../utils/projects"
 import AddTaskModal from "../components/modals/AddTaskModal"
 import AddAttachmentModal from "../components/modals/AddAttachmentModal"
-import type { ProjectApiResponse} from "../types/projects"
-import { getProjects } from "../api/projects"
 import { downloadAttachment } from "../api/attachments"
 import { useAuth } from "../context/useAuth"
 import DeleteModal from "../components/modals/DeleteModal"
@@ -17,6 +15,7 @@ import useProject from "../hooks/useProject"
 import useProjectTasks from "../hooks/useProjectTasks"
 import useAttachments from "../hooks/useAttachments"
 import ProjectInfoSection from "../sections/ProjectInfoSection"
+import useProjects from "../hooks/useProjects"
 
 function ProjectsDetails() {
   const { token } = useAuth()
@@ -38,6 +37,8 @@ function ProjectsDetails() {
     removeTask
   } = useProjectTasks(token, Number(projectId))
 
+  const {projects} = useProjects(token, 'all', 'asc')
+
   const {
     attachments,
     loading: attachmentLoading,
@@ -48,21 +49,11 @@ function ProjectsDetails() {
 
   const navigate = useNavigate()
 
-  const [projects, setProjects] = useState<ProjectApiResponse[] | null>(null)
 
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false)
   const [isAttachmentModalOpen, setIsAttachmentModalOpen] = useState(false)
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
-
-  useEffect(() => {
-    const start = async () => {
-      const projectsData = await getProjects(token, "all", "asc")
-      setProjects(projectsData)
-    }
-
-    start()
-  }, [token])
 
 
   const handleDeleteTech = async (tech: string) => {
