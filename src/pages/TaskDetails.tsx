@@ -1,16 +1,9 @@
 import {
-  Edit3,
-  FolderKanban,
-  Clock,
   Trash2,
   CirclePlus,
-  Check
 } from "lucide-react"
 
-import StatusBadge from "../components/badges/StatusBadge"
-import PriorityBadge from "../components/badges/PriorityBadge"
 import { useNavigate, useParams } from "react-router-dom"
-import dayjs from "dayjs"
 import NoteCard from "../components/cards/NoteCard"
 import PrimaryButton from "../components/buttons/PrimaryButton"
 import AddNoteModal from "../components/modals/AddNoteModal"
@@ -20,6 +13,7 @@ import { useAuth } from "../context/useAuth"
 import useTask from "../hooks/useTask"
 import useNotes from "../hooks/useNotes"
 import useProject from "../hooks/useProject"
+import TaskInfoSection from "../sections/TaskInfoSection"
 
 function TaskDetails() {
   const { token } = useAuth()
@@ -27,39 +21,24 @@ function TaskDetails() {
   const [isNoteModalOpen, setIsNoteModalOpen] = useState(false)
   const {
     task,
-    loading: taskLoading,
-    error: taskError,
-    updateTask,
-    updateTaskStatus
+
+    updateTask
   } = useTask(token, Number(taskId))
 
   const {
     notes,
-    loading: notesLoading,
-    error: notesError,
     addNote,
     removeNote
   } = useNotes(token, Number(taskId))
 
-  const { project } = useProject(token, task!.projectId)
+  const { project } = useProject(token, task?.projectId)
 
-  const [isEditName, setIsEditName] = useState(false)
-  const [taskName, setTaskName] = useState("")
-  const [isEditDescription, setIsEditDescription] = useState(false)
-  const [taskDescription, setTaskDescription] = useState("")
-  const [isEditDuedate, setIsEditDuedate] = useState(false)
-  const [taskDuedate, setTaskDuedate] = useState("")
-
+ 
   const navigate = useNavigate()
 
   if (!task || !project) {
     return <p>Task not found</p>
   }
-
-  const displayStatus =
-    task.status === "open" && dayjs(task.dueDate).isBefore(dayjs(), "day")
-      ? "overdue"
-      : task.status
 
   const handleDeleteTask = async () => {
     await deleteTask(Number(taskId), token)
@@ -79,125 +58,7 @@ function TaskDetails() {
         />
       )}
 
-      <div className="rounded-3xl border border-primary/15 bg-white p-6 shadow-sm">
-        <div className="flex flex-col gap-3">
-          {/* Task Name */}
-          <div className="flex flex-wrap items-center gap-2">
-            <h1
-              className={`font-heading text-2xl sm:text-3xl font-bold text-primary-font ${isEditName ? "hidden" : ""}`}
-            >
-              {task.name}
-            </h1>
-
-            {isEditName && (
-              <input
-                type="text"
-                className="rounded-2xl border border-primary/45 bg-white px-2 py-3 font-heading text-2xl font-bold text-primary-font outline-none transition-all duration-300 placeholder:text-primary-font/40 focus:border-primary focus:ring-2 focus:ring-primary/10"
-                value={taskName}
-                onChange={(e) => setTaskName(e.target.value)}
-              />
-            )}
-
-            {isEditName ? (
-              <button
-                onClick={async () =>
-                  await updateTask("name", taskName, setIsEditName)
-                }
-              >
-                <Check className="h-5 w-5 mr-5 ml-1 text-primary cursor-pointer hover:text-primary/40 transition-all duration-300" />
-              </button>
-            ) : (
-              <button onClick={() => setIsEditName(true)}>
-                <Edit3 className="h-4 w-4 mr-5 ml-1 text-primary cursor-pointer hover:text-primary/40 transition-all duration-300" />
-              </button>
-            )}
-
-            <StatusBadge
-              status={displayStatus}
-              interactive
-              onStatusChange={updateTaskStatus}
-            />
-            <PriorityBadge priority={task.priority} />
-          </div>
-
-          {/* Description */}
-          <div className="flex items-center gap-2">
-            <p
-              className={`flex-1 font-body leading-7 text-primary-font/70 ${isEditDescription ? "hidden" : ""}`}
-            >
-              {task.description}
-            </p>
-
-            {isEditDescription && (
-              <textarea
-                rows={5}
-                className="flex-1 max-w-260 rounded-2xl border border-primary/45 bg-white px-2 py-3 font-body text-primary-font/70 outline-none transition-all duration-300 placeholder:text-primary-font/40 focus:border-primary focus:ring-2 focus:ring-primary/10"
-                value={taskDescription}
-                onChange={(e) => setTaskDescription(e.target.value)}
-              />
-            )}
-
-            {isEditDescription ? (
-              <button
-                onClick={async () =>
-                  await updateTask(
-                    "description",
-                    taskDescription,
-                    setIsEditDescription
-                  )
-                }
-              >
-                <Check className="h-5 w-5 mr-5 ml-1 text-primary cursor-pointer hover:text-primary/40 transition-all duration-300" />
-              </button>
-            ) : (
-              <button onClick={() => setIsEditDescription(true)}>
-                <Edit3 className="h-4 w-4 mr-5 ml-1 text-primary cursor-pointer hover:text-primary/40 transition-all duration-300" />
-              </button>
-            )}
-          </div>
-
-          {/* Due Date */}
-          <div className="flex items-center gap-2 mt-3">
-            <Clock className="h-5 w-5 text-primary" />
-
-            <span
-              className={`font-body text-primary-font ${isEditDuedate ? "hidden" : ""}`}
-            >
-              {dayjs(task.dueDate).format("MMMM D, YYYY")}
-            </span>
-
-            {isEditDuedate && (
-              <input
-                type="date"
-                className="rounded-2xl border border-primary/45 bg-white px-2 py-2 font-body text-primary-font outline-none transition-all duration-300 placeholder:text-primary-font/40 focus:border-primary focus:ring-2 focus:ring-primary/10"
-                value={taskDuedate}
-                onChange={(e) => setTaskDuedate(e.target.value)}
-              />
-            )}
-
-            {isEditDuedate ? (
-              <button
-                onClick={async () =>
-                  await updateTask("dueDate", taskDuedate, setIsEditDuedate)
-                }
-              >
-                <Check className="h-5 w-5 mr-5 ml-1 text-primary cursor-pointer hover:text-primary/40 transition-all duration-300" />
-              </button>
-            ) : (
-              <button onClick={() => setIsEditDuedate(true)}>
-                <Edit3 className="h-4 w-4 mr-5 ml-1 text-primary cursor-pointer hover:text-primary/40 transition-all duration-300" />
-              </button>
-            )}
-          </div>
-
-          {/* Project */}
-          <div className="flex items-center gap-2">
-            <FolderKanban className="h-5 w-5 text-primary" />
-
-            <span className="font-body text-primary-font">{project?.name}</span>
-          </div>
-        </div>
-      </div>
+      <TaskInfoSection onUpdate={updateTask} task={task} projectName={project.name} />
 
       {/* Notes */}
       <div className="flex flex-col gap-5">

@@ -1,7 +1,7 @@
 import { type Task, type TaskStatus } from "../types/tasks"
 import { useState, useEffect } from "react"
 import { getTaskById, updateTaskData } from "../api/tasks"
-
+import type { EditInfoFields } from "../types/common"
 function useTask(token: string, taskId: number) {
   const [task, setTask] = useState<Task | null>(null)
   const [loading, setLoading] = useState(false)
@@ -16,6 +16,7 @@ function useTask(token: string, taskId: number) {
         setLoading(true)
       } catch (e) {
         setError("Failed to fetch task")
+        console.log(e)
       } finally {
         setLoading(false)
       }
@@ -25,9 +26,8 @@ function useTask(token: string, taskId: number) {
   }, [token, taskId])
 
   const updateTask = async (
-    field: string,
-    data: unknown,
-    setter: React.Dispatch<React.SetStateAction<boolean>>
+    field: EditInfoFields,
+    data: string | boolean | string[] | TaskStatus
   ) => {
     try {
       setLoading(true)
@@ -41,10 +41,9 @@ function useTask(token: string, taskId: number) {
           [field]: data
         }
       })
-
-      setter(false)
     } catch (e) {
       setError("Failed to update task")
+      console.log(e)
     } finally {
       setLoading(false)
     }
@@ -64,6 +63,7 @@ function useTask(token: string, taskId: number) {
       })
     } catch (e) {
       setError("Failed to update task")
+      console.log(e)
     } finally {
       setLoading(false)
     }

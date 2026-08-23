@@ -1,14 +1,14 @@
 import { useState } from "react"
 import { Check, Edit3, Clock } from "lucide-react"
 import dayjs from "dayjs"
-
-type ProjectInfoFields = "name" | "description" | "dueDate"
+import type { EditInfoFields } from "../../types/common"
+import type { TaskStatus } from "../../types/tasks"
 type EditableFieldProps = {
   data: string
-  field: ProjectInfoFields
+  field: EditInfoFields
   onUpdate: (
-    field: ProjectInfoFields,
-    data: string | boolean | string[]
+    field: EditInfoFields,
+    data: string | boolean | string[] | TaskStatus
   ) => Promise<void>
 }
 

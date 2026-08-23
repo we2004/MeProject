@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react"
-import type { ProjectApiResponse, ProjectFields } from "../types/projects"
+import type { ProjectApiResponse } from "../types/projects"
 import {
   getProjectById,
   updateProjectData,
   deleteProject
 } from "../api/projects"
-
-function useProject(token: string, projectId: number) {
+import type { EditInfoFields } from "../types/common"
+function useProject(token: string, projectId?: number) {
   const [project, setProject] = useState<ProjectApiResponse | undefined>(
     undefined
   )
@@ -15,6 +15,8 @@ function useProject(token: string, projectId: number) {
 
   //GET project
   useEffect(() => {
+    if (!projectId) return
+
     const handleFetchProject = async () => {
       try {
         setLoading(true)
@@ -24,6 +26,7 @@ function useProject(token: string, projectId: number) {
         setProject(projectData)
       } catch (e) {
         setError("Failed to fetch project")
+        console.log(e)
       } finally {
         setLoading(false)
       }
@@ -33,9 +36,10 @@ function useProject(token: string, projectId: number) {
   }, [token, projectId])
 
   const updateProject = async (
-    field: ProjectFields,
+    field: EditInfoFields,
     data: string | boolean | string[]
   ) => {
+    if (!projectId) return
     try {
       setLoading(true)
       await updateProjectData(projectId, field, data, token)
@@ -50,18 +54,21 @@ function useProject(token: string, projectId: number) {
       })
     } catch (e) {
       setError("Failed to update project")
+      console.log(e)
     } finally {
       setLoading(false)
     }
   }
 
   const deleteCurrentProject = async () => {
+    if (!projectId) return
     try {
       setLoading(true)
       await deleteProject(projectId, token)
       return true
     } catch (e) {
       setError("Failed to delete project")
+      console.log(e)
       return false
     } finally {
       setLoading(false)

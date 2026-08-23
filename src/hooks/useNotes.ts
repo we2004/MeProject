@@ -17,13 +17,14 @@ function useNotes(token: string, taskId: number) {
         setNotes(taskNotes)
       } catch (e) {
         setError("Failed to fetch notes")
+        console.log(e)
       } finally {
         setLoading(false)
       }
     }
 
     fetchNotesData()
-  })
+  }, [token, taskId])
 
   const addNote = async (notes: string[]) => {
     for (const content of notes) {

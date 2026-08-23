@@ -9,14 +9,21 @@ import {
 import { useState } from "react"
 import type { TaskStatus } from "../../types/tasks"
 import type { ProjectStatus } from "../../types/projects"
-
+import type { EditInfoFields } from "../../types/common"
 type StatusBadgeProps = {
   status: TaskStatus | ProjectStatus
   interactive?: boolean
-  onStatusChange?: (newStatus: TaskStatus) => void
+  onStatusChange?: (
+    field: EditInfoFields,
+    data: string | boolean | string[] | TaskStatus
+  ) => Promise<void>
 }
 
-function StatusBadge({ status, interactive = false, onStatusChange }: StatusBadgeProps) {
+function StatusBadge({
+  status,
+  interactive = false,
+  onStatusChange
+}: StatusBadgeProps) {
   const [isOpen, setIsOpen] = useState(false)
 
   let statusStyle = ""
@@ -90,7 +97,7 @@ function StatusBadge({ status, interactive = false, onStatusChange }: StatusBadg
               event.preventDefault()
               event.stopPropagation()
 
-              onStatusChange?.(nextStatus)
+              onStatusChange?.("status", nextStatus)
               setIsOpen(false)
             }}
             className="w-full rounded-xl px-3 py-2 text-left font-body text-sm capitalize text-primary-font transition-colors duration-200 hover:bg-primary hover:text-white"
