@@ -6,18 +6,17 @@ import { type Project } from "../../types/projects"
 import TechStackSection from "../../sections/TechStackSection"
 type AddProjectModalProps = {
   onClose: () => void
-  onSubmit: (newItem: Project, file:File[]) => void
+  onSubmit: (newProject: Project, files: File[]) => Promise<void>
 }
 
 function AddProjectModal({ onClose, onSubmit }: AddProjectModalProps) {
   const [files, setFiles] = useState<File[]>([])
-
   const [projectName, setProjectName] = useState("")
   const [projectDescription, setProjectDescription] = useState("")
   const [projectDueDate, setProjectDueDate] = useState("")
   const [techStack, setTechStack] = useState<string[]>([])
 
-  const handleAddTech = (tech:string) => {
+  const handleAddTech = (tech: string) => {
     if (!tech.trim()) return
     setTechStack([...techStack, tech])
   }
@@ -41,7 +40,7 @@ function AddProjectModal({ onClose, onSubmit }: AddProjectModalProps) {
       modalTitle="Create Project"
       modalDescription="Add the details of the new Project."
       onClose={onClose}
-      onSubmit={() => {
+      onSubmit={async () => {
         const newProject = {
           name: projectName,
           description: projectDescription,
@@ -49,7 +48,7 @@ function AddProjectModal({ onClose, onSubmit }: AddProjectModalProps) {
           cancelled: false,
           techStack: techStack
         }
-        onSubmit(newProject, files)
+        await onSubmit(newProject, files)
         onClose()
       }}
     >
@@ -142,9 +141,11 @@ function AddProjectModal({ onClose, onSubmit }: AddProjectModalProps) {
               Tech Stack
             </label>
 
-            <TechStackSection onAddTech={handleAddTech} onDeleteTech={handleDeleteTech} techStack={techStack}/>
-
-
+            <TechStackSection
+              onAddTech={handleAddTech}
+              onDeleteTech={handleDeleteTech}
+              techStack={techStack}
+            />
           </div>
 
           {/* Attachments */}
@@ -153,7 +154,11 @@ function AddProjectModal({ onClose, onSubmit }: AddProjectModalProps) {
               Attachments
             </label>
 
-            <AttachmentSection files={files} onAddAttachment={handleAddAttachment} onDeleteAttachment={handleDeleteFile}/>
+            <AttachmentSection
+              files={files}
+              onAddAttachment={handleAddAttachment}
+              onDeleteAttachment={handleDeleteFile}
+            />
           </div>
         </div>
       </div>

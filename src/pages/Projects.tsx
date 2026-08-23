@@ -20,8 +20,6 @@ function Projects() {
   )
   const {
     projects,
-    loading: projectsLoading,
-    error: projectsError,
     addProject
   } = useProjects(token, filter, order)
 
