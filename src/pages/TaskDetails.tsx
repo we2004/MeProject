@@ -14,14 +14,12 @@ import dayjs from "dayjs"
 import NoteCard from "../components/cards/NoteCard"
 import PrimaryButton from "../components/buttons/PrimaryButton"
 import AddNoteModal from "../components/modals/AddNoteModal"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { deleteTask } from "../api/tasks"
-import { type ProjectApiResponse } from "../types/projects"
-import { getProjectById } from "../api/projects"
-import { createNote, deleteNote, getNotesByTask } from "../api/notes"
-import { type NoteApiResonse } from "../types/notes"
 import { useAuth } from "../context/useAuth"
 import useTask from "../hooks/useTask"
+import useNotes from "../hooks/useNotes"
+import useProject from "../hooks/useProject"
 
 function TaskDetails() {
   const { token } = useAuth()
@@ -35,8 +33,15 @@ function TaskDetails() {
     updateTaskStatus
   } = useTask(token, Number(taskId))
 
-  const [project, setProject] = useState<ProjectApiResponse | null>(null)
-  const [notes, setNotes] = useState<NoteApiResonse[] | null>(null)
+  const {
+    notes,
+    loading: notesLoading,
+    error: notesError,
+    addNote,
+    removeNote
+  } = useNotes(token, Number(taskId))
+
+  const { project } = useProject(token, task!.projectId)
 
   const [isEditName, setIsEditName] = useState(false)
   const [taskName, setTaskName] = useState("")
@@ -46,30 +51,6 @@ function TaskDetails() {
   const [taskDuedate, setTaskDuedate] = useState("")
 
   const navigate = useNavigate()
-
-  useEffect(() => {
-    const start = async () => {
-      const taskNotes = await getNotesByTask(taskData.id, token)
-
-      setNotes(taskNotes)
-
-      setTaskName(taskData.name)
-      setTaskDescription(taskData.description)
-      setTaskDuedate(taskData.dueDate)
-    }
-
-    start()
-  }, [token, taskId])
-
-  useEffect(() => {
-    const start = async () => {
-      if (!task) return
-      const projectData = await getProjectById(task.projectId, token)
-      setProject(projectData)
-    }
-
-    start()
-  }, [task, token])
 
   if (!task || !project) {
     return <p>Task not found</p>
@@ -85,23 +66,6 @@ function TaskDetails() {
     navigate("/tasks")
   }
 
-
-  const handleAddNote = async (notes: string[]) => {
-    for (const content of notes) {
-      await createNote(token, { content: content, taskId: task.id })
-    }
-
-    const updatedNotes = await getNotesByTask(Number(taskId), token)
-    setNotes(updatedNotes)
-  }
-
-  const handleDeleteNote = async (noteId: number) => {
-    await deleteNote(token, noteId)
-
-    const updatedNotes = await getNotesByTask(task.id, token)
-    setNotes(updatedNotes)
-  }
-
   if (!notes) return <p>something is wrong</p>
 
   return (
@@ -111,7 +75,7 @@ function TaskDetails() {
       {isNoteModalOpen && (
         <AddNoteModal
           onClose={() => setIsNoteModalOpen(false)}
-          onSubmit={handleAddNote}
+          onSubmit={addNote}
         />
       )}
 
@@ -214,11 +178,7 @@ function TaskDetails() {
             {isEditDuedate ? (
               <button
                 onClick={async () =>
-                  await updateTask(
-                    "dueDate",
-                    taskDuedate,
-                    setIsEditDuedate
-                  )
+                  await updateTask("dueDate", taskDuedate, setIsEditDuedate)
                 }
               >
                 <Check className="h-5 w-5 mr-5 ml-1 text-primary cursor-pointer hover:text-primary/40 transition-all duration-300" />
@@ -265,7 +225,7 @@ function TaskDetails() {
               </div>
 
               <button
-                onClick={() => handleDeleteNote(note.id)}
+                onClick={() => removeNote(note.id)}
                 className="flex h-12 w-12 items-center justify-center rounded-2xl border border-primary/15 bg-white text-primary-font shadow-sm transition-all duration-300 hover:bg-redT hover:text-white"
               >
                 <Trash2 className="h-5 w-5" />

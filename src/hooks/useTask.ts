@@ -22,7 +22,7 @@ function useTask(token: string, taskId: number) {
     }
 
     handleFetchTask()
-  })
+  }, [token, taskId])
 
   const updateTask = async (
     field: string,
