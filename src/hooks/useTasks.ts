@@ -46,6 +46,7 @@ function useTasks(
         }
       } catch (e) {
         setError("Failed to fetch tasks")
+        console.log(e)
       } finally {
         setLoading(false)
       }
@@ -99,11 +100,11 @@ function useTasks(
       setTasks(updatedTasks.data)
     } catch (e) {
       setError("Failed to delete task")
+      console.log(e)
     } finally {
       setLoading(false)
     }
   }
-  
 
   return { tasks, loading, error, addTask, updateTaskStatus, removeTask }
 }
