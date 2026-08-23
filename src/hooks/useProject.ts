@@ -59,6 +59,7 @@ function useProject(token: string, projectId: number) {
     try {
       setLoading(true)
       await deleteProject(projectId, token)
+      return true
     } catch (e) {
       setError("Failed to delete project")
       return false

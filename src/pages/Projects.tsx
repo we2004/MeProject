@@ -4,29 +4,29 @@ import PrimaryButton from "../components/buttons/PrimaryButton"
 import DropdownButton from "../components/buttons/DropdownButton"
 import { useSearchParams } from "react-router-dom"
 import type { MenuType, SortOrder } from "../types/common"
-import { useState, useEffect } from "react"
-import type {
-  ProjectApiResponse,
-  Project,
-  ProjectStatusFilter
-} from "../types/projects"
+import { useState } from "react"
+import type { ProjectStatusFilter } from "../types/projects"
 import { getProjectFilter } from "../utils/projects"
 import SortByDateButton from "../components/buttons/SortByDateButton"
 import AddProjectModal from "../components/modals/AddProjectModal"
-import { createProject } from "../api/projects"
-import { getProjects } from "../api/projects"
-import { createAttachment } from "../api/attachments"
 import { useAuth } from "../context/useAuth"
+import useProjects from "../hooks/useProjects"
 function Projects() {
-  const {token} = useAuth()
+  const { token } = useAuth()
   const [searchParams, setSearchParams] = useSearchParams()
-  const [projects, setProjects] = useState<ProjectApiResponse[]>([])
-  const [openMenu, setOpenMenu] = useState<MenuType | null>(null)
-  const [isModalOpen, setIsModalOpen] = useState(false)
   const order: SortOrder = searchParams.get("order") === "desc" ? "desc" : "asc"
   const filter: ProjectStatusFilter = getProjectFilter(
     searchParams.get("filter")
   )
+  const {
+    projects,
+    loading: projectsLoading,
+    error: projectsError,
+    addProject
+  } = useProjects(token, filter, order)
+
+  const [openMenu, setOpenMenu] = useState<MenuType | null>(null)
+  const [isModalOpen, setIsModalOpen] = useState(false)
 
   const filters: ProjectStatusFilter[] = [
     "all",
@@ -51,35 +51,12 @@ function Projects() {
     })
   }
 
-  useEffect(() => {
-    const start = async () => {
-      const projectsData = await getProjects(token, filter, order)
-      setProjects(projectsData)
-    }
-
-    start()
-  }, [token, filter, order])
-
-  const handleAddProject = async (newProject: Project, files: File[]) => {
-    const response = await createProject(token, newProject)
-    const projectsData = await getProjects(token, filter, order)
-
-    for (const file of files) {
-      await createAttachment(token, {
-        file: file,
-        projectId: Number(response.id)
-      })
-    }
-
-    setProjects(projectsData)
-  }
-
   return (
     <section className="flex flex-col gap-8">
       {isModalOpen && (
         <AddProjectModal
           onClose={() => setIsModalOpen(false)}
-          onSubmit={handleAddProject}
+          onSubmit={addProject}
         />
       )}
       <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
