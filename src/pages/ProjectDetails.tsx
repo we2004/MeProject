@@ -30,27 +30,24 @@ function ProjectsDetails() {
 
   const {
     tasks: projectTasks,
-    updateTaskStatus,
+    updateTask,
     addTask,
     removeTask
-  } = useTasks(token, 'all', 'all', 'asc', Number(projectId))
+  } = useTasks(token, "all", "all", "asc", Number(projectId))
 
-  const {projects} = useProjects(token, 'all', 'asc')
+  const { projects } = useProjects(token, "all", "asc")
 
-  const {
-    attachments,
-    addAttachment,
-    removeAttachment
-  } = useAttachments(token, Number(projectId))
+  const { attachments, addAttachment, removeAttachment } = useAttachments(
+    token,
+    Number(projectId)
+  )
 
   const navigate = useNavigate()
-
 
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false)
   const [isAttachmentModalOpen, setIsAttachmentModalOpen] = useState(false)
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
-
 
   const handleDeleteTech = async (tech: string) => {
     if (!project) return
@@ -156,7 +153,9 @@ function ProjectsDetails() {
                 <TaskCard
                   projectName={project.name}
                   {...task}
-                  onStatusChange={updateTaskStatus}
+                  onUpdate={(field, data) =>
+                    updateTask(task.id, field, data)
+                  }
                 />
               </div>
 

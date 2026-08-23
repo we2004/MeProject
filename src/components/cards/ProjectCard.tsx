@@ -2,33 +2,20 @@ import { Clock3 } from "lucide-react"
 import { type ProjectCardProps } from "../../types/projects"
 import { Link } from "react-router-dom"
 import dayjs from "dayjs"
-import { calculateProgress } from "../../utils/projects"
 import StatusBadge from "../badges/StatusBadge"
-import { useEffect, useState } from "react"
-import type { TaskApiResponse } from "../../types/tasks"
-import { getTasksByProject } from "../../api/tasks"
-import { useAuth } from "../../context/useAuth"
+
+
 function ProjectCard({
   id,
   name,
   description,
   dueDate,
   showDaysLeft = true,
-  derivedStatus
+  derivedStatus,
+  progress
 }: ProjectCardProps) {
-  const {token} = useAuth()
-  const [tasks, setTasks] = useState<TaskApiResponse | null>(null)
-  useEffect(() => {
-    const start = async () => {
-      const projectTasks = await getTasksByProject(id, token, 'all', 'all', 'asc')
-      setTasks(projectTasks)
-    }
-
-    start()
-  }, [id, token])
 
   const daysLeft = dayjs(dueDate).diff(dayjs(), "day")
-  const progress = calculateProgress( id, tasks?.data)
 
   return (
     <Link
@@ -62,7 +49,7 @@ function ProjectCard({
         </div>
       </div>
 
-      <div className="mt-6 flex flex-warp items-center justify-between border-t border-primary/10 pt-4">
+      <div className="mt-6 flex flex-wrap items-center justify-between border-t border-primary/10 pt-4">
         {showDaysLeft && (
           <div className="flex items-center gap-2 text-primary-font/70">
             <Clock3 className="h-4 w-4" />

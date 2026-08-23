@@ -18,6 +18,7 @@ export type ProjectCardProps = {
   dueDate: string
   showDaysLeft?: boolean
   derivedStatus: ProjectStatus
+  progress: number
 }
 
 export type ProjectStatus = "cancelled" | "overdue" | "active" | "completed"

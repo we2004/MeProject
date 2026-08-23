@@ -1,3 +1,5 @@
+import type { EditInfoFields } from "./common"
+
 export type Task = {
   id: number
   name: string
@@ -34,7 +36,10 @@ export type TaskCardProps = {
   status: TaskStatus
   dueDate: string
   priority: TaskPriority
-  onStatusChange?: (taskId: number, newStatus: TaskStatus) => void
+  onUpdate: (
+    field: EditInfoFields,
+    data: string | boolean | string[] | TaskStatus
+  ) => Promise<void>
 }
 
 export type TaskStatus = "open" | "completed"

@@ -6,11 +6,12 @@ import { useSearchParams } from "react-router-dom"
 import type { MenuType, SortOrder } from "../types/common"
 import { useState } from "react"
 import type { ProjectStatusFilter } from "../types/projects"
-import { getProjectFilter } from "../utils/projects"
+import { calculateProgress, getProjectFilter } from "../utils/projects"
 import SortByDateButton from "../components/buttons/SortByDateButton"
 import AddProjectModal from "../components/modals/AddProjectModal"
 import { useAuth } from "../context/useAuth"
 import useProjects from "../hooks/useProjects"
+import useTasks from "../hooks/useTasks"
 function Projects() {
   const { token } = useAuth()
   const [searchParams, setSearchParams] = useSearchParams()
@@ -18,10 +19,8 @@ function Projects() {
   const filter: ProjectStatusFilter = getProjectFilter(
     searchParams.get("filter")
   )
-  const {
-    projects,
-    addProject
-  } = useProjects(token, filter, order)
+  const { projects, addProject } = useProjects(token, filter, order)
+  const { tasks } = useTasks(token, "all", "all", "asc")
 
   const [openMenu, setOpenMenu] = useState<MenuType | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -58,9 +57,9 @@ function Projects() {
         />
       )}
       <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
-          <h1 className="font-heading text-3xl font-bold text-primary-font text-center sm:text-start">
-            My Projects
-          </h1>
+        <h1 className="font-heading text-3xl font-bold text-primary-font text-center sm:text-start">
+          My Projects
+        </h1>
 
         <PrimaryButton
           Icon={CirclePlus}
@@ -91,6 +90,7 @@ function Projects() {
           <ProjectCard
             key={project.id}
             {...project}
+            progress={calculateProgress(project.id, tasks)}
           />
         ))}
       </div>

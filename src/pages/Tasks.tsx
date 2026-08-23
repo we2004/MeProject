@@ -13,7 +13,6 @@ import { useAuth } from "../context/useAuth"
 import useTasks from "../hooks/useTasks"
 import useProjects from "../hooks/useProjects"
 
-
 function Tasks() {
   const { token } = useAuth()
   const [searchParams, setSearchParams] = useSearchParams()
@@ -23,12 +22,13 @@ function Tasks() {
   const priority: TaskPriorityFilter = getTaskPriority(
     searchParams.get("priority")
   )
-  const {
-    tasks,
-    loading: tasksLoading,
-    error: tasksError,
-    addTask
-  } = useTasks(token, filter, priority, order, Number(projectId))
+  const { tasks, addTask, updateTask } = useTasks(
+    token,
+    filter,
+    priority,
+    order,
+    Number(projectId)
+  )
   const { projects } = useProjects(token, "all", "asc")
 
   const [openMenu, setOpenMenu] = useState<MenuType | null>(null)
@@ -161,6 +161,7 @@ function Tasks() {
             projectName={
               projects?.find((project) => project.id == task.projectId)?.name
             }
+            onUpdate={(field, data) => updateTask(task.id, field, data)}
           />
         ))}
       </div>

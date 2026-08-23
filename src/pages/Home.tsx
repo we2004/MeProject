@@ -4,7 +4,7 @@ import TaskCard from "../components/cards/TaskCard"
 import OverviewCard from "../components/cards/OverviewCard"
 import ProjectCard from "../components/cards/ProjectCard"
 import { Link } from "react-router-dom"
-import { getOngoingProjects } from "../utils/projects"
+import { calculateProgress, getOngoingProjects } from "../utils/projects"
 import {
   getOngoingTasks,
   getOverdueTasks,
@@ -17,7 +17,7 @@ import useTasks from "../hooks/useTasks"
 function Home() {
   const { token } = useAuth()
   const { projects } = useProjects(token, "all", "asc")
-  const { tasks, updateTaskStatus } = useTasks(token, "all", "all", "asc")
+  const { tasks, updateTask } = useTasks(token, "all", "all", "asc")
 
   const ongoingProjects = getOngoingProjects(projects, tasks).slice(0, 4)
   const ongoingTasks = getOngoingTasks(tasks).slice(0, 3)
@@ -65,6 +65,7 @@ function Home() {
               key={project.id}
               {...project}
               showDaysLeft={false}
+              progress={calculateProgress(project.id, tasks)}
             />
           ))}
         </div>
@@ -94,7 +95,7 @@ function Home() {
               projectName={
                 projects.find((project) => project.id == task.projectId)?.name
               }
-              onStatusChange={updateTaskStatus}
+              onUpdate={(field, data) => updateTask(task.id, field, data)}
             />
           ))}
         </div>

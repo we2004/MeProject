@@ -1,9 +1,10 @@
 import { Link } from "react-router-dom"
+import type { TaskStatusFilter } from "../../types/tasks"
 
 type OverviewCardProps = {
   num: number
   title: string
-  filter: string
+  filter: TaskStatusFilter
 }
 
 function OverviewCard({ num, title, filter }: OverviewCardProps) {

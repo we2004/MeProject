@@ -2,9 +2,10 @@ import {
   getTasks,
   getTasksByProject,
   createTask,
-  deleteTask
+  deleteTask,
+  updateTaskData
 } from "../api/tasks"
-import type { SortOrder } from "../types/common"
+import type { EditInfoFields, SortOrder } from "../types/common"
 import type {
   TaskPriorityFilter,
   TaskStatusFilter,
@@ -77,12 +78,27 @@ function useTasks(
     }
   }
 
-  const updateTaskStatus = (taskId: number, newStatus: TaskStatus) => {
-    setTasks((current) =>
-      current.map((task) =>
-        task.id === taskId ? { ...task, status: newStatus } : task
+  const updateTask = async (
+    taskId: number,
+    field: EditInfoFields,
+    data: string | boolean | string[] | TaskStatus
+  ) => {
+    try {
+      setLoading(true)
+
+      await updateTaskData(taskId, field, data, token)
+
+      setTasks((current) =>
+        current.map((task) =>
+          task.id === taskId ? { ...task, [field]: data } : task
+        )
       )
-    )
+    } catch (e) {
+      setError("Failed to update task")
+      console.log(e)
+    } finally {
+      setLoading(false)
+    }
   }
 
   const removeTask = async (taskId: number) => {
@@ -106,7 +122,7 @@ function useTasks(
     }
   }
 
-  return { tasks, loading, error, addTask, updateTaskStatus, removeTask }
+  return { tasks, loading, error, addTask, updateTask, removeTask }
 }
 
 export default useTasks

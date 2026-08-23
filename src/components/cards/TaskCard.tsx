@@ -1,13 +1,10 @@
 import { Briefcase, ClipboardList } from "lucide-react"
 
-import { type TaskCardProps, type TaskStatus } from "../../types/tasks"
+import { type TaskCardProps } from "../../types/tasks"
 import StatusBadge from "../badges/StatusBadge"
 import PriorityBadge from "../badges/PriorityBadge"
 import { Link } from "react-router-dom"
-import { updateTaskData } from "../../api/tasks"
-import { useState } from "react"
 import dayjs from "dayjs"
-import { useAuth } from "../../context/useAuth"
 function TaskCard({
   id,
   name,
@@ -15,21 +12,12 @@ function TaskCard({
   status,
   dueDate,
   priority,
-  onStatusChange
+  onUpdate
 }: TaskCardProps) {
-  const {token} = useAuth()
-  const [displayedStatus, setDisplayedStatus] = useState(status)
-
-  const handleStatusChange = async (newStatus: TaskStatus) => {
-    await updateTaskData(id, "status", newStatus, token)
-    setDisplayedStatus(newStatus)
-    onStatusChange?.(id, newStatus)
-  }
-
   const displayStatus =
-    displayedStatus === "open" && dayjs(dueDate).isBefore(dayjs(), "day")
+    status === "open" && dayjs(dueDate).isBefore(dayjs(), "day")
       ? "overdue"
-      : displayedStatus
+      : status
 
   return (
     <Link
@@ -58,7 +46,7 @@ function TaskCard({
         <StatusBadge
           status={displayStatus}
           interactive
-          onStatusChange={handleStatusChange}
+          onStatusChange={onUpdate}
         />
 
         <PriorityBadge priority={priority} />
