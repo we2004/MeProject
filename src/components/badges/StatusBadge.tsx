@@ -38,9 +38,7 @@ function StatusBadge({
 
   const nextStatus = status === "completed" ? "open" : "completed"
 
-  const handleBadgeClick = (event: React.MouseEvent) => {
-    event.preventDefault()
-    event.stopPropagation()
+  const handleBadgeClick = () => {
 
     if (interactive) {
       setIsOpen(!isOpen)
@@ -82,10 +80,7 @@ function StatusBadge({
         <div className="absolute left-0 top-full z-20 mt-2 w-36 rounded-2xl border border-primary/15 bg-white p-2 shadow-lg">
           <button
             type="button"
-            onClick={(event) => {
-              event.preventDefault()
-              event.stopPropagation()
-
+            onClick={() => {
               onStatusChange?.("status", nextStatus)
               setIsOpen(false)
             }}
