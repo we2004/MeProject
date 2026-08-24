@@ -14,16 +14,24 @@ import {
 import { useAuth } from "../context/useAuth"
 import useProjects from "../hooks/useProjects"
 import useTasks from "../hooks/useTasks"
+import HomeSkeleton from "../components/loading/skeletons/HomeSkeleton"
+
 function Home() {
   const { token } = useAuth()
-  const { projects } = useProjects(token, "all", "asc")
-  const { tasks, updateTask } = useTasks(token, "all", "all", "asc")
+  const { projects, loading: projectLoading } = useProjects(token, "all", "asc")
+  const {
+    tasks,
+    loading: taskLoading,
+    updateTask
+  } = useTasks(token, "all", "all", "asc")
 
   const ongoingProjects = getOngoingProjects(projects, tasks).slice(0, 4)
   const ongoingTasks = getOngoingTasks(tasks).slice(0, 3)
 
+  if (projectLoading || taskLoading) return <HomeSkeleton />
+  
   return (
-    <section className="flex flex-col gap-10">
+    <section className="animate-fade-in flex flex-col gap-10">
       {/* Overview */}
       <div className="grid gap-5 md:grid-cols-3">
         <OverviewCard
