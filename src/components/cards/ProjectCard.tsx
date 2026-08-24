@@ -26,7 +26,7 @@ function ProjectCard({
         {name}
       </h2>
 
-      <p className="mt-1 line-clamp-2 font-body text-sm leading-5 text-primary-font/70">
+      <p className="h-10 mt-1 line-clamp-2 font-body text-sm leading-5 text-primary-font/70">
         {description}
       </p>
 
