@@ -23,13 +23,8 @@ function Tasks() {
   const priority: TaskPriorityFilter = getTaskPriority(
     searchParams.get("priority")
   )
-  const { tasks, tasksLoading, addTask, updateTask } = useTasks(
-    token,
-    filter,
-    priority,
-    order,
-    Number(projectId)
-  )
+  const { tasks, tasksLoading, udpateTaskLoading, addTask, updateTask } =
+    useTasks(token, filter, priority, order, Number(projectId))
   const { projects, projectsLoading } = useProjects(token, "all", "asc")
 
   const [openMenu, setOpenMenu] = useState<MenuType | null>(null)
@@ -99,6 +94,7 @@ function Tasks() {
           onClose={() => setIsModalOpen(false)}
           onSubmit={addTask}
           projects={projects!}
+          udpateTaskLoading={udpateTaskLoading}
         />
       )}
       <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">

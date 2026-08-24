@@ -10,13 +10,15 @@ type AddTaskModalProps = {
   projects: ProjectApiResponse[]
   onSubmit: (newItem: CreateTask, notes: string[]) => Promise<boolean>
   currentProjectId?: number
+  udpateTaskLoading: boolean
 }
 
 function AddTaskModal({
   onClose,
   projects,
   onSubmit,
-  currentProjectId
+  currentProjectId,
+  udpateTaskLoading
 }: AddTaskModalProps) {
   const [taskTitle, setTaskTitle] = useState("")
   const [projectOption, setProjectOption] = useState<number | "">("")
@@ -56,9 +58,11 @@ function AddTaskModal({
           description
         }
 
-        await onSubmit(newTask, notes)
-        onClose()
+        const success = await onSubmit(newTask, notes)
+        if(success)
+          onClose()
       }}
+      loading={udpateTaskLoading}
     >
       {/* General Information */}
       <div className="flex flex-col gap-5">

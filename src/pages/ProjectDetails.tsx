@@ -17,6 +17,7 @@ import ProjectInfoSection from "../sections/ProjectInfoSection"
 import useProjects from "../hooks/useProjects"
 import useTasks from "../hooks/useTasks"
 import ProjectsDetailsSkeleton from "../components/loading/skeletons/ProjectDetailsSkeleton"
+import Spinner from "../components/loading/spinners/Spinner"
 
 function ProjectsDetails() {
   const { token } = useAuth()
@@ -32,6 +33,8 @@ function ProjectsDetails() {
   const {
     tasks: projectTasks,
     tasksLoading,
+    udpateTaskLoading,
+    removeTaskLoading,
     updateTask,
     addTask,
     removeTask
@@ -39,8 +42,14 @@ function ProjectsDetails() {
 
   const { projects } = useProjects(token, "all", "asc")
 
-  const { attachments, attachmentLoading, addAttachment, removeAttachment } =
-    useAttachments(token, Number(projectId))
+  const {
+    attachments,
+    attachmentLoading,
+    addAttachmentLoading,
+    removeAttachmentLoading,
+    addAttachment,
+    removeAttachment
+  } = useAttachments(token, Number(projectId))
 
   const navigate = useNavigate()
 
@@ -109,6 +118,7 @@ function ProjectsDetails() {
           projects={projects!}
           onSubmit={addTask}
           currentProjectId={Number(projectId)}
+          udpateTaskLoading={udpateTaskLoading}
         />
       )}
 
@@ -116,6 +126,7 @@ function ProjectsDetails() {
         <AddAttachmentModal
           onClose={() => setIsAttachmentModalOpen(false)}
           onSubmit={addAttachment}
+          addAttachmentLoading={addAttachmentLoading}
         />
       )}
 
@@ -162,7 +173,14 @@ function ProjectsDetails() {
                 className="flex h-12 w-12 items-center justify-center rounded-2xl border border-primary/15 bg-white text-primary-font shadow-sm transition-all duration-300 hover:bg-redT hover:text-white"
                 onClick={() => removeTask(task.id)}
               >
-                <Trash2 className="h-5 w-5" />
+                {removeTaskLoading ? (
+                  <Spinner
+                    size="sm"
+                    color="dark"
+                  />
+                ) : (
+                  <Trash2 className="h-5 w-5" />
+                )}
               </button>
             </div>
           ))}
@@ -211,7 +229,14 @@ function ProjectsDetails() {
                 onClick={() => removeAttachment(attachment.id)}
                 className="flex h-12 w-12 items-center justify-center rounded-2xl border border-primary/15 bg-white text-primary-font shadow-sm transition-all duration-300 hover:bg-redT hover:text-white"
               >
-                <Trash2 className="h-5 w-5" />
+                {removeAttachmentLoading ? (
+                  <Spinner
+                    size="sm"
+                    color="dark"
+                  />
+                ) : (
+                  <Trash2 className="h-5 w-5" />
+                )}
               </button>
             </div>
           ))}
