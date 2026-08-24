@@ -14,6 +14,7 @@ import { useNavigate } from "react-router-dom"
 import { useState } from "react"
 import DeleteModal from "../components/modals/DeleteModal"
 import ErrorCard from "../components/cards/ErrorCard"
+import Spinner from "../components/loading/spinners/Spinner"
 
 function Settings() {
   const { user, signout, removeAccount, changeName, loading, error } = useAuth()
@@ -156,13 +157,24 @@ function Settings() {
                   setName(user.name)
                   setIsEditName(true)
                 }}
+                disabled={loading}
               >
                 Edit Profile
               </SecondaryButton>
             )}
             {isEditName && (
-              <button onClick={async () => await handleUpdateName(name)}>
-                <Check className="h-5 w-5 mr-5 ml-1 text-primary cursor-pointer hover:text-primary/40 transition-all duration-300" />
+              <button
+                disabled={loading}
+                onClick={async () => await handleUpdateName(name)}
+              >
+                {loading ? (
+                  <Spinner
+                    size="sm"
+                    color="dark"
+                  />
+                ) : (
+                  <Check className="h-5 w-5 mr-5 ml-1 text-primary cursor-pointer hover:text-primary/40 transition-all duration-300" />
+                )}
               </button>
             )}
           </div>
