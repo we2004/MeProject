@@ -17,7 +17,8 @@ function Register() {
 
   const { loading, registerUser } = useAuth()
 
-  const handleCreateAccount = async () => {
+  const handleCreateAccount = async (e: React.SubmitEvent) => {
+    e.preventDefault()
     const newUser: NewUser = {
       name: name,
       password: password,
@@ -32,7 +33,7 @@ function Register() {
   }
 
   return (
-    <div className="flex w-full items-center justify-center px-6 py-12 lg:w-1/2">
+    <div className="animate-fade-in flex w-full items-center justify-center px-6 py-12 lg:w-1/2">
       <div className="w-full max-w-md">
         {/* Heading */}
 
@@ -49,7 +50,7 @@ function Register() {
         {/* Form */}
         <form
           className="flex flex-col gap-5 mt-10"
-          onSubmit={handleCreateAccount}
+          onSubmit={(e) => handleCreateAccount(e)}
         >
           {/* name */}
           <div className="flex flex-col gap-2">
@@ -115,6 +116,7 @@ function Register() {
               <button
                 className="absolute right-4  top-1/2 cursor-pointer"
                 onClick={() => setShowPassword((c) => !c)}
+                type="button"
               >
                 {showPassword ? (
                   <Eye className="h-5 w-5 -translate-y-1/2 text-primary-font/40" />
@@ -153,6 +155,7 @@ function Register() {
               <button
                 onClick={() => setShowConfirmPassword((c) => !c)}
                 className="absolute right-4  top-1/2 cursor-pointer"
+                type="button"
               >
                 {showConfirmPassword ? (
                   <Eye className="h-5 w-5 -translate-y-1/2 text-primary-font/40" />

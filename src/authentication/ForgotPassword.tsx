@@ -25,7 +25,7 @@ function ForgotPassword() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-lightBodyBackground px-4 py-8">
+    <main className="animate-fade-in flex min-h-screen items-center justify-center bg-lightBodyBackground px-4 py-8">
       <div className="w-full max-w-md rounded-3xl border border-primary/15 bg-white p-6 shadow-lg sm:p-8">
         {/* Header */}
 
@@ -36,7 +36,10 @@ function ForgotPassword() {
         </div>
 
         {/* Form */}
-        <div className="flex flex-col gap-5 mt-10">
+        <form
+          onSubmit={handleChangePassword}
+          className="flex flex-col gap-5 mt-10"
+        >
           {/* Username */}
           <div className="flex flex-col gap-2">
             <label
@@ -98,6 +101,7 @@ function ForgotPassword() {
               <button
                 className="absolute right-4  top-1/2 cursor-pointer"
                 onClick={() => setShowPassword((c) => !c)}
+                type="button"
               >
                 {showPassword ? (
                   <Eye className="h-5 w-5 -translate-y-1/2 text-primary-font/40" />
@@ -114,7 +118,7 @@ function ForgotPassword() {
 
           {/* Change Password */}
           <button
-            onClick={handleChangePassword}
+            type="submit"
             className="mt-3 flex w-full items-center gap-2 rounded-2xl border border-primary/15 bg-primary px-4 py-3 font-body text-white shadow-sm transition-all text-center duration-300 hover:-translate-y-0.5 hover:shadow-md hover:bg-secondary"
           >
             {loading ? (
@@ -129,7 +133,7 @@ function ForgotPassword() {
               </>
             )}
           </button>
-        </div>
+        </form>
       </div>
     </main>
   )

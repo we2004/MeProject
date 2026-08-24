@@ -16,7 +16,7 @@ function Welcome() {
   }
 
   return (
-    <div className="flex w-full items-center justify-center px-6 py-12 lg:w-1/2">
+    <div className="animate-fade-in flex w-full items-center justify-center px-6 py-12 lg:w-1/2">
       <div className="flex  items-center w-full max-w-md flex-col">
         {/* Heading */}
 

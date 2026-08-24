@@ -9,7 +9,7 @@ function Recovery() {
   const recoveryKey = location.state?.recoveryKey
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-lightBodyBackground px-4 py-8">
+    <main className="animate-fade-in flex min-h-screen items-center justify-center bg-lightBodyBackground px-4 py-8">
       <div className="w-full max-w-md rounded-3xl border border-primary/15 bg-white p-6 shadow-lg sm:p-8">
         {/* Header */}
         <div className="mb-7 text-center">

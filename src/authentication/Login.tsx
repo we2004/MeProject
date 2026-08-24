@@ -24,7 +24,7 @@ function Login() {
   }
 
   return (
-    <div className="flex w-full items-center justify-center px-6 py-12 lg:w-1/2">
+    <div className="animate-fade-in flex w-full items-center justify-center px-6 py-12 lg:w-1/2">
       <div className="w-full max-w-md">
         {/* Heading */}
         <div className="mb-8 relative">
@@ -94,6 +94,7 @@ function Login() {
               <button
                 className="absolute right-4  top-1/2 cursor-pointer"
                 onClick={() => setShowPassword((c) => !c)}
+                type='button'
               >
                 {showPassword ? (
                   <Eye className="h-5 w-5 -translate-y-1/2 text-primary-font/40" />
