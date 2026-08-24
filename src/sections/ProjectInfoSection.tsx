@@ -13,7 +13,7 @@ type ProjectInfoSectionProps = {
   onUpdate: (
     field: EditInfoFields,
     data: string | boolean | string[] | TaskStatus
-  ) => Promise<void>
+  ) => Promise<boolean | undefined>
   progress: number
   onDeleteTech: (tech: string) => Promise<void>
   onAddTech: (tech: string) => Promise<void>

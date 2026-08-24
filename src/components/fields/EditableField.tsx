@@ -10,7 +10,7 @@ type EditableFieldProps = {
   onUpdate: (
     field: EditInfoFields,
     data: string | boolean | string[] | TaskStatus
-  ) => Promise<void>
+  ) => Promise<boolean | undefined>
   loading?: boolean
 }
 
@@ -20,7 +20,7 @@ function EditableField({ data, field, onUpdate, loading }: EditableFieldProps) {
 
   let inputField: React.JSX.Element
   let dataDisplay: React.JSX.Element
-  
+
   if (field === "name") {
     inputField = (
       <input
@@ -86,25 +86,27 @@ function EditableField({ data, field, onUpdate, loading }: EditableFieldProps) {
 
       {isEditField ? (
         <button
+          disabled={loading}
           onClick={async () => {
-            await onUpdate(field, value)
-            setIsEditField(false)
-          }}
-        >
-          <Check className="h-5 w-5 mr-5 ml-1 text-primary cursor-pointer hover:text-primary/40 transition-all duration-300" />
-        </button>
-      ) : (
-        <button
-          onClick={() => {
-            setValue(data)
-            setIsEditField(true)
+            const success = await onUpdate(field, value)
+            if (success) setIsEditField(false)
           }}
         >
           {loading ? (
             <Spinner size="sm" />
           ) : (
-            <Edit3 className="h-4 w-4 mr-5 ml-1 text-primary cursor-pointer hover:text-primary/40 transition-all duration-300" />
+            <Check className="mr-5 ml-1 h-5 w-5 cursor-pointer text-primary transition-all duration-300 hover:text-primary/40" />
           )}
+        </button>
+      ) : (
+        <button
+          disabled={loading}
+          onClick={() => {
+            setValue(data)
+            setIsEditField(true)
+          }}
+        >
+          <Edit3 className="mr-5 ml-1 h-4 w-4 cursor-pointer text-primary transition-all duration-300 hover:text-primary/40" />
         </button>
       )}
     </>

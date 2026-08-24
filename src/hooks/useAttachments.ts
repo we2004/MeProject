@@ -43,9 +43,11 @@ function useAttachments(token: string, projectId: number) {
       const updatedAttachments = await getAttachments(projectId, token)
 
       setAttachments(updatedAttachments)
+      return true
     } catch (e) {
       setError("Failed to add attachment")
       console.log(e)
+      return false
     } finally {
       setAddAttachmentLoading(false)
     }
@@ -58,9 +60,13 @@ function useAttachments(token: string, projectId: number) {
 
       const updatedAttachments = await getAttachments(projectId, token)
       setAttachments(updatedAttachments)
+      return true
+
     } catch (e) {
       console.log(e)
       setError("Failed to delete attachment")
+
+      return false
     } finally {
       setRemoveAttachmentLoading(false)
     }

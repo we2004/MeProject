@@ -48,9 +48,13 @@ function useProjects(
       }
       const projectsData = await getProjects(token, filter, order)
       setProjects(projectsData)
+      return true
+
     } catch (e) {
       setError("Faild to add project")
       console.log(e)
+      return false
+
     } finally {
       setAddProjectLoading(false)
     }

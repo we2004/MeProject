@@ -37,9 +37,11 @@ function useNotes(token: string, taskId: number) {
 
       const updatedNotes = await getNotesByTask(taskId, token)
       setNotes(updatedNotes)
+      return true
     } catch (e) {
       setError("Failed to add note")
       console.log(e)
+      return false
     } finally {
       setAddNoteLoading(false)
     }
@@ -52,9 +54,11 @@ function useNotes(token: string, taskId: number) {
 
       const updatedNotes = await getNotesByTask(taskId, token)
       setNotes(updatedNotes)
+      return true
     } catch (e) {
       setError("Failed to remove note")
       console.log(e)
+      return false
     } finally {
       setRemoveNoteLoading(false)
     }

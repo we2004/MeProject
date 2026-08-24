@@ -54,11 +54,15 @@ function useProject(token: string, projectId?: number) {
           [field]: data
         }
       })
+
+      return true
     } catch (e) {
       setError("Failed to update project")
       console.log(e)
+      return false
     } finally {
       setUpdateProjectLoading(false)
+      
     }
   }
 

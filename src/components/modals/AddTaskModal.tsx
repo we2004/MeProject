@@ -8,7 +8,7 @@ import type { CreateTask, TaskStatus, TaskPriority } from "../../types/tasks"
 type AddTaskModalProps = {
   onClose: () => void
   projects: ProjectApiResponse[]
-  onSubmit: (newItem: CreateTask, notes: string[]) => Promise<void>
+  onSubmit: (newItem: CreateTask, notes: string[]) => Promise<boolean>
   currentProjectId?: number
 }
 

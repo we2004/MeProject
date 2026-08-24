@@ -42,9 +42,11 @@ function useTask(token: string, taskId: number) {
           [field]: data
         }
       })
+      return true
     } catch (e) {
       setError("Failed to update task")
       console.log(e)
+      return false
     } finally {
       setUpdateTaskLoading(false)
     }

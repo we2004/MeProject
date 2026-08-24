@@ -81,9 +81,13 @@ function useTasks(
 
         setTasks(response.data)
       }
+
+      return true
     } catch (e) {
       setError("Failed to add task")
       console.log(e)
+
+      return false
     } finally {
       setAddTaskLoading(false)
     }
@@ -104,9 +108,11 @@ function useTasks(
           task.id === taskId ? { ...task, [field]: data } : task
         )
       )
+      return true
     } catch (e) {
       setError("Failed to update task")
       console.log(e)
+      return false
     } finally {
       setUpdateTaskLoading(false)
     }
@@ -125,9 +131,12 @@ function useTasks(
         "asc"
       )
       setTasks(updatedTasks.data)
+      return true
     } catch (e) {
       setError("Failed to delete task")
       console.log(e)
+
+      return false
     } finally {
       setRemoveTaskLoading(false)
     }
