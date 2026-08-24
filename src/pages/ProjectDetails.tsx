@@ -18,6 +18,7 @@ import useProjects from "../hooks/useProjects"
 import useTasks from "../hooks/useTasks"
 import ProjectsDetailsSkeleton from "../components/loading/skeletons/ProjectDetailsSkeleton"
 import Spinner from "../components/loading/spinners/Spinner"
+import ErrorCard from "../components/cards/ErrorCard"
 
 function ProjectsDetails() {
   const { token } = useAuth()
@@ -28,35 +29,39 @@ function ProjectsDetails() {
     deleteProjectLoading,
     updateProjectLoading,
     updateProject,
-    deleteCurrentProject
+    deleteCurrentProject,
+    error: projectError
   } = useProject(token, Number(projectId))
 
   const {
     tasks: projectTasks,
     tasksLoading,
     udpateTaskLoading,
-    removeTaskLoading,
     updateTask,
     addTask,
-    removeTask
+    removeTask,
+    error: tasksError
   } = useTasks(token, "all", "all", "asc", Number(projectId))
 
-  const { projects } = useProjects(token, "all", "asc")
+  const { projects, error: projectsError } = useProjects(token, "all", "asc")
 
   const {
     attachments,
     attachmentLoading,
     addAttachmentLoading,
-    removeAttachmentLoading,
     addAttachment,
-    removeAttachment
+    removeAttachment,
+    error: attachmentsError
   } = useAttachments(token, Number(projectId))
 
   const navigate = useNavigate()
 
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false)
   const [isAttachmentModalOpen, setIsAttachmentModalOpen] = useState(false)
-
+  const [deletingTaskId, setDeletingTaskId] = useState<number | null>(null)
+  const [deletingAttachmentId, setDeletingAttachmentId] = useState<
+    number | null
+  >(null)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
 
   const handleDeleteTech = async (tech: string) => {
@@ -79,7 +84,6 @@ function ProjectsDetails() {
     if (success) navigate("/projects")
   }
 
-
   const handleDownloadAttachment = async (
     attachmentId: number,
     fileName: string
@@ -96,15 +100,28 @@ function ProjectsDetails() {
     URL.revokeObjectURL(url)
   }
 
+
   if (tasksLoading || projectLoading || attachmentLoading)
     return <ProjectsDetailsSkeleton />
-  if (!project) return
+
+  if (!project)
+    return (
+      <div className="fixed right-6 top-25 z-9999">
+        <ErrorCard message={projectError} />
+      </div>
+    )
 
   const progress = calculateProgress(Number(projectId), projectTasks)
   const displayedStatus = getProjectStatus(project, projectTasks)
 
   return (
     <section className="animate-fade-in flex flex-col gap-15">
+      <div className="fixed right-6 top-25 z-9999 flex flex-col gap-3">
+        {tasksError && <ErrorCard message={tasksError} />}
+        {attachmentsError && <ErrorCard message={attachmentsError} />}
+        {projectsError && <ErrorCard message={projectsError} />}
+      </div>
+
       {isDeleteModalOpen && (
         <DeleteModal
           onCancel={() => setIsDeleteModalOpen(false)}
@@ -174,9 +191,17 @@ function ProjectsDetails() {
 
               <button
                 className="flex h-12 w-12 items-center justify-center rounded-2xl border border-primary/15 bg-white text-primary-font shadow-sm transition-all duration-300 hover:bg-redT hover:text-white"
-                onClick={() => removeTask(task.id)}
+                onClick={async () => {
+                  setDeletingTaskId(task.id)
+
+                  try {
+                    await removeTask(task.id)
+                  } finally {
+                    setDeletingTaskId(null)
+                  }
+                }}
               >
-                {removeTaskLoading ? (
+                {deletingTaskId === task.id ? (
                   <Spinner
                     size="sm"
                     color="dark"
@@ -229,10 +254,18 @@ function ProjectsDetails() {
               </div>
 
               <button
-                onClick={() => removeAttachment(attachment.id)}
+                onClick={async () => {
+                  setDeletingAttachmentId(attachment.id)
+
+                  try {
+                    await removeAttachment(attachment.id)
+                  } finally {
+                    setDeletingAttachmentId(null)
+                  }
+                }}
                 className="flex h-12 w-12 items-center justify-center rounded-2xl border border-primary/15 bg-white text-primary-font shadow-sm transition-all duration-300 hover:bg-redT hover:text-white"
               >
-                {removeAttachmentLoading ? (
+                {deletingAttachmentId === attachment.id ? (
                   <Spinner
                     size="sm"
                     color="dark"

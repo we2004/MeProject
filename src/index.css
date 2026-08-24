@@ -25,6 +25,18 @@
       opacity: 1;
     }
   }
+
+  --animate-fade-out: fade-out 300ms ease-in;
+
+  @keyframes fade-out {
+    from {
+      opacity: 1;
+    }
+
+    to {
+      opacity: 0;
+    }
+  }
 }
 
 body {

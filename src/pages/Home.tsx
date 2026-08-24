@@ -15,16 +15,21 @@ import { useAuth } from "../context/useAuth"
 import useProjects from "../hooks/useProjects"
 import useTasks from "../hooks/useTasks"
 import HomeSkeleton from "../components/loading/skeletons/HomeSkeleton"
+import ErrorCard from "../components/cards/ErrorCard"
 
 function Home() {
   const { token } = useAuth()
-  const { projects, projectsLoading } = useProjects(token, "all", "asc")
-  const { tasks, tasksLoading, updateTask } = useTasks(
-    token,
-    "all",
-    "all",
-    "asc"
-  )
+  const {
+    projects,
+    projectsLoading,
+    error: projectsError
+  } = useProjects(token, "all", "asc")
+  const {
+    tasks,
+    tasksLoading,
+    updateTask,
+    error: tasksError
+  } = useTasks(token, "all", "all", "asc")
 
   const ongoingProjects = getOngoingProjects(projects, tasks).slice(0, 4)
   const ongoingTasks = getOngoingTasks(tasks).slice(0, 3)
@@ -32,7 +37,12 @@ function Home() {
   if (projectsLoading || tasksLoading) return <HomeSkeleton />
 
   return (
-    <section className="animate-fade-in flex flex-col gap-10">
+    <section className="animate-fade-in flex flex-col gap-7">
+      <div className="fixed right-6 top-25 z-9999 flex flex-col gap-3">
+        {projectsError && <ErrorCard message={projectsError} />}
+        {tasksError && <ErrorCard message={tasksError} />}
+      </div>
+
       {/* Overview */}
       <div className="grid gap-5 md:grid-cols-3">
         <OverviewCard
