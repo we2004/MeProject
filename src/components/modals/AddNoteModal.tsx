@@ -3,7 +3,7 @@ import NoteSection from "../../sections/NoteSection"
 import Modal from "./Modal"
 type AddNoteModal = {
   onClose: () => void
-  onSubmit: (notes: string[]) => Promise<void>
+  onSubmit: (notes: string[]) => Promise<boolean>
 }
 function AddNoteModal({ onClose, onSubmit }: AddNoteModal) {
   const [notes, setNotes] = useState<string[]>([])
@@ -24,8 +24,8 @@ function AddNoteModal({ onClose, onSubmit }: AddNoteModal) {
       modalTitle="Add Notes"
       onClose={onClose}
       onSubmit={async () => {
-        await onSubmit(notes)
-        onClose()
+        const success = await onSubmit(notes)
+        if (success) onClose()
       }}
     >
       <NoteSection

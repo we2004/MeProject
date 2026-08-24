@@ -10,7 +10,7 @@ type TaskInfoSectionProps = {
   onUpdate: (
     field: EditInfoFields,
     data: string | boolean | string[] | TaskStatus
-  ) => Promise<void>
+  ) => Promise<boolean>
   projectName: string
 }
 

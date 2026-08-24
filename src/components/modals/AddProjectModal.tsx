@@ -6,7 +6,7 @@ import { type Project } from "../../types/projects"
 import TechStackSection from "../../sections/TechStackSection"
 type AddProjectModalProps = {
   onClose: () => void
-  onSubmit: (newProject: Project, files: File[]) => Promise<void>
+  onSubmit: (newProject: Project, files: File[]) => Promise<boolean>
 }
 
 function AddProjectModal({ onClose, onSubmit }: AddProjectModalProps) {
@@ -48,8 +48,8 @@ function AddProjectModal({ onClose, onSubmit }: AddProjectModalProps) {
           cancelled: false,
           techStack: techStack
         }
-        await onSubmit(newProject, files)
-        onClose()
+        const success = await onSubmit(newProject, files)
+        if (success) onClose()
       }}
     >
       {/* General Information */}

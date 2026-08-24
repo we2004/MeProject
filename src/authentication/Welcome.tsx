@@ -16,6 +16,7 @@ function Welcome() {
 
   const handleExploreMode = async () => {
     const response = await explore()
+
     setToken(response.token)
     navigate("/home")
   }
