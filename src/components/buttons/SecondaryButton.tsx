@@ -6,6 +6,7 @@ type SecondaryButtonProps = {
   children: React.ReactNode
   bgHoverColor?: string
   bgColor?: string
+  disabled?: boolean
 }
 
 function SecondaryButton({
@@ -13,10 +14,12 @@ function SecondaryButton({
   onClickFun,
   children,
   bgHoverColor,
-  bgColor
+  bgColor,
+  disabled
 }: SecondaryButtonProps) {
   return (
     <button
+      disabled={disabled}
       className={`flex items-center w-fit gap-2 rounded-2xl border border-primary/15 ${bgColor ? bgColor : " bg-white text-primary-font"} px-4 py-3 font-body shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/60 hover:shadow-md ${bgHoverColor ? bgHoverColor : "hover:bg-secondary"} hover:text-white`}
       onClick={onClickFun}
     >

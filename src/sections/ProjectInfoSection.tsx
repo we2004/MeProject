@@ -19,7 +19,7 @@ type ProjectInfoSectionProps = {
   onAddTech: (tech: string) => Promise<void>
   updateProjectLoading: boolean
 }
-
+ 
 function ProjectInfoSection({
   project,
   displayedProjectStatus,

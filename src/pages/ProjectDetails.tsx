@@ -25,6 +25,7 @@ function ProjectsDetails() {
   const {
     project,
     projectLoading,
+    deleteProjectLoading,
     updateProjectLoading,
     updateProject,
     deleteCurrentProject
@@ -78,6 +79,7 @@ function ProjectsDetails() {
     if (success) navigate("/projects")
   }
 
+
   const handleDownloadAttachment = async (
     attachmentId: number,
     fileName: string
@@ -110,6 +112,7 @@ function ProjectsDetails() {
           btnText="Delete Project"
           message=" This action cannot be undone. Your Project and all associated tasks, notes, and attachments will be permanently deleted."
           title="Delete Project"
+          loading={deleteProjectLoading}
         />
       )}
       {isTaskModalOpen && (

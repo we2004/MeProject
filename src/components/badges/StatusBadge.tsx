@@ -79,7 +79,8 @@ function StatusBadge({
             type="button"
             onClick={async () => {
               const success = await onStatusChange?.("status", nextStatus)
-              if (success) setIsOpen(false)
+              if(success)
+                setIsOpen(false)
             }}
             className="w-full rounded-xl px-3 py-2 text-left font-body text-sm capitalize text-primary-font transition-colors duration-200 hover:bg-primary hover:text-white"
           >

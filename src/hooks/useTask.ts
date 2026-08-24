@@ -1,11 +1,12 @@
 import { type Task, type TaskStatus } from "../types/tasks"
 import { useState, useEffect } from "react"
-import { getTaskById, updateTaskData } from "../api/tasks"
+import { deleteTask, getTaskById, updateTaskData } from "../api/tasks"
 import type { EditInfoFields } from "../types/common"
 function useTask(token: string, taskId: number) {
   const [task, setTask] = useState<Task | null>(null)
   const [taskLoading, setTaskLoading] = useState(false)
   const [updateTaskLoading, setUpdateTaskLoading] = useState(false)
+  const [removeTaskLoading, setRemoveTaskLoading] = useState(false)
   const [error, setError] = useState("")
 
   //GET
@@ -52,7 +53,31 @@ function useTask(token: string, taskId: number) {
     }
   }
 
-  return { task, taskLoading, updateTaskLoading, error, updateTask }
+  const removeTask = async () => {
+    try {
+      setRemoveTaskLoading(true)
+
+      await deleteTask(taskId, token)
+
+      return true
+    } catch (e) {
+      setError("Failed to delete task")
+      console.log(e)
+      return false
+    } finally {
+      setRemoveTaskLoading(false)
+    }
+  }
+
+  return {
+    task,
+    taskLoading,
+    updateTaskLoading,
+    removeTaskLoading,
+    error,
+    updateTask,
+    removeTask
+  }
 }
 
 export default useTask

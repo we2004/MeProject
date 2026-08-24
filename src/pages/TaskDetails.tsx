@@ -5,19 +5,21 @@ import NoteCard from "../components/cards/NoteCard"
 import PrimaryButton from "../components/buttons/PrimaryButton"
 import AddNoteModal from "../components/modals/AddNoteModal"
 import { useState } from "react"
-import { deleteTask } from "../api/tasks"
 import { useAuth } from "../context/useAuth"
 import useTask from "../hooks/useTask"
 import useNotes from "../hooks/useNotes"
 import useProject from "../hooks/useProject"
 import TaskInfoSection from "../sections/TaskInfoSection"
 import TaskDetailsSkeleton from "../components/loading/skeletons/TaskDetails"
+import DeleteModal from "../components/modals/DeleteModal"
 
 function TaskDetails() {
   const { token } = useAuth()
   const { taskId } = useParams()
   const [isNoteModalOpen, setIsNoteModalOpen] = useState(false)
-  const { task, taskLoading, updateTask } = useTask(token, Number(taskId))
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+  const { task, taskLoading, removeTaskLoading, updateTaskLoading,removeTask, updateTask } =
+    useTask(token, Number(taskId))
 
   const { notes, notesLoading, addNoteLoading, addNote, removeNote } = useNotes(
     token,
@@ -33,8 +35,8 @@ function TaskDetails() {
   }
 
   const handleDeleteTask = async () => {
-    await deleteTask(Number(taskId), token)
-    navigate("/tasks")
+    const success = await removeTask()
+    if (success) navigate("/tasks")
   }
 
   if (!notes) return <p>something is wrong</p>
@@ -54,10 +56,23 @@ function TaskDetails() {
         />
       )}
 
+      {isDeleteModalOpen && (
+        <DeleteModal
+          onCancel={() => setIsDeleteModalOpen(false)}
+          onDelete={handleDeleteTask}
+          btnText="Delete Task"
+          message=" This action cannot be undone. Your Task and all associated notes, and attachments will be permanently deleted."
+          title="Delete Task"
+          loading={removeTaskLoading}
+        />
+      )}
+
       <TaskInfoSection
         onUpdate={updateTask}
         task={task}
         projectName={project.name}
+        updateTaskLoading={updateTaskLoading}
+
       />
 
       {/* Notes */}
@@ -98,7 +113,7 @@ function TaskDetails() {
 
       <button
         className="bg-redT rounded-[15px] text-md font-body py-3 text-white transition-all duration-300 cursor-pointer hover:shadow-md hover:-translate-y-0.5"
-        onClick={handleDeleteTask}
+        onClick={() => setIsDeleteModalOpen(true)}
       >
         Delete Task{" "}
       </button>
