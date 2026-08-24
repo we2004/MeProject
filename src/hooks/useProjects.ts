@@ -13,20 +13,22 @@ function useProjects(
   order: SortOrder
 ) {
   const [projects, setProjects] = useState<ProjectApiResponse[]>([])
-  const [loading, setLoading] = useState(false)
+  const [projectsLoading, setprojectsLoading] = useState(false)
+  const [addProjectLoading, setAddProjectLoading] = useState(false)
   const [error, setError] = useState("")
 
   //GET
   useEffect(() => {
     const handleFetchProjects = async () => {
       try {
-        setLoading(true)
+        setprojectsLoading(true)
         const projectsData = await getProjects(token, filter, order)
         setProjects(projectsData)
       } catch (e) {
         setError("Failed to fetch projects")
+        console.log(e)
       } finally {
-        setLoading(false)
+        setprojectsLoading(false)
       }
     }
 
@@ -35,7 +37,7 @@ function useProjects(
 
   const addProject = async (newProject: Project, files: File[]) => {
     try {
-      setLoading(true)
+      setAddProjectLoading(true)
       const response = await createProject(token, newProject)
 
       for (const file of files) {
@@ -48,12 +50,13 @@ function useProjects(
       setProjects(projectsData)
     } catch (e) {
       setError("Faild to add project")
+      console.log(e)
     } finally {
-      setLoading(false)
+      setAddProjectLoading(false)
     }
   }
 
-  return { projects, loading, error, addProject }
+  return { projects, projectsLoading, addProjectLoading, error, addProject }
 }
 
 export default useProjects

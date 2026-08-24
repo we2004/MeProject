@@ -23,17 +23,14 @@ function Tasks() {
   const priority: TaskPriorityFilter = getTaskPriority(
     searchParams.get("priority")
   )
-  const {
-    tasks,
-    loading: tasksLoading,
-    addTask,
-    updateTask
-  } = useTasks(token, filter, priority, order, Number(projectId))
-  const { projects, loading: projectsLoading } = useProjects(
+  const { tasks, tasksLoading, addTask, updateTask } = useTasks(
     token,
-    "all",
-    "asc"
+    filter,
+    priority,
+    order,
+    Number(projectId)
   )
+  const { projects, projectsLoading } = useProjects(token, "all", "asc")
 
   const [openMenu, setOpenMenu] = useState<MenuType | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)

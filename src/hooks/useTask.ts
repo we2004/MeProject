@@ -4,21 +4,22 @@ import { getTaskById, updateTaskData } from "../api/tasks"
 import type { EditInfoFields } from "../types/common"
 function useTask(token: string, taskId: number) {
   const [task, setTask] = useState<Task | null>(null)
-  const [loading, setLoading] = useState(false)
+  const [taskLoading, setTaskLoading] = useState(false)
+  const [updateTaskLoading, setUpdateTaskLoading] = useState(false)
   const [error, setError] = useState("")
 
   //GET
   useEffect(() => {
     const handleFetchTask = async () => {
       try {
-        setLoading(true)
+        setTaskLoading(true)
         const taskData = await getTaskById(taskId, token)
         setTask(taskData)
       } catch (e) {
         setError("Failed to fetch task")
         console.log(e)
       } finally {
-        setLoading(false)
+        setTaskLoading(false)
       }
     }
 
@@ -30,7 +31,7 @@ function useTask(token: string, taskId: number) {
     data: string | boolean | string[] | TaskStatus
   ) => {
     try {
-      setLoading(true)
+      setUpdateTaskLoading(true)
       await updateTaskData(Number(taskId), field, data, token)
 
       setTask((currentTask) => {
@@ -45,11 +46,11 @@ function useTask(token: string, taskId: number) {
       setError("Failed to update task")
       console.log(e)
     } finally {
-      setLoading(false)
+      setUpdateTaskLoading(false)
     }
   }
 
-  return { task, loading, error, updateTask }
+  return { task, taskLoading, updateTaskLoading, error, updateTask }
 }
 
 export default useTask

@@ -20,12 +20,12 @@ function Projects() {
   const filter: ProjectStatusFilter = getProjectFilter(
     searchParams.get("filter")
   )
-  const {
-    projects,
-    loading: projectsLoading,
-    addProject
-  } = useProjects(token, filter, order)
-  const { tasks, loading: tasksLoading } = useTasks(token, "all", "all", "asc")
+  const { projects, projectsLoading, addProject } = useProjects(
+    token,
+    filter,
+    order
+  )
+  const { tasks, tasksLoading } = useTasks(token, "all", "all", "asc")
 
   const [openMenu, setOpenMenu] = useState<MenuType | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)

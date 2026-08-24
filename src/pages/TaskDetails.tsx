@@ -17,23 +17,14 @@ function TaskDetails() {
   const { token } = useAuth()
   const { taskId } = useParams()
   const [isNoteModalOpen, setIsNoteModalOpen] = useState(false)
-  const {
-    task,
-    loading: taskLoading,
-    updateTask
-  } = useTask(token, Number(taskId))
+  const { task, taskLoading, updateTask } = useTask(token, Number(taskId))
 
-  const {
-    notes,
-    loading: notesLoading,
-    addNote,
-    removeNote
-  } = useNotes(token, Number(taskId))
-
-  const { project, loading: projectLoading } = useProject(
+  const { notes, notesLoading, addNote, removeNote } = useNotes(
     token,
-    task?.projectId
+    Number(taskId)
   )
+
+  const { project, projectLoading } = useProject(token, task?.projectId)
 
   const navigate = useNavigate()
 

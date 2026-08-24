@@ -21,16 +21,12 @@ import ProjectsDetailsSkeleton from "../components/loading/skeletons/ProjectDeta
 function ProjectsDetails() {
   const { token } = useAuth()
   const { projectId } = useParams()
-  const {
-    project,
-    loading: projectLoading,
-    updateProject,
-    deleteCurrentProject
-  } = useProject(token, Number(projectId))
+  const { project, projectLoading, updateProject, deleteCurrentProject } =
+    useProject(token, Number(projectId))
 
   const {
     tasks: projectTasks,
-    loading: taskLoading,
+    tasksLoading,
     updateTask,
     addTask,
     removeTask
@@ -38,12 +34,8 @@ function ProjectsDetails() {
 
   const { projects } = useProjects(token, "all", "asc")
 
-  const {
-    attachments,
-    loading: attachmentLoading,
-    addAttachment,
-    removeAttachment
-  } = useAttachments(token, Number(projectId))
+  const { attachments, attachmentLoading, addAttachment, removeAttachment } =
+    useAttachments(token, Number(projectId))
 
   const navigate = useNavigate()
 
@@ -88,10 +80,9 @@ function ProjectsDetails() {
     URL.revokeObjectURL(url)
   }
 
-  if (taskLoading || projectLoading || attachmentLoading)
+  if (tasksLoading || projectLoading || attachmentLoading)
     return <ProjectsDetailsSkeleton />
-  if(!project)
-    return 
+  if (!project) return
 
   const progress = calculateProgress(Number(projectId), projectTasks)
   const displayedStatus = getProjectStatus(project, projectTasks)
