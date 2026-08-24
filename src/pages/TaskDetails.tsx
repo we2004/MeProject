@@ -1,7 +1,4 @@
-import {
-  Trash2,
-  CirclePlus,
-} from "lucide-react"
+import { Trash2, CirclePlus } from "lucide-react"
 
 import { useNavigate, useParams } from "react-router-dom"
 import NoteCard from "../components/cards/NoteCard"
@@ -14,6 +11,7 @@ import useTask from "../hooks/useTask"
 import useNotes from "../hooks/useNotes"
 import useProject from "../hooks/useProject"
 import TaskInfoSection from "../sections/TaskInfoSection"
+import TaskDetailsSkeleton from "../components/loading/skeletons/TaskDetails"
 
 function TaskDetails() {
   const { token } = useAuth()
@@ -21,19 +19,22 @@ function TaskDetails() {
   const [isNoteModalOpen, setIsNoteModalOpen] = useState(false)
   const {
     task,
-
+    loading: taskLoading,
     updateTask
   } = useTask(token, Number(taskId))
 
   const {
     notes,
+    loading: notesLoading,
     addNote,
     removeNote
   } = useNotes(token, Number(taskId))
 
-  const { project } = useProject(token, task?.projectId)
+  const { project, loading: projectLoading } = useProject(
+    token,
+    task?.projectId
+  )
 
- 
   const navigate = useNavigate()
 
   if (!task || !project) {
@@ -47,8 +48,11 @@ function TaskDetails() {
 
   if (!notes) return <p>something is wrong</p>
 
+  if (taskLoading || notesLoading || projectLoading)
+    return <TaskDetailsSkeleton />
+
   return (
-    <section className="flex flex-col gap-8">
+    <section className="animate-fade-in flex flex-col gap-8">
       {/* Task Information */}
 
       {isNoteModalOpen && (
@@ -58,7 +62,11 @@ function TaskDetails() {
         />
       )}
 
-      <TaskInfoSection onUpdate={updateTask} task={task} projectName={project.name} />
+      <TaskInfoSection
+        onUpdate={updateTask}
+        task={task}
+        projectName={project.name}
+      />
 
       {/* Notes */}
       <div className="flex flex-col gap-5">

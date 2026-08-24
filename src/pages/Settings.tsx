@@ -84,7 +84,7 @@ function Settings() {
 
   if (!currentUser) return <p>user not found</p>
   return (
-    <section className="flex flex-col gap-8">
+    <section className="animate-fade-in flex flex-col gap-8">
       {isDeleteModalOpen && (
         <DeleteModal
           onCancel={() => setIsDeleteModalOpen(false)}

@@ -12,6 +12,7 @@ import AddTaskModal from "../components/modals/AddTaskModal"
 import { useAuth } from "../context/useAuth"
 import useTasks from "../hooks/useTasks"
 import useProjects from "../hooks/useProjects"
+import TasksSkeleton from "../components/loading/skeletons/TasksSkeleton"
 
 function Tasks() {
   const { token } = useAuth()
@@ -22,14 +23,17 @@ function Tasks() {
   const priority: TaskPriorityFilter = getTaskPriority(
     searchParams.get("priority")
   )
-  const { tasks, addTask, updateTask } = useTasks(
+  const {
+    tasks,
+    loading: tasksLoading,
+    addTask,
+    updateTask
+  } = useTasks(token, filter, priority, order, Number(projectId))
+  const { projects, loading: projectsLoading } = useProjects(
     token,
-    filter,
-    priority,
-    order,
-    Number(projectId)
+    "all",
+    "asc"
   )
-  const { projects } = useProjects(token, "all", "asc")
 
   const [openMenu, setOpenMenu] = useState<MenuType | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -89,8 +93,10 @@ function Tasks() {
     }
   }
 
+  if (tasksLoading || projectsLoading) return <TasksSkeleton />
+
   return (
-    <section className="flex flex-col gap-8">
+    <section className="animate-fade-in flex flex-col gap-8">
       {isModalOpen && (
         <AddTaskModal
           onClose={() => setIsModalOpen(false)}

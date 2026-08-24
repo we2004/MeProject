@@ -12,6 +12,7 @@ import AddProjectModal from "../components/modals/AddProjectModal"
 import { useAuth } from "../context/useAuth"
 import useProjects from "../hooks/useProjects"
 import useTasks from "../hooks/useTasks"
+import ProjectsSkeleton from "../components/loading/skeletons/ProjectsSkeleton"
 function Projects() {
   const { token } = useAuth()
   const [searchParams, setSearchParams] = useSearchParams()
@@ -19,8 +20,12 @@ function Projects() {
   const filter: ProjectStatusFilter = getProjectFilter(
     searchParams.get("filter")
   )
-  const { projects, addProject } = useProjects(token, filter, order)
-  const { tasks } = useTasks(token, "all", "all", "asc")
+  const {
+    projects,
+    loading: projectsLoading,
+    addProject
+  } = useProjects(token, filter, order)
+  const { tasks, loading: tasksLoading } = useTasks(token, "all", "all", "asc")
 
   const [openMenu, setOpenMenu] = useState<MenuType | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -47,9 +52,9 @@ function Projects() {
       filter
     })
   }
-
+  if (projectsLoading || tasksLoading) return <ProjectsSkeleton />
   return (
-    <section className="flex flex-col gap-8">
+    <section className="animate-fade-in flex flex-col gap-8">
       {isModalOpen && (
         <AddProjectModal
           onClose={() => setIsModalOpen(false)}
