@@ -1,8 +1,9 @@
-import { UserPlus, Eye, EyeClosed, CircleAlert } from "lucide-react"
+import { UserPlus, Eye, EyeClosed } from "lucide-react"
 import { useState } from "react"
 import type { NewUser } from "../types/auth"
-import { register } from "../api/auth"
 import { useNavigate } from "react-router-dom"
+import { useAuth } from "../context/useAuth"
+import Spinner from "../components/loading/spinners/Spinner"
 function Register() {
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
@@ -11,40 +12,23 @@ function Register() {
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
   const [name, setName] = useState("")
-  const [message, setMessage] = useState("")
 
   const navigate = useNavigate()
 
-  const showMessage = (message: string) => {
-    setMessage(message)
+  const { loading, registerUser } = useAuth()
 
-    setTimeout(() => {
-      setMessage("")
-    }, 3500)
-  }
-
-  const handleCreateAccount = async (e: React.SubmitEvent) => {
-    e.preventDefault()
-    if (username.length < 1 || name.length < 1) {
-      showMessage("Please Enter all Empty Fields")
-      return
-    }
-
-    if (password !== confirmPassword) {
-      showMessage("Passwords Don't Match")
-      return
-    }
-
+  const handleCreateAccount = async () => {
     const newUser: NewUser = {
       name: name,
       password: password,
       username: username
     }
 
-    const response = await register(newUser)
-    navigate("/recovery", {
-      state: { recoveryKey: response.recoveryKey }
-    })
+    const response = await registerUser(newUser)
+    if (response)
+      navigate("/recovery", {
+        state: { recoveryKey: response.recoveryKey }
+      })
   }
 
   return (
@@ -60,13 +44,6 @@ function Register() {
           <p className="mt-2 font-body text-sm text-primary-font/60">
             Start organizing your projects and tasks.
           </p>
-
-          {message && (
-            <div className="absolute text-xs left-0 top-full mt-2 flex w-fit items-center gap-1 rounded-xl bg-redT/15 px-3 py-0.5">
-              <CircleAlert className="h-4 w-4 text-redT" />
-              <p className="font-body text-sm text-redT">{message}</p>
-            </div>
-          )}
         </div>
 
         {/* Form */}
@@ -191,8 +168,17 @@ function Register() {
             type="submit"
             className="mt-3 flex w-full items-center gap-2 rounded-2xl border border-primary/15 bg-primary px-4 py-3 font-body text-white shadow-sm transition-all text-center duration-300 hover:-translate-y-0.5 hover:shadow-md hover:bg-secondary"
           >
-            <UserPlus className="h-5 w-5" />
-            Create Account
+            {loading ? (
+              <Spinner
+                size="sm"
+                color="light"
+              />
+            ) : (
+              <>
+                <UserPlus className="h-5 w-5 mr-2" />
+                Create Account
+              </>
+            )}
           </button>
         </form>
       </div>

@@ -1,26 +1,17 @@
-import { LogIn, Eye, EyeClosed, CircleAlert } from "lucide-react"
+import { LogIn, Eye, EyeClosed } from "lucide-react"
 import { useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import { useAuth } from "../context/useAuth"
-import { login } from "../api/auth"
 import type { LogUser } from "../types/auth"
+import Spinner from "../components/loading/spinners/Spinner"
 
 function Login() {
-  const { setToken } = useAuth()
+  const { loginApp, loading } = useAuth()
   const navigate = useNavigate()
 
   const [showPassword, setShowPassword] = useState(false)
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
-  const [message, setMessage] = useState("")
-
-  const showMessage = (message: string) => {
-    setMessage(message)
-
-    setTimeout(() => {
-      setMessage("")
-    }, 3500)
-  }
 
   const handleLogin = async (e: React.SubmitEvent) => {
     e.preventDefault()
@@ -28,15 +19,8 @@ function Login() {
       password: password,
       username: username
     }
-    try {
-      const response = await login(user)
-
-      setToken(response.token)
-      navigate("/home")
-    } catch (error) {
-      showMessage("Incorrect username or password")
-      console.log(error)
-    }
+    const success = await loginApp(user)
+    if (success) navigate("/home")
   }
 
   return (
@@ -51,13 +35,6 @@ function Login() {
           <p className="mt-2 font-body text-sm text-primary-font/60">
             Log in to continue managing your projects.
           </p>
-
-          {message && (
-            <div className="absolute text-xs left-0 top-full mt-2 flex w-fit items-center gap-1 rounded-xl bg-redT/15 px-3 py-0.5">
-              <CircleAlert className="h-4 w-4 text-redT" />
-              <p className="font-body text-sm text-redT">{message}</p>
-            </div>
-          )}
         </div>
 
         {/* Form */}
@@ -136,8 +113,17 @@ function Login() {
             type="submit"
             className="mt-3 flex w-full items-center gap-2 rounded-2xl border border-primary/15 bg-primary px-4 py-3 font-body text-white shadow-sm transition-all text-center duration-300 hover:-translate-y-0.5 hover:shadow-md hover:bg-secondary"
           >
-            <LogIn className="h-5 w-5 mr-2" />
-            Log In
+            {loading ? (
+              <Spinner
+                size="sm"
+                color="light"
+              />
+            ) : (
+              <>
+                <LogIn className="h-5 w-5 mr-2" />
+                Log In
+              </>
+            )}
           </button>
         </form>
 

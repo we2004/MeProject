@@ -1,47 +1,27 @@
-import { LockKeyhole, Eye, EyeClosed, CircleAlert } from "lucide-react"
-import {  useState } from "react"
+import { LockKeyhole, Eye, EyeClosed } from "lucide-react"
+import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import type { ChangePassword } from "../types/auth"
-import { changePassword } from "../api/auth"
 import { useAuth } from "../context/useAuth"
+import Spinner from "../components/loading/spinners/Spinner"
 
 function ForgotPassword() {
-  const { setToken } = useAuth()
+  const { changeUserPassword, loading } = useAuth()
   const navigate = useNavigate()
   const [showPassword, setShowPassword] = useState(false)
   const [username, setUsername] = useState("")
   const [recoveryKey, setRecoveryKey] = useState("")
   const [password, setPassword] = useState("")
-  const [message, setMessage] = useState("")
-
-  const showMessage = (message: string) => {
-    setMessage(message)
-
-    setTimeout(() => {
-      setMessage("")
-    }, 3500)
-  }
 
   const handleChangePassword = async () => {
-    if (username.length < 1 || recoveryKey.length < 1 || password.length < 1) {
-      showMessage("Please Enter all Empty Fields")
-      return
-    }
-
     const data: ChangePassword = {
       newPassword: password,
       username: username,
       recoveryKey: recoveryKey
     }
-    try {
-      const response = await changePassword(data)
 
-      setToken(response.token)
-      navigate("/login")
-    } catch (error) {
-      showMessage("Incorrect username or Recovery Key")
-      console.log(error)
-    }
+    const success = await changeUserPassword(data)
+    if (success) navigate("/login")
   }
 
   return (
@@ -53,13 +33,6 @@ function ForgotPassword() {
           <h1 className="font-heading text-3xl font-bold text-primary-font sm:text-4xl">
             Change Password
           </h1>
-
-          {message && (
-            <div className="absolute text-xs left-0 top-full mt-2 flex w-fit items-center gap-1 rounded-xl bg-redT/15 px-3 py-0.5">
-              <CircleAlert className="h-4 w-4 text-redT" />
-              <p className="font-body text-sm text-redT">{message}</p>
-            </div>
-          )}
         </div>
 
         {/* Form */}
@@ -144,8 +117,17 @@ function ForgotPassword() {
             onClick={handleChangePassword}
             className="mt-3 flex w-full items-center gap-2 rounded-2xl border border-primary/15 bg-primary px-4 py-3 font-body text-white shadow-sm transition-all text-center duration-300 hover:-translate-y-0.5 hover:shadow-md hover:bg-secondary"
           >
-            <LockKeyhole className="h-5 w-5 mr-2" />
-            Change Password
+            {loading ? (
+              <Spinner
+                size="sm"
+                color="light"
+              />
+            ) : (
+              <>
+                <LockKeyhole className="h-5 w-5 mr-2" />
+                Change Password
+              </>
+            )}
           </button>
         </div>
       </div>
