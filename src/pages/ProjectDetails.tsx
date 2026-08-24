@@ -21,8 +21,13 @@ import ProjectsDetailsSkeleton from "../components/loading/skeletons/ProjectDeta
 function ProjectsDetails() {
   const { token } = useAuth()
   const { projectId } = useParams()
-  const { project, projectLoading, updateProject, deleteCurrentProject } =
-    useProject(token, Number(projectId))
+  const {
+    project,
+    projectLoading,
+    updateProjectLoading,
+    updateProject,
+    deleteCurrentProject
+  } = useProject(token, Number(projectId))
 
   const {
     tasks: projectTasks,
@@ -121,6 +126,7 @@ function ProjectsDetails() {
         progress={progress}
         onDeleteTech={handleDeleteTech}
         onAddTech={handleAddTech}
+        updateProjectLoading={updateProjectLoading}
       />
 
       {/* Tasks */}
