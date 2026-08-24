@@ -16,6 +16,7 @@ import useAttachments from "../hooks/useAttachments"
 import ProjectInfoSection from "../sections/ProjectInfoSection"
 import useProjects from "../hooks/useProjects"
 import useTasks from "../hooks/useTasks"
+import ProjectsDetailsSkeleton from "../components/loading/skeletons/ProjectDetailsSkeleton"
 
 function ProjectsDetails() {
   const { token } = useAuth()
@@ -23,13 +24,13 @@ function ProjectsDetails() {
   const {
     project,
     loading: projectLoading,
-    error: projectError,
     updateProject,
     deleteCurrentProject
   } = useProject(token, Number(projectId))
 
   const {
     tasks: projectTasks,
+    loading: taskLoading,
     updateTask,
     addTask,
     removeTask
@@ -37,10 +38,12 @@ function ProjectsDetails() {
 
   const { projects } = useProjects(token, "all", "asc")
 
-  const { attachments, addAttachment, removeAttachment } = useAttachments(
-    token,
-    Number(projectId)
-  )
+  const {
+    attachments,
+    loading: attachmentLoading,
+    addAttachment,
+    removeAttachment
+  } = useAttachments(token, Number(projectId))
 
   const navigate = useNavigate()
 
@@ -85,17 +88,16 @@ function ProjectsDetails() {
     URL.revokeObjectURL(url)
   }
 
-  if (projectError) return <p>{projectError}</p>
-
-  if (projectLoading) return <p>is loading...</p>
-
-  if (!project) return <p>No project found</p>
+  if (taskLoading || projectLoading || attachmentLoading)
+    return <ProjectsDetailsSkeleton />
+  if(!project)
+    return 
 
   const progress = calculateProgress(Number(projectId), projectTasks)
   const displayedStatus = getProjectStatus(project, projectTasks)
 
   return (
-    <section className="flex flex-col gap-15">
+    <section className="animate-fade-in flex flex-col gap-15">
       {isDeleteModalOpen && (
         <DeleteModal
           onCancel={() => setIsDeleteModalOpen(false)}
@@ -123,7 +125,7 @@ function ProjectsDetails() {
 
       <ProjectInfoSection
         project={project}
-        displayedProjectStatus= {displayedStatus}
+        displayedProjectStatus={displayedStatus}
         onUpdate={updateProject}
         progress={progress}
         onDeleteTech={handleDeleteTech}
