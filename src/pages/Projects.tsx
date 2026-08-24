@@ -13,6 +13,7 @@ import { useAuth } from "../context/useAuth"
 import useProjects from "../hooks/useProjects"
 import useTasks from "../hooks/useTasks"
 import ProjectsSkeleton from "../components/loading/skeletons/ProjectsSkeleton"
+
 function Projects() {
   const { token } = useAuth()
   const [searchParams, setSearchParams] = useSearchParams()
@@ -20,11 +21,8 @@ function Projects() {
   const filter: ProjectStatusFilter = getProjectFilter(
     searchParams.get("filter")
   )
-  const { projects, projectsLoading, addProject } = useProjects(
-    token,
-    filter,
-    order
-  )
+  const { projects, projectsLoading, addProjectLoading, addProject } =
+    useProjects(token, filter, order)
   const { tasks, tasksLoading } = useTasks(token, "all", "all", "asc")
 
   const [openMenu, setOpenMenu] = useState<MenuType | null>(null)
@@ -59,6 +57,7 @@ function Projects() {
         <AddProjectModal
           onClose={() => setIsModalOpen(false)}
           onSubmit={addProject}
+          addProjectLoading={addProjectLoading}
         />
       )}
       <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">

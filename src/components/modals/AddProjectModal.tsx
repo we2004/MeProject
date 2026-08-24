@@ -7,9 +7,14 @@ import TechStackSection from "../../sections/TechStackSection"
 type AddProjectModalProps = {
   onClose: () => void
   onSubmit: (newProject: Project, files: File[]) => Promise<boolean>
+  addProjectLoading: boolean
 }
 
-function AddProjectModal({ onClose, onSubmit }: AddProjectModalProps) {
+function AddProjectModal({
+  onClose,
+  onSubmit,
+  addProjectLoading
+}: AddProjectModalProps) {
   const [files, setFiles] = useState<File[]>([])
   const [projectName, setProjectName] = useState("")
   const [projectDescription, setProjectDescription] = useState("")
@@ -51,6 +56,7 @@ function AddProjectModal({ onClose, onSubmit }: AddProjectModalProps) {
         const success = await onSubmit(newProject, files)
         if (success) onClose()
       }}
+      loading={addProjectLoading}
     >
       {/* General Information */}
       <div className="flex flex-col gap-5">
