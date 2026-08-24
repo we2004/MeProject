@@ -4,8 +4,9 @@ import Modal from "./Modal"
 type AddNoteModal = {
   onClose: () => void
   onSubmit: (notes: string[]) => Promise<boolean>
+  addNoteLoading: boolean
 }
-function AddNoteModal({ onClose, onSubmit }: AddNoteModal) {
+function AddNoteModal({ onClose, onSubmit, addNoteLoading }: AddNoteModal) {
   const [notes, setNotes] = useState<string[]>([])
 
   const handleAddNote = (note: string) => {
@@ -27,11 +28,13 @@ function AddNoteModal({ onClose, onSubmit }: AddNoteModal) {
         const success = await onSubmit(notes)
         if (success) onClose()
       }}
+      loading={addNoteLoading}
     >
       <NoteSection
         onAddNote={handleAddNote}
         notes={notes}
         onDeleteNote={handleDeleteNote}
+        disable={addNoteLoading}
       />
     </Modal>
   )

@@ -19,7 +19,7 @@ function TaskDetails() {
   const [isNoteModalOpen, setIsNoteModalOpen] = useState(false)
   const { task, taskLoading, updateTask } = useTask(token, Number(taskId))
 
-  const { notes, notesLoading, addNote, removeNote } = useNotes(
+  const { notes, notesLoading, addNoteLoading, addNote, removeNote } = useNotes(
     token,
     Number(taskId)
   )
@@ -50,6 +50,7 @@ function TaskDetails() {
         <AddNoteModal
           onClose={() => setIsNoteModalOpen(false)}
           onSubmit={addNote}
+          addNoteLoading={addNoteLoading}
         />
       )}
 
