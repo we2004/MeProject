@@ -21,7 +21,7 @@ function AddTaskModal({
   const [taskTitle, setTaskTitle] = useState("")
   const [projectOption, setProjectOption] = useState<number | "">("")
   const [dueDate, setDueDate] = useState("")
-  const [priority, setPriority] = useState<TaskPriority>()
+  const [priority, setPriority] = useState<TaskPriority | "">("")
   const [description, setDescription] = useState("")
   const [notes, setNotes] = useState<string[]>([])
   const status: TaskStatus = "open"
