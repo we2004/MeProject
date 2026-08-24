@@ -2,7 +2,7 @@ import { X } from "lucide-react"
 
 type TechBadgeProps = {
   tech: string
-  onDelete : (tech:string) => Promise<void>
+  onDelete : (tech:string) => void
 }
 
 function TechBadge({ tech, onDelete }: TechBadgeProps) {

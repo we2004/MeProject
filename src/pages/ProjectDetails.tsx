@@ -5,7 +5,7 @@ import PrimaryButton from "../components/buttons/PrimaryButton"
 import AttachmentCard from "../components/cards/AttachmentCard"
 import { useParams, Link, useNavigate } from "react-router-dom"
 import { useState } from "react"
-import { calculateProgress } from "../utils/projects"
+import { calculateProgress, getProjectStatus } from "../utils/projects"
 import AddTaskModal from "../components/modals/AddTaskModal"
 import AddAttachmentModal from "../components/modals/AddAttachmentModal"
 import { downloadAttachment } from "../api/attachments"
@@ -85,13 +85,14 @@ function ProjectsDetails() {
     URL.revokeObjectURL(url)
   }
 
-  const progress = calculateProgress(Number(projectId), projectTasks)
-
   if (projectError) return <p>{projectError}</p>
 
   if (projectLoading) return <p>is loading...</p>
 
   if (!project) return <p>No project found</p>
+
+  const progress = calculateProgress(Number(projectId), projectTasks)
+  const displayedStatus = getProjectStatus(project, projectTasks)
 
   return (
     <section className="flex flex-col gap-15">
@@ -122,6 +123,7 @@ function ProjectsDetails() {
 
       <ProjectInfoSection
         project={project}
+        displayedProjectStatus= {displayedStatus}
         onUpdate={updateProject}
         progress={progress}
         onDeleteTech={handleDeleteTech}
@@ -153,9 +155,7 @@ function ProjectsDetails() {
                 <TaskCard
                   projectName={project.name}
                   {...task}
-                  onUpdate={(field, data) =>
-                    updateTask(task.id, field, data)
-                  }
+                  onUpdate={(field, data) => updateTask(task.id, field, data)}
                 />
               </div>
 

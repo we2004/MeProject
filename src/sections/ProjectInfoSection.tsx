@@ -1,6 +1,6 @@
 import { Check, Edit3 } from "lucide-react"
 import { useState } from "react"
-import type { ProjectApiResponse } from "../types/projects"
+import type { ProjectApiResponse, ProjectStatus } from "../types/projects"
 import StatusBadge from "../components/badges/StatusBadge"
 import TechBadge from "../components/badges/TechBadge"
 import TechStackSection from "./TechStackSection"
@@ -9,6 +9,7 @@ import { type EditInfoFields } from "../types/common"
 import type { TaskStatus } from "../types/tasks"
 type ProjectInfoSectionProps = {
   project: ProjectApiResponse
+  displayedProjectStatus?: ProjectStatus
   onUpdate: (
     field: EditInfoFields,
     data: string | boolean | string[] | TaskStatus
@@ -20,6 +21,7 @@ type ProjectInfoSectionProps = {
 
 function ProjectInfoSection({
   project,
+  displayedProjectStatus,
   onUpdate,
   progress,
   onDeleteTech,
@@ -27,6 +29,8 @@ function ProjectInfoSection({
 }: ProjectInfoSectionProps) {
   const [isEditTechStack, setIsEditTechStack] = useState(false)
 
+  const status = displayedProjectStatus? displayedProjectStatus : project.derivedStatus
+  
   return (
     <div className="rounded-3xl border border-primary/15 bg-white p-6 shadow-sm">
       <div className="flex flex-col gap-6">
@@ -37,7 +41,7 @@ function ProjectInfoSection({
             onUpdate={onUpdate}
           />
 
-          <StatusBadge status={project.derivedStatus} />
+          <StatusBadge status={status}/>
         </div>
 
         <div className="flex items-center gap-10">

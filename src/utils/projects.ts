@@ -1,8 +1,10 @@
 import { type Task } from "../types/tasks"
 import {
   type ProjectApiResponse,
+  type ProjectStatus,
   type ProjectStatusFilter
 } from "../types/projects"
+import dayjs from "dayjs"
 
 export function calculateProgress(
   projectId: number,
@@ -33,7 +35,6 @@ export function getOngoingProjects(
   return onGoionProjects
 }
 
-
 export function getProjectFilter(
   value: string | undefined | null
 ): ProjectStatusFilter {
@@ -46,4 +47,21 @@ export function getProjectFilter(
     default:
       return "all"
   }
+}
+
+export function getProjectStatus(
+  project: ProjectApiResponse,
+  tasks: Task[]
+): ProjectStatus {
+  if (project.cancelled) return "cancelled"
+
+  if (tasks.length > 0 && tasks.every((task) => task.status === "completed")) {
+    return "completed"
+  }
+
+  if (dayjs(project.dueDate).isBefore(dayjs(), "day")) {
+    return "overdue"
+  }
+
+  return "active"
 }
