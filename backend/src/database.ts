@@ -10,7 +10,7 @@ export const getDb = () => db;
 
 export async function initDb() {
   db = await open({
-    filename: path.join(__dirname, '../../database.sqlite'),
+    filename: path.join(__dirname, '../database.sqlite'),
     driver: sqlite3.Database
   });
 
