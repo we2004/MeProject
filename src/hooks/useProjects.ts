@@ -21,6 +21,7 @@ function useProjects(
   useEffect(() => {
     const handleFetchProjects = async () => {
       try {
+        setError("")
         setprojectsLoading(true)
         const projectsData = await getProjects(token, filter, order)
         setProjects(projectsData)
@@ -37,6 +38,7 @@ function useProjects(
 
   const addProject = async (newProject: Project, files: File[]) => {
     try {
+      setError("")
       setAddProjectLoading(true)
       const response = await createProject(token, newProject)
 

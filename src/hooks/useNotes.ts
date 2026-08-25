@@ -13,6 +13,7 @@ function useNotes(token: string, taskId: number) {
   useEffect(() => {
     const fetchNotesData = async () => {
       try {
+        setError("")
         setNotesLoading(true)
         const taskNotes = await getNotesByTask(taskId, token)
 
@@ -30,6 +31,7 @@ function useNotes(token: string, taskId: number) {
 
   const addNote = async (notes: string[]) => {
     try {
+      setError("")
       setAddNoteLoading(true)
       for (const content of notes) {
         await createNote(token, { content: content, taskId: taskId })
@@ -49,6 +51,7 @@ function useNotes(token: string, taskId: number) {
 
   const removeNote = async (noteId: number) => {
     try {
+      setError("")
       setRemoveNoteLoading(true)
       await deleteNote(token, noteId)
 

@@ -21,6 +21,7 @@ function useProject(token: string, projectId?: number) {
 
     const handleFetchProject = async () => {
       try {
+        setError("")
         setProjectLoading(true)
 
         const projectData = await getProjectById(projectId, token)
@@ -43,6 +44,7 @@ function useProject(token: string, projectId?: number) {
   ) => {
     if (!projectId) return
     try {
+      setError("")
       setUpdateProjectLoading(true)
       await updateProjectData(projectId, field, data, token)
 
@@ -69,6 +71,7 @@ function useProject(token: string, projectId?: number) {
   const deleteCurrentProject = async () => {
     if (!projectId) return
     try {
+      setError("")
       setDeleteProjectLoading(true)
       await deleteProject(projectId, token)
       return true

@@ -45,9 +45,10 @@ function AddTaskModal({
       modalDescription="Add the details of the new Task."
       onClose={onClose}
       onSubmit={async () => {
-        const selectedProjectId = currentProjectId ?? projectOption
+        let selectedProjectId = currentProjectId ?? projectOption
 
-        if (selectedProjectId === "") return
+        if (selectedProjectId === "") 
+          selectedProjectId = -1
 
         const newTask: CreateTask = {
           name: taskTitle,

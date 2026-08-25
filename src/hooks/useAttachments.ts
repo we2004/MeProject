@@ -17,6 +17,7 @@ function useAttachments(token: string, projectId: number) {
   useEffect(() => {
     const handleFetchAttachments = async () => {
       try {
+        setError("")
         setAttachmentLoading(true)
         const attachmentsData = await getAttachments(projectId, token)
         setAttachments(attachmentsData)
@@ -32,6 +33,7 @@ function useAttachments(token: string, projectId: number) {
 
   const addAttachment = async (files: File[]) => {
     try {
+      setError("")
       setAddAttachmentLoading(true)
       for (const file of files) {
         await createAttachment(token, {
@@ -55,6 +57,7 @@ function useAttachments(token: string, projectId: number) {
 
   const removeAttachment = async (fileId: number) => {
     try {
+      setError("")
       setRemoveAttachmentLoading(true)
       await deleteAttachment(token, fileId)
 
