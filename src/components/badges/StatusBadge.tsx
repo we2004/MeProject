@@ -15,7 +15,7 @@ type StatusBadgeProps = {
   interactive?: boolean
   onStatusChange?: (
     field: EditInfoFields,
-    data: string | boolean | string[] | TaskStatus
+    data: string | boolean | string[] | TaskStatus | ProjectStatus
   ) => Promise<boolean>
 }
 
@@ -34,7 +34,17 @@ function StatusBadge({
     cancelled: "bg-secondary/15"
   }
 
-  const nextStatus = status === "completed" ? "open" : "completed"
+  const nextStatus =
+    status === "active"
+      ? "cancelled"
+      : status === "cancelled"
+        ? "active"
+        : status === "completed"
+          ? "open"
+          : "completed"
+
+  const isCancelled = nextStatus === 'cancelled'
+  
 
   const handleBadgeClick = () => {
     if (interactive) {
@@ -78,9 +88,13 @@ function StatusBadge({
           <button
             type="button"
             onClick={async () => {
-              const success = await onStatusChange?.("status", nextStatus)
-              if(success)
-                setIsOpen(false)
+              if (nextStatus === "cancelled" || nextStatus === 'active') {
+                const success = await onStatusChange?.("cancelled", isCancelled)
+                if (success) setIsOpen(false)
+              } else {
+                const success = await onStatusChange?.("status", nextStatus)
+                if (success) setIsOpen(false)
+              }
             }}
             className="w-full rounded-xl px-3 py-2 text-left font-body text-sm capitalize text-primary-font transition-colors duration-200 hover:bg-primary hover:text-white"
           >

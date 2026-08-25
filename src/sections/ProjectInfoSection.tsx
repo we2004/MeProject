@@ -13,13 +13,13 @@ type ProjectInfoSectionProps = {
   onUpdate: (
     field: EditInfoFields,
     data: string | boolean | string[] | TaskStatus
-  ) => Promise<boolean | undefined>
+  ) => Promise<boolean>
   progress: number
   onDeleteTech: (tech: string) => Promise<void>
   onAddTech: (tech: string) => Promise<void>
   updateProjectLoading: boolean
 }
- 
+
 function ProjectInfoSection({
   project,
   displayedProjectStatus,
@@ -46,7 +46,11 @@ function ProjectInfoSection({
             loading={updateProjectLoading}
           />
 
-          <StatusBadge status={status} />
+          <StatusBadge
+            status={status}
+            interactive
+            onStatusChange={onUpdate}
+          />
         </div>
 
         <div className="flex items-center gap-10">

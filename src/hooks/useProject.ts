@@ -42,7 +42,7 @@ function useProject(token: string, projectId?: number) {
     field: EditInfoFields,
     data: string | boolean | string[]
   ) => {
-    if (!projectId) return
+    if (!projectId) return false
     try {
       setError("")
       setUpdateProjectLoading(true)
