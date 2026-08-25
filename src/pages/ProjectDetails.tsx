@@ -39,7 +39,6 @@ function ProjectsDetails() {
     udpateTaskLoading,
     updateTask,
     addTask,
-    removeTask,
     error: tasksError
   } = useTasks(token, "all", "all", "asc", Number(projectId))
 
@@ -58,7 +57,6 @@ function ProjectsDetails() {
 
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false)
   const [isAttachmentModalOpen, setIsAttachmentModalOpen] = useState(false)
-  const [deletingTaskId, setDeletingTaskId] = useState<number | null>(null)
   const [deletingAttachmentId, setDeletingAttachmentId] = useState<
     number | null
   >(null)
@@ -185,28 +183,6 @@ function ProjectsDetails() {
                   onUpdate={(field, data) => updateTask(task.id, field, data)}
                 />
               </div>
-
-              <button
-                className="flex h-12 w-12 items-center justify-center rounded-2xl border border-primary/15 bg-white text-primary-font shadow-sm transition-all duration-300 hover:bg-redT hover:text-white"
-                onClick={async () => {
-                  setDeletingTaskId(task.id)
-
-                  try {
-                    await removeTask(task.id)
-                  } finally {
-                    setDeletingTaskId(null)
-                  }
-                }}
-              >
-                {deletingTaskId === task.id ? (
-                  <Spinner
-                    size="sm"
-                    color="dark"
-                  />
-                ) : (
-                  <Trash2 className="h-5 w-5" />
-                )}
-              </button>
             </div>
           ))}
 
