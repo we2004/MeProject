@@ -13,6 +13,7 @@ import TaskInfoSection from "../sections/TaskInfoSection"
 import TaskDetailsSkeleton from "../components/loading/skeletons/TaskDetails"
 import DeleteModal from "../components/modals/DeleteModal"
 import ErrorCard from "../components/cards/ErrorCard"
+import Spinner from "../components/loading/spinners/Spinner"
 
 function TaskDetails() {
   const { token } = useAuth()
@@ -20,6 +21,8 @@ function TaskDetails() {
   const { taskId } = useParams()
   const [isNoteModalOpen, setIsNoteModalOpen] = useState(false)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+  const [deletingNoteId, setDeletingNoteId] = useState<number | null>(null)
+
   const {
     task,
     taskLoading,
@@ -54,7 +57,6 @@ function TaskDetails() {
 
   if (taskLoading || notesLoading || projectLoading)
     return <TaskDetailsSkeleton />
-
 
   return (
     <section className="animate-fade-in flex flex-col gap-8">
@@ -120,10 +122,24 @@ function TaskDetails() {
               </div>
 
               <button
-                onClick={() => removeNote(note.id)}
+                onClick={async () => {
+                  setDeletingNoteId(note.id)
+                  try {
+                    await removeNote(note.id)
+                  } finally {
+                    setDeletingNoteId(null)
+                  }
+                }}
                 className="flex h-12 w-12 items-center justify-center rounded-2xl border border-primary/15 bg-white text-primary-font shadow-sm transition-all duration-300 hover:bg-redT hover:text-white"
               >
-                <Trash2 className="h-5 w-5" />
+                {deletingNoteId === note.id ? (
+                  <Spinner
+                    size="sm"
+                    color="dark"
+                  />
+                ) : (
+                  <Trash2 className="h-5 w-5" />
+                )}
               </button>
             </div>
           ))}
