@@ -54,46 +54,6 @@ My work on this project focused on the frontend application, including the UI, s
 
 For full API details, endpoints, and request/response structures, see [backend/API_DOCUMENTATION.md](./backend/API_DOCUMENTATION.md).
 
-## Installation and Setup
-### Backend
-
-The backend REST API is included in this repository and was AI-generated.
-
-Navigate to the backend folder:
-cd backend
-Install the backend dependencies:
-npm install
-Create a .env file based on .env.example and configure the required environment variables.
-Start the backend development server:
-npm run dev
-
-Keep the backend running while using the frontend.
-
-### Frontend
-Open a new terminal and navigate to the frontend folder:
-cd frontend
-Install the frontend dependencies:
-npm install
-Create a .env file based on .env.example and configure the backend API URL:
-VITE_BASE_URL=http://localhost:YOUR_BACKEND_PORT
-Start the frontend development server:
-npm run dev
-Open the URL provided in the terminal, typically:
-http://localhost:5173
-Running the Full Application
-
-Both the frontend and backend must be running at the same time.
-
-Frontend
-http://localhost:5173
-        │
-        │ API requests
-        ▼
-Backend
-http://localhost:YOUR_BACKEND_PORT
-
-The frontend communicates with the backend through the VITE_BASE_URL environment variable.
-
 ## Deployment
 
 The application is deployed using **Google Cloud Run**.
