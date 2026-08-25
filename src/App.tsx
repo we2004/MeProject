@@ -1,4 +1,5 @@
 import { Routes, Route } from "react-router-dom"
+import { useState } from "react"
 import Projects from "./pages/Projects"
 import Home from "./pages/Home"
 import Tasks from "./pages/Tasks"
@@ -12,69 +13,77 @@ import Register from "./authentication/Register"
 import Login from "./authentication/Login"
 import ForgotPassword from "./authentication/ForgotPassword"
 import Recovery from "./authentication/Recovery"
-
+import IntroScreen from "./components/IntroScreen"
+import { AnimatePresence } from "motion/react"
 function App() {
-
+  const [showIntro, setShowIntro] = useState(
+    !sessionStorage.getItem("introShown")
+  )
 
   return (
-    <Routes>
-      <Route element={<AuthLayout />}>
+    <>
+      <AnimatePresence>
+        {showIntro && <IntroScreen onFinish={() => setShowIntro(false)} />}
+      </AnimatePresence>
+      <Routes>
+        <Route element={<AuthLayout />}>
+          <Route
+            index
+            element={<Welcome />}
+          />
+
+          <Route
+            path="register"
+            element={<Register />}
+          />
+
+          <Route
+            path="login"
+            element={<Login />}
+          />
+        </Route>
+
         <Route
-          index
-          element={<Welcome />}
+          path="forgot-password"
+          element={<ForgotPassword />}
         />
 
         <Route
-          path="register"
-          element={<Register />}
+          path="recovery"
+          element={<Recovery />}
         />
 
-        <Route
-          path="login"
-          element={<Login />}
-        />
-      </Route>
+        <Route element={<AppLayout />}>
+          <Route
+            path="home"
+            element={<Home />}
+          />
+          <Route
+            path="projects"
+            element={<Projects />}
+          />
+          <Route
+            path="tasks"
+            element={<Tasks />}
+          />
 
-      <Route
-        path="forgot-password"
-        element={<ForgotPassword />}
-      />
+          <Route
+            path="projectDetails/:projectId"
+            element={<ProjectsDetails />}
+          />
 
-      <Route
-        path="recovery"
-        element={<Recovery />}
-      />
+          <Route
+            path="taskDetails/:taskId"
+            element={<TaskDetails />}
+          />
 
-      <Route element={<AppLayout />}>
-        <Route
-          path="home"
-          element={<Home />}
-        />
-        <Route
-          path="projects"
-          element={<Projects />}
-        />
-        <Route
-          path="tasks"
-          element={<Tasks />}
-        />
-
-        <Route
-          path="projectDetails/:projectId"
-          element={<ProjectsDetails />}
-        />
-
-        <Route
-          path="taskDetails/:taskId"
-          element={<TaskDetails />}
-        />
-
-        <Route
-          path="settings"
-          element={<Settings />}
-        />
-      </Route>
-    </Routes>
+          <Route
+            path="settings"
+            element={<Settings />}
+          />
+        </Route>
+      </Routes>
+    </>
   )
 }
 export default App
