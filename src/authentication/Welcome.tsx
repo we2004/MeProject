@@ -2,10 +2,11 @@ import { Compass, LogIn, UserPlus } from "lucide-react"
 import { Link, useNavigate } from "react-router-dom"
 import logo from "../assets/logo2.png"
 import { useAuth } from "../context/useAuth"
+import ErrorCard from "../components/cards/ErrorCard"
 
 function Welcome() {
   const navigate = useNavigate()
-  const { exploreApp } = useAuth()
+  const { exploreApp, error } = useAuth()
 
   const handleExploreMode = async () => {
     const success = await exploreApp()
@@ -19,6 +20,9 @@ function Welcome() {
     <div className="animate-fade-in flex w-full items-center justify-center px-6 py-12 lg:w-1/2">
       <div className="flex  items-center w-full max-w-md flex-col">
         {/* Heading */}
+        <div className="fixed right-6 top-6 z-9999 flex flex-col gap-3">
+          {error && <ErrorCard message={error} />}
+        </div>
 
         <img
           src={logo}

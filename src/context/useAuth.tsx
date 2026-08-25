@@ -92,7 +92,7 @@ export function useAuth() {
       const response = await register(newUser)
       return response
     } catch (error) {
-      setError("Failed to create account")
+      setError("Existing username or invalid password")
       console.log(error)
 
       return null

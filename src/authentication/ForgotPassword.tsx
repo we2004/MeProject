@@ -4,16 +4,18 @@ import { useNavigate } from "react-router-dom"
 import type { ChangePassword } from "../types/auth"
 import { useAuth } from "../context/useAuth"
 import Spinner from "../components/loading/spinners/Spinner"
+import ErrorCard from "../components/cards/ErrorCard"
 
 function ForgotPassword() {
-  const { changeUserPassword, loading } = useAuth()
+  const { changeUserPassword, loading, error } = useAuth()
   const navigate = useNavigate()
   const [showPassword, setShowPassword] = useState(false)
   const [username, setUsername] = useState("")
   const [recoveryKey, setRecoveryKey] = useState("")
   const [password, setPassword] = useState("")
 
-  const handleChangePassword = async () => {
+  const handleChangePassword = async (e: React.SubmitEvent) => {
+    e.preventDefault()
     const data: ChangePassword = {
       newPassword: password,
       username: username,
@@ -29,6 +31,10 @@ function ForgotPassword() {
       <div className="w-full max-w-md rounded-3xl border border-primary/15 bg-white p-6 shadow-lg sm:p-8">
         {/* Header */}
 
+        <div className="fixed right-6 top-6 z-9999 flex flex-col gap-3">
+          {error && <ErrorCard message={error} />}
+        </div>
+
         <div className="mb-8 relative">
           <h1 className="font-heading text-3xl font-bold text-primary-font sm:text-4xl">
             Change Password
@@ -37,7 +43,7 @@ function ForgotPassword() {
 
         {/* Form */}
         <form
-          onSubmit={handleChangePassword}
+          onSubmit={(e) => handleChangePassword(e)}
           className="flex flex-col gap-5 mt-10"
         >
           {/* Username */}

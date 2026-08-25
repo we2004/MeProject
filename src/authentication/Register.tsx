@@ -4,6 +4,7 @@ import type { NewUser } from "../types/auth"
 import { useNavigate } from "react-router-dom"
 import { useAuth } from "../context/useAuth"
 import Spinner from "../components/loading/spinners/Spinner"
+import ErrorCard from "../components/cards/ErrorCard"
 function Register() {
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
@@ -15,7 +16,7 @@ function Register() {
 
   const navigate = useNavigate()
 
-  const { loading, registerUser } = useAuth()
+  const { loading, registerUser, error } = useAuth()
 
   const handleCreateAccount = async (e: React.SubmitEvent) => {
     e.preventDefault()
@@ -36,7 +37,9 @@ function Register() {
     <div className="animate-fade-in flex w-full items-center justify-center px-6 py-12 lg:w-1/2">
       <div className="w-full max-w-md">
         {/* Heading */}
-
+        <div className="fixed right-6 top-6 z-9999 flex flex-col gap-3">
+          {error && <ErrorCard message={error} />}
+        </div>
         <div className="mb-8 relative">
           <h1 className="font-heading text-3xl font-bold text-primary-font sm:text-4xl">
             Create your account
