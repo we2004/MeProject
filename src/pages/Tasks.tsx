@@ -171,7 +171,7 @@ function Tasks() {
       </div>
 
       {tasks.length === 0 ? (
-        <PlaceHolderCard message="No Tasks Yet" />
+        <PlaceHolderCard message="No Tasks" />
       ) : (
         <>
           <div className="flex flex-col gap-4">

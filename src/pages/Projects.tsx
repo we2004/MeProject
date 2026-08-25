@@ -53,27 +53,35 @@ function Projects() {
     if (searchParams.get("create") === "true") {
       const timer = setTimeout(() => {
         setIsModalOpen(true)
-        setSearchParams((current) => {
-          const params = new URLSearchParams(current)
-          params.delete("create")
-          return params
-        }, {replace : true})
+        setSearchParams(
+          (current) => {
+            const params = new URLSearchParams(current)
+            params.delete("create")
+            return params
+          },
+          { replace: true }
+        )
       }, 230)
       return () => clearTimeout(timer)
     }
   }, [searchParams, setSearchParams])
 
   const handleFilterSelect = (newFilter: ProjectStatusFilter) => {
-    setSearchParams({
-      filter: newFilter,
-      order
+    setSearchParams((current) => {
+      const params = new URLSearchParams(current)
+      params.set("filter", newFilter)
+
+      return params
     })
   }
 
   const handleToggleOrder = () => {
-    setSearchParams({
-      order: nextOrder,
-      filter
+    setSearchParams((current) => {
+      const params = new URLSearchParams(current)
+
+      params.set("order", nextOrder)
+
+      return params
     })
   }
   if (projectsLoading || tasksLoading) return <ProjectsSkeleton />
@@ -120,7 +128,7 @@ function Projects() {
       </div>
 
       {projects.length === 0 ? (
-        <PlaceHolderCard message="No Projets Yet" />
+        <PlaceHolderCard message="No Projets" />
       ) : (
         <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 ">
           {projects.map((project) => (
