@@ -14,6 +14,7 @@ import TaskDetailsSkeleton from "../components/loading/skeletons/TaskDetails"
 import DeleteModal from "../components/modals/DeleteModal"
 import ErrorCard from "../components/cards/ErrorCard"
 import Spinner from "../components/loading/spinners/Spinner"
+import PlaceHolderCard from "../components/cards/PlaceHolderCard"
 
 function TaskDetails() {
   const { token } = useAuth()
@@ -111,39 +112,43 @@ function TaskDetails() {
           </PrimaryButton>
         </div>
 
-        <div className="flex flex-col gap-4">
-          {notes.map((note) => (
-            <div
-              key={note.id}
-              className="flex items-center gap-3"
-            >
-              <div className="flex-1">
-                <NoteCard {...note} />
-              </div>
-
-              <button
-                onClick={async () => {
-                  setDeletingNoteId(note.id)
-                  try {
-                    await removeNote(note.id)
-                  } finally {
-                    setDeletingNoteId(null)
-                  }
-                }}
-                className="flex h-12 w-12 items-center justify-center rounded-2xl border border-primary/15 bg-white text-primary-font shadow-sm transition-all duration-300 hover:bg-redT hover:text-white"
+        {notes.length === 0 ? (
+          <PlaceHolderCard message="No Notes Yet" />
+        ) : (
+          <div className="flex flex-col gap-4">
+            {notes.map((note) => (
+              <div
+                key={note.id}
+                className="flex items-center gap-3"
               >
-                {deletingNoteId === note.id ? (
-                  <Spinner
-                    size="sm"
-                    color="dark"
-                  />
-                ) : (
-                  <Trash2 className="h-5 w-5" />
-                )}
-              </button>
-            </div>
-          ))}
-        </div>
+                <div className="flex-1">
+                  <NoteCard {...note} />
+                </div>
+
+                <button
+                  onClick={async () => {
+                    setDeletingNoteId(note.id)
+                    try {
+                      await removeNote(note.id)
+                    } finally {
+                      setDeletingNoteId(null)
+                    }
+                  }}
+                  className="flex h-12 w-12 items-center justify-center rounded-2xl border border-primary/15 bg-white text-primary-font shadow-sm transition-all duration-300 hover:bg-redT hover:text-white"
+                >
+                  {deletingNoteId === note.id ? (
+                    <Spinner
+                      size="sm"
+                      color="dark"
+                    />
+                  ) : (
+                    <Trash2 className="h-5 w-5" />
+                  )}
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       <button

@@ -4,7 +4,7 @@ import PrimaryButton from "../components/buttons/PrimaryButton"
 import DropdownButton from "../components/buttons/DropdownButton"
 import { useSearchParams } from "react-router-dom"
 import type { MenuType, SortOrder } from "../types/common"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import type { ProjectStatusFilter } from "../types/projects"
 import { calculateProgress, getProjectFilter } from "../utils/projects"
 import SortByDateButton from "../components/buttons/SortByDateButton"
@@ -14,10 +14,11 @@ import useProjects from "../hooks/useProjects"
 import useTasks from "../hooks/useTasks"
 import ProjectsSkeleton from "../components/loading/skeletons/ProjectsSkeleton"
 import ErrorCard from "../components/cards/ErrorCard"
+import PlaceHolderCard from "../components/cards/PlaceHolderCard"
 
 function Projects() {
   const { token } = useAuth()
-  
+
   const [searchParams, setSearchParams] = useSearchParams()
   const order: SortOrder = searchParams.get("order") === "desc" ? "desc" : "asc"
   const filter: ProjectStatusFilter = getProjectFilter(
@@ -48,6 +49,20 @@ function Projects() {
   ]
   const nextOrder = order === "asc" ? "desc" : "asc"
 
+  useEffect(() => {
+    if (searchParams.get("create") === "true") {
+      const timer = setTimeout(() => {
+        setIsModalOpen(true)
+        setSearchParams((current) => {
+          const params = new URLSearchParams(current)
+          params.delete("create")
+          return params
+        }, {replace : true})
+      }, 230)
+      return () => clearTimeout(timer)
+    }
+  }, [searchParams, setSearchParams])
+
   const handleFilterSelect = (newFilter: ProjectStatusFilter) => {
     setSearchParams({
       filter: newFilter,
@@ -63,7 +78,7 @@ function Projects() {
   }
   if (projectsLoading || tasksLoading) return <ProjectsSkeleton />
   return (
-    <section className="animate-fade-in flex flex-col gap-8">
+    <section className="animate-fade-in flex flex-col gap-8 ">
       <div className="fixed right-6 top-25 z-9999 flex flex-col gap-3">
         {projectsError && <ErrorCard message={projectsError} />}
         {tasksError && <ErrorCard message={tasksError} />}
@@ -104,15 +119,19 @@ function Projects() {
         <SortByDateButton onToggle={handleToggleOrder} />
       </div>
 
-      <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 ">
-        {projects.map((project) => (
-          <ProjectCard
-            key={project.id}
-            {...project}
-            progress={calculateProgress(project.id, tasks)}
-          />
-        ))}
-      </div>
+      {projects.length === 0 ? (
+        <PlaceHolderCard message="No Projets Yet" />
+      ) : (
+        <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 ">
+          {projects.map((project) => (
+            <ProjectCard
+              key={project.id}
+              {...project}
+              progress={calculateProgress(project.id, tasks)}
+            />
+          ))}
+        </div>
+      )}
     </section>
   )
 }

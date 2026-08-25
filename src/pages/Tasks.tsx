@@ -5,7 +5,7 @@ import { useSearchParams } from "react-router-dom"
 import { type TaskStatusFilter, type TaskPriorityFilter } from "../types/tasks"
 import { getTaskFilter, getTaskPriority } from "../utils/tasks"
 import { type MenuType, type SortOrder } from "../types/common"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import SortByDateButton from "../components/buttons/SortByDateButton"
 import DropdownButton from "../components/buttons/DropdownButton"
 import AddTaskModal from "../components/modals/AddTaskModal"
@@ -14,6 +14,7 @@ import useTasks from "../hooks/useTasks"
 import useProjects from "../hooks/useProjects"
 import TasksSkeleton from "../components/loading/skeletons/TasksSkeleton"
 import ErrorCard from "../components/cards/ErrorCard"
+import PlaceHolderCard from "../components/cards/PlaceHolderCard"
 
 function Tasks() {
   const { token } = useAuth()
@@ -44,6 +45,23 @@ function Tasks() {
   const filters: TaskStatusFilter[] = ["all", "open", "completed", "overdue"]
   const priorities: TaskPriorityFilter[] = ["all", "high", "medium", "low"]
   const nextOrder = order === "asc" ? "desc" : "asc"
+
+  useEffect(() => {
+    if (searchParams.get("create") === "true") {
+      const timer = setTimeout(() => {
+        setIsModalOpen(true)
+        setSearchParams(
+          (current) => {
+            const params = new URLSearchParams(current)
+            params.delete("create")
+            return params
+          },
+          { replace: true }
+        )
+      }, 230)
+      return () => clearTimeout(timer)
+    }
+  }, [searchParams, setSearchParams])
 
   const handleFilterSelect = (newFilter: TaskStatusFilter) => {
     if (projectId) {
@@ -167,18 +185,22 @@ function Tasks() {
         <SortByDateButton onToggle={handleToggleOrder} />
       </div>
 
-      <div className="flex flex-col gap-4">
-        {tasks?.map((task) => (
-          <TaskCard
-            key={task.id}
-            {...task}
-            projectName={
-              projects?.find((project) => project.id == task.projectId)?.name
-            }
-            onUpdate={(field, data) => updateTask(task.id, field, data)}
-          />
-        ))}
-      </div>
+      {tasks.length === 0 ? (
+        <PlaceHolderCard message="No Tasks Yet" />
+      ) : (
+        <div className="flex flex-col gap-4">
+          {tasks?.map((task) => (
+            <TaskCard
+              key={task.id}
+              {...task}
+              projectName={
+                projects?.find((project) => project.id == task.projectId)?.name
+              }
+              onUpdate={(field, data) => updateTask(task.id, field, data)}
+            />
+          ))}
+        </div>
+      )}
     </section>
   )
 }

@@ -17,7 +17,7 @@ function PlaceHolderCard({
     navigate(navigateTo || "")
   }
   return (
-    <div className="w-full h-full flex flex-col items-center justify-center gap-5 bg-white/50 py-15 rounded-3xl">
+    <div className="w-full flex flex-col items-center justify-center gap-5 bg-white/50 py-15 rounded-3xl">
       <p className="text-2xl font-heading text-primary-font/80 text-center font-semibold">
         {message}
       </p>

@@ -19,6 +19,7 @@ import useTasks from "../hooks/useTasks"
 import ProjectsDetailsSkeleton from "../components/loading/skeletons/ProjectDetailsSkeleton"
 import Spinner from "../components/loading/spinners/Spinner"
 import ErrorCard from "../components/cards/ErrorCard"
+import PlaceHolderCard from "../components/cards/PlaceHolderCard"
 
 function ProjectsDetails() {
   const { token } = useAuth()
@@ -171,20 +172,24 @@ function ProjectsDetails() {
         </div>
 
         <div className="flex flex-col items-center justify-center gap-5">
-          {project && projectTasks.slice(0, 3).map((task) => (
-            <div
-              key={task.id}
-              className="flex items-center w-full gap-3"
-            >
-              <div className="flex-1">
-                <TaskCard
-                  projectName={project.name}
-                  {...task}
-                  onUpdate={(field, data) => updateTask(task.id, field, data)}
-                />
+          {project && projectTasks.length !== 0 ? (
+            projectTasks.slice(0, 3).map((task) => (
+              <div
+                key={task.id}
+                className="flex items-center w-full gap-3"
+              >
+                <div className="flex-1">
+                  <TaskCard
+                    projectName={project.name}
+                    {...task}
+                    onUpdate={(field, data) => updateTask(task.id, field, data)}
+                  />
+                </div>
               </div>
-            </div>
-          ))}
+            ))
+          ) : (
+            <PlaceHolderCard message="No Tasks Yet" />
+          )}
 
           {project && projectTasks.length > 3 && (
             <Link
@@ -214,41 +219,45 @@ function ProjectsDetails() {
         </div>
 
         <div className="flex flex-col gap-3">
-          {attachments.map((attachment) => (
-            <div
-              key={attachment.id}
-              className="flex items-center gap-3"
-            >
-              <div className="flex-1">
-                <AttachmentCard
-                  {...attachment}
-                  onDownload={handleDownloadAttachment}
-                />
-              </div>
-
-              <button
-                onClick={async () => {
-                  setDeletingAttachmentId(attachment.id)
-
-                  try {
-                    await removeAttachment(attachment.id)
-                  } finally {
-                    setDeletingAttachmentId(null)
-                  }
-                }}
-                className="flex h-12 w-12 items-center justify-center rounded-2xl border border-primary/15 bg-white text-primary-font shadow-sm transition-all duration-300 hover:bg-redT hover:text-white"
+          {attachments.length === 0 ? (
+            <PlaceHolderCard message="No Attachments Yet" />
+          ) : (
+            attachments.map((attachment) => (
+              <div
+                key={attachment.id}
+                className="flex items-center gap-3"
               >
-                {deletingAttachmentId === attachment.id ? (
-                  <Spinner
-                    size="sm"
-                    color="dark"
+                <div className="flex-1">
+                  <AttachmentCard
+                    {...attachment}
+                    onDownload={handleDownloadAttachment}
                   />
-                ) : (
-                  <Trash2 className="h-5 w-5" />
-                )}
-              </button>
-            </div>
-          ))}
+                </div>
+
+                <button
+                  onClick={async () => {
+                    setDeletingAttachmentId(attachment.id)
+
+                    try {
+                      await removeAttachment(attachment.id)
+                    } finally {
+                      setDeletingAttachmentId(null)
+                    }
+                  }}
+                  className="flex h-12 w-12 items-center justify-center rounded-2xl border border-primary/15 bg-white text-primary-font shadow-sm transition-all duration-300 hover:bg-redT hover:text-white"
+                >
+                  {deletingAttachmentId === attachment.id ? (
+                    <Spinner
+                      size="sm"
+                      color="dark"
+                    />
+                  ) : (
+                    <Trash2 className="h-5 w-5" />
+                  )}
+                </button>
+              </div>
+            ))
+          )}
         </div>
       </div>
 
