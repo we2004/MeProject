@@ -3,16 +3,18 @@ import { Check, Edit3, Clock } from "lucide-react"
 import dayjs from "dayjs"
 import type { EditInfoFields } from "../../types/common"
 import type { TaskStatus } from "../../types/tasks"
+import Spinner from "../loading/spinners/Spinner"
 type EditableFieldProps = {
   data: string
   field: EditInfoFields
   onUpdate: (
     field: EditInfoFields,
     data: string | boolean | string[] | TaskStatus
-  ) => Promise<void>
+  ) => Promise<boolean | undefined>
+  loading?: boolean
 }
 
-function EditableField({ data, field, onUpdate }: EditableFieldProps) {
+function EditableField({ data, field, onUpdate, loading }: EditableFieldProps) {
   const [isEditField, setIsEditField] = useState(false)
   const [value, setValue] = useState("")
 
@@ -84,21 +86,27 @@ function EditableField({ data, field, onUpdate }: EditableFieldProps) {
 
       {isEditField ? (
         <button
+          disabled={loading}
           onClick={async () => {
-            await onUpdate(field, value)
-            setIsEditField(false)
+            const success = await onUpdate(field, value)
+            if (success) setIsEditField(false)
           }}
         >
-          <Check className="h-5 w-5 mr-5 ml-1 text-primary cursor-pointer hover:text-primary/40 transition-all duration-300" />
+          {loading ? (
+            <Spinner size="sm" />
+          ) : (
+            <Check className="mr-5 ml-1 h-5 w-5 cursor-pointer text-primary transition-all duration-300 hover:text-primary/40" />
+          )}
         </button>
       ) : (
         <button
+          disabled={loading}
           onClick={() => {
             setValue(data)
             setIsEditField(true)
           }}
         >
-          <Edit3 className="h-4 w-4 mr-5 ml-1 text-primary cursor-pointer hover:text-primary/40 transition-all duration-300" />
+          <Edit3 className="mr-5 ml-1 h-4 w-4 cursor-pointer text-primary transition-all duration-300 hover:text-primary/40" />
         </button>
       )}
     </>

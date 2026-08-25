@@ -10,81 +10,86 @@ import {
 } from "lucide-react"
 import SecondaryButton from "../components/buttons/SecondaryButton"
 import { useAuth } from "../context/useAuth"
-import { deleteAccount, getUser, logout, updateName } from "../api/auth"
 import { useNavigate } from "react-router-dom"
-import { useState, useEffect } from "react"
-import type { User } from "../types/auth"
+import { useState } from "react"
 import DeleteModal from "../components/modals/DeleteModal"
+import ErrorCard from "../components/cards/ErrorCard"
+import Spinner from "../components/loading/spinners/Spinner"
 
 function Settings() {
-  const { token, setToken } = useAuth()
+  const { user, signout, removeAccount, changeName, loading, error } = useAuth()
+
   const navigate = useNavigate()
-  const [currentUser, setCurrentUser] = useState<User | undefined>(undefined)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [isEditName, setIsEditName] = useState(false)
   const [name, setName] = useState("")
+  const [actionError, setActionError] = useState<{
+    id: number
+    message: string
+  } | null>(null)
 
   const handleLogout = async () => {
-    await logout(token)
-    localStorage.removeItem("token")
-    setToken("")
-    navigate("/")
+    const success = await signout()
+    if (success) navigate("/")
   }
 
   const handleDeleteAccount = async () => {
-    if (currentUser?.isDemo) {
-      alert("Can't Delete a Demo User")
+    if (user?.isDemo) {
+      setActionError({
+        id: Date.now(),
+        message: "Can't Delete a Demo User"
+      })
       return
     }
 
-    await deleteAccount(token)
-    localStorage.removeItem("token")
-    setToken("")
-    navigate("/")
+    const success = await removeAccount()
+
+    if (success) {
+      navigate("/")
+    }
   }
 
   const handleUpdateName = async (newName: string) => {
-    if (!currentUser) return
-
-    if (currentUser?.isDemo) {
-      alert("Can't Edit a Demo User")
+    if (user?.isDemo) {
+      setActionError({
+        id: Date.now(),
+        message: "Can't Edit a Demo User"
+      })
       setIsEditName(false)
-      setName(currentUser.name)
       return
     }
 
-    const response = await updateName(token, newName)
-    setName(response.name)
-    setCurrentUser({
-      ...currentUser,
-      name: response.name
-    })
-    setIsEditName(false)
+    const success = await changeName(newName)
+
+    if (success) {
+      setIsEditName(false)
+    }
   }
 
   const handleChangePassword = async () => {
-    if (currentUser?.isDemo) {
-      alert("Can't Edit a Demo User")
+    if (user?.isDemo) {
+      setActionError({
+        id: Date.now(),
+        message: "Can't Edit a Demo User"
+      })
       return
     }
 
     navigate("/forgot-password")
   }
 
-  useEffect(() => {
-    const start = async () => {
-      const user = await getUser(token)
-      setName(user.name)
-
-      setCurrentUser(user)
-    }
-
-    start()
-  }, [token])
-
-  if (!currentUser) return <p>user not found</p>
   return (
-    <section className="flex flex-col gap-8">
+    <section className="animate-fade-in flex flex-col gap-8">
+      <div className="fixed right-6 top-25 z-9999 flex flex-col gap-3">
+        {error && <ErrorCard message={error} />}
+        {actionError && (
+          <ErrorCard
+            message={actionError.message}
+            key={actionError.id}
+          />
+        )}
+      </div>
+
       {isDeleteModalOpen && (
         <DeleteModal
           onCancel={() => setIsDeleteModalOpen(false)}
@@ -93,6 +98,7 @@ function Settings() {
           message=" This action cannot be undone. Your account and all associated
           projects, tasks, notes, and attachments will be permanently deleted."
           title="Delete Account"
+          loading={loading}
         />
       )}
       {/* Header */}
@@ -125,11 +131,13 @@ function Settings() {
               <div className=" min-w-40">
                 <p className="font-body font-medium text-primary-font">Name</p>
 
-                <p
-                  className={`mt-1 font-body text-sm text-primary-font/60 ${isEditName && "hidden"}`}
-                >
-                  {currentUser.name}
-                </p>
+                {user && (
+                  <p
+                    className={`mt-1 font-body text-sm text-primary-font/60 ${isEditName && "hidden"}`}
+                  >
+                    {user.name}
+                  </p>
+                )}
 
                 {isEditName && (
                   <input
@@ -142,18 +150,36 @@ function Settings() {
               </div>
             </div>
 
-            {!isEditName && (
-              <SecondaryButton
-                Icon={Pencil}
-                onClickFun={() => setIsEditName(true)}
-              >
-                Edit Profile
-              </SecondaryButton>
-            )}
-            {isEditName && (
-              <button onClick={async () => await handleUpdateName(name)}>
-                <Check className="h-5 w-5 mr-5 ml-1 text-primary cursor-pointer hover:text-primary/40 transition-all duration-300" />
-              </button>
+            {user && (
+              <>
+                {!isEditName && (
+                  <SecondaryButton
+                    Icon={Pencil}
+                    onClickFun={() => {
+                      setName(user.name)
+                      setIsEditName(true)
+                    }}
+                    disabled={loading}
+                  >
+                    Edit Profile
+                  </SecondaryButton>
+                )}
+                {isEditName && (
+                  <button
+                    disabled={loading}
+                    onClick={async () => await handleUpdateName(name)}
+                  >
+                    {loading ? (
+                      <Spinner
+                        size="sm"
+                        color="dark"
+                      />
+                    ) : (
+                      <Check className="h-5 w-5 mr-5 ml-1 text-primary cursor-pointer hover:text-primary/40 transition-all duration-300" />
+                    )}
+                  </button>
+                )}
+              </>
             )}
           </div>
 

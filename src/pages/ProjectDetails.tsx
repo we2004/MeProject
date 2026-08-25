@@ -16,37 +16,52 @@ import useAttachments from "../hooks/useAttachments"
 import ProjectInfoSection from "../sections/ProjectInfoSection"
 import useProjects from "../hooks/useProjects"
 import useTasks from "../hooks/useTasks"
+import ProjectsDetailsSkeleton from "../components/loading/skeletons/ProjectDetailsSkeleton"
+import Spinner from "../components/loading/spinners/Spinner"
+import ErrorCard from "../components/cards/ErrorCard"
 
 function ProjectsDetails() {
   const { token } = useAuth()
   const { projectId } = useParams()
   const {
     project,
-    loading: projectLoading,
-    error: projectError,
+    projectLoading,
+    deleteProjectLoading,
+    updateProjectLoading,
     updateProject,
-    deleteCurrentProject
+    deleteCurrentProject,
+    error: projectError
   } = useProject(token, Number(projectId))
 
   const {
     tasks: projectTasks,
+    tasksLoading,
+    udpateTaskLoading,
     updateTask,
     addTask,
-    removeTask
+    removeTask,
+    error: tasksError
   } = useTasks(token, "all", "all", "asc", Number(projectId))
 
-  const { projects } = useProjects(token, "all", "asc")
+  const { projects, error: projectsError } = useProjects(token, "all", "asc")
 
-  const { attachments, addAttachment, removeAttachment } = useAttachments(
-    token,
-    Number(projectId)
-  )
+  const {
+    attachments,
+    attachmentLoading,
+    addAttachmentLoading,
+    addAttachment,
+    removeAttachment,
+    error: attachmentsError
+  } = useAttachments(token, Number(projectId))
 
   const navigate = useNavigate()
 
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false)
   const [isAttachmentModalOpen, setIsAttachmentModalOpen] = useState(false)
-
+  const [deletingTaskId, setDeletingTaskId] = useState<number | null>(null)
+  const [deletingAttachmentId, setDeletingAttachmentId] = useState<
+    number | null
+  >(null)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
 
   const handleDeleteTech = async (tech: string) => {
@@ -85,17 +100,23 @@ function ProjectsDetails() {
     URL.revokeObjectURL(url)
   }
 
-  if (projectError) return <p>{projectError}</p>
-
-  if (projectLoading) return <p>is loading...</p>
-
-  if (!project) return <p>No project found</p>
+  if (tasksLoading || projectLoading || attachmentLoading)
+    return <ProjectsDetailsSkeleton />
 
   const progress = calculateProgress(Number(projectId), projectTasks)
-  const displayedStatus = getProjectStatus(project, projectTasks)
+  const displayedStatus = project
+    ? getProjectStatus(project, projectTasks)
+    : undefined
 
   return (
-    <section className="flex flex-col gap-15">
+    <section className="animate-fade-in flex flex-col gap-15">
+      <div className="fixed right-6 top-25 z-9999 flex flex-col gap-3">
+        {tasksError && <ErrorCard message={tasksError} />}
+        {attachmentsError && <ErrorCard message={attachmentsError} />}
+        {projectsError && <ErrorCard message={projectsError} />}
+        {projectError && <ErrorCard message={projectError} />}
+      </div>
+
       {isDeleteModalOpen && (
         <DeleteModal
           onCancel={() => setIsDeleteModalOpen(false)}
@@ -103,14 +124,16 @@ function ProjectsDetails() {
           btnText="Delete Project"
           message=" This action cannot be undone. Your Project and all associated tasks, notes, and attachments will be permanently deleted."
           title="Delete Project"
+          loading={deleteProjectLoading}
         />
       )}
       {isTaskModalOpen && (
         <AddTaskModal
           onClose={() => setIsTaskModalOpen(false)}
-          projects={projects!}
+          projects={projects}
           onSubmit={addTask}
           currentProjectId={Number(projectId)}
+          udpateTaskLoading={udpateTaskLoading}
         />
       )}
 
@@ -118,17 +141,21 @@ function ProjectsDetails() {
         <AddAttachmentModal
           onClose={() => setIsAttachmentModalOpen(false)}
           onSubmit={addAttachment}
+          addAttachmentLoading={addAttachmentLoading}
         />
       )}
 
-      <ProjectInfoSection
-        project={project}
-        displayedProjectStatus= {displayedStatus}
-        onUpdate={updateProject}
-        progress={progress}
-        onDeleteTech={handleDeleteTech}
-        onAddTech={handleAddTech}
-      />
+      {project && (
+        <ProjectInfoSection
+          project={project}
+          displayedProjectStatus={displayedStatus}
+          onUpdate={updateProject}
+          progress={progress}
+          onDeleteTech={handleDeleteTech}
+          onAddTech={handleAddTech}
+          updateProjectLoading={updateProjectLoading}
+        />
+      )}
 
       {/* Tasks */}
       <div className="flex flex-col gap-5">
@@ -146,7 +173,7 @@ function ProjectsDetails() {
         </div>
 
         <div className="flex flex-col items-center justify-center gap-5">
-          {projectTasks.slice(0, 3).map((task) => (
+          {project && projectTasks.slice(0, 3).map((task) => (
             <div
               key={task.id}
               className="flex items-center w-full gap-3"
@@ -161,14 +188,29 @@ function ProjectsDetails() {
 
               <button
                 className="flex h-12 w-12 items-center justify-center rounded-2xl border border-primary/15 bg-white text-primary-font shadow-sm transition-all duration-300 hover:bg-redT hover:text-white"
-                onClick={() => removeTask(task.id)}
+                onClick={async () => {
+                  setDeletingTaskId(task.id)
+
+                  try {
+                    await removeTask(task.id)
+                  } finally {
+                    setDeletingTaskId(null)
+                  }
+                }}
               >
-                <Trash2 className="h-5 w-5" />
+                {deletingTaskId === task.id ? (
+                  <Spinner
+                    size="sm"
+                    color="dark"
+                  />
+                ) : (
+                  <Trash2 className="h-5 w-5" />
+                )}
               </button>
             </div>
           ))}
 
-          {(projectTasks.length ?? 0) > 3 && (
+          {project && projectTasks.length > 3 && (
             <Link
               className="flex items-center gap-2 font-body font-medium text-primary transition-colors duration-300 hover:text-primary-font"
               to={`/tasks?projectId=${project.id}`}
@@ -209,10 +251,25 @@ function ProjectsDetails() {
               </div>
 
               <button
-                onClick={() => removeAttachment(attachment.id)}
+                onClick={async () => {
+                  setDeletingAttachmentId(attachment.id)
+
+                  try {
+                    await removeAttachment(attachment.id)
+                  } finally {
+                    setDeletingAttachmentId(null)
+                  }
+                }}
                 className="flex h-12 w-12 items-center justify-center rounded-2xl border border-primary/15 bg-white text-primary-font shadow-sm transition-all duration-300 hover:bg-redT hover:text-white"
               >
-                <Trash2 className="h-5 w-5" />
+                {deletingAttachmentId === attachment.id ? (
+                  <Spinner
+                    size="sm"
+                    color="dark"
+                  />
+                ) : (
+                  <Trash2 className="h-5 w-5" />
+                )}
               </button>
             </div>
           ))}

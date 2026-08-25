@@ -6,9 +6,15 @@ type NoteSectionProps = {
   onAddNote: (note: string) => void
   notes: string[]
   onDeleteNote: (note: string) => void
+  disable?: boolean
 }
 
-function NoteSection({ onAddNote, notes, onDeleteNote }: NoteSectionProps) {
+function NoteSection({
+  onAddNote,
+  notes,
+  onDeleteNote,
+  disable
+}: NoteSectionProps) {
   const [note, setNote] = useState("")
   return (
     <>
@@ -33,6 +39,7 @@ function NoteSection({ onAddNote, notes, onDeleteNote }: NoteSectionProps) {
       </div>
 
       <button
+        disabled={disable}
         onClick={() => {
           onAddNote(note)
           setNote("")

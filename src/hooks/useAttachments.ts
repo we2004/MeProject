@@ -1,31 +1,40 @@
 import { useState, useEffect } from "react"
 import type { AttachmentApiResponse } from "../types/attachments"
-import { getAttachments, createAttachment, deleteAttachment } from "../api/attachments"
+import {
+  getAttachments,
+  createAttachment,
+  deleteAttachment
+} from "../api/attachments"
 
 function useAttachments(token: string, projectId: number) {
   const [attachments, setAttachments] = useState<AttachmentApiResponse[]>([])
-  const [loading, setLoading] = useState(false)
+  const [attachmentLoading, setAttachmentLoading] = useState(false)
+  const [addAttachmentLoading, setAddAttachmentLoading] = useState(false)
+  const [removeAttachmentLoading, setRemoveAttachmentLoading] = useState(false)
   const [error, setError] = useState("")
 
   //GET attachments
   useEffect(() => {
     const handleFetchAttachments = async () => {
       try {
-        setLoading(true)
+        setError("")
+        setAttachmentLoading(true)
         const attachmentsData = await getAttachments(projectId, token)
         setAttachments(attachmentsData)
       } catch (e) {
         setError("Failed to fetch attachments")
+        console.log(e)
       } finally {
-        setLoading(false)
+        setAttachmentLoading(false)
       }
     }
     handleFetchAttachments()
-  },[token, projectId])
+  }, [token, projectId])
 
   const addAttachment = async (files: File[]) => {
     try {
-      setLoading(true)
+      setError("")
+      setAddAttachmentLoading(true)
       for (const file of files) {
         await createAttachment(token, {
           file: file,
@@ -36,28 +45,45 @@ function useAttachments(token: string, projectId: number) {
       const updatedAttachments = await getAttachments(projectId, token)
 
       setAttachments(updatedAttachments)
+      return true
     } catch (e) {
       setError("Failed to add attachment")
+      console.log(e)
+      return false
     } finally {
-      setLoading(false)
+      setAddAttachmentLoading(false)
     }
   }
 
   const removeAttachment = async (fileId: number) => {
     try {
-      setLoading(true)
+      setError("")
+      setRemoveAttachmentLoading(true)
       await deleteAttachment(token, fileId)
 
       const updatedAttachments = await getAttachments(projectId, token)
       setAttachments(updatedAttachments)
+      return true
+
     } catch (e) {
+      console.log(e)
       setError("Failed to delete attachment")
+
+      return false
     } finally {
-      setLoading(false)
+      setRemoveAttachmentLoading(false)
     }
   }
 
-  return { attachments, loading, error, addAttachment, removeAttachment }
+  return {
+    attachments,
+    attachmentLoading,
+    addAttachmentLoading,
+    removeAttachmentLoading,
+    error,
+    addAttachment,
+    removeAttachment
+  }
 }
 
 export default useAttachments

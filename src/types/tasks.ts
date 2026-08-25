@@ -39,7 +39,7 @@ export type TaskCardProps = {
   onUpdate: (
     field: EditInfoFields,
     data: string | boolean | string[] | TaskStatus
-  ) => Promise<void>
+  ) => Promise<boolean>
 }
 
 export type TaskStatus = "open" | "completed"

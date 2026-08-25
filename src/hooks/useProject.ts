@@ -10,7 +10,9 @@ function useProject(token: string, projectId?: number) {
   const [project, setProject] = useState<ProjectApiResponse | undefined>(
     undefined
   )
-  const [loading, setLoading] = useState(false)
+  const [projectLoading, setProjectLoading] = useState(false)
+  const [updateProjectLoading, setUpdateProjectLoading] = useState(false)
+  const [deleteProjectLoading, setDeleteProjectLoading] = useState(false)
   const [error, setError] = useState("")
 
   //GET project
@@ -19,7 +21,8 @@ function useProject(token: string, projectId?: number) {
 
     const handleFetchProject = async () => {
       try {
-        setLoading(true)
+        setError("")
+        setProjectLoading(true)
 
         const projectData = await getProjectById(projectId, token)
 
@@ -28,7 +31,7 @@ function useProject(token: string, projectId?: number) {
         setError("Failed to fetch project")
         console.log(e)
       } finally {
-        setLoading(false)
+        setProjectLoading(false)
       }
     }
 
@@ -41,7 +44,8 @@ function useProject(token: string, projectId?: number) {
   ) => {
     if (!projectId) return
     try {
-      setLoading(true)
+      setError("")
+      setUpdateProjectLoading(true)
       await updateProjectData(projectId, field, data, token)
 
       setProject((currentProject) => {
@@ -52,18 +56,23 @@ function useProject(token: string, projectId?: number) {
           [field]: data
         }
       })
+
+      return true
     } catch (e) {
       setError("Failed to update project")
       console.log(e)
+      return false
     } finally {
-      setLoading(false)
+      setUpdateProjectLoading(false)
+      
     }
   }
 
   const deleteCurrentProject = async () => {
     if (!projectId) return
     try {
-      setLoading(true)
+      setError("")
+      setDeleteProjectLoading(true)
       await deleteProject(projectId, token)
       return true
     } catch (e) {
@@ -71,11 +80,19 @@ function useProject(token: string, projectId?: number) {
       console.log(e)
       return false
     } finally {
-      setLoading(false)
+      setDeleteProjectLoading(false)
     }
   }
 
-  return { project, loading, error, updateProject, deleteCurrentProject }
+  return {
+    project,
+    projectLoading,
+    updateProjectLoading,
+    deleteProjectLoading,
+    error,
+    updateProject,
+    deleteCurrentProject
+  }
 }
 
 export default useProject

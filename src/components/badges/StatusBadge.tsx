@@ -16,7 +16,7 @@ type StatusBadgeProps = {
   onStatusChange?: (
     field: EditInfoFields,
     data: string | boolean | string[] | TaskStatus
-  ) => Promise<void>
+  ) => Promise<boolean>
 }
 
 function StatusBadge({
@@ -26,20 +26,17 @@ function StatusBadge({
 }: StatusBadgeProps) {
   const [isOpen, setIsOpen] = useState(false)
 
-
-  const statusStyle =  {
-    active: 'bg-blueT/25',
-    open: 'bg-blueT/25',
-    completed: 'bg-greenT/25',
-    overdue: 'bg-redT/45',
-    cancelled: 'bg-secondary/15'
+  const statusStyle = {
+    active: "bg-blueT/25",
+    open: "bg-blueT/25",
+    completed: "bg-greenT/25",
+    overdue: "bg-redT/45",
+    cancelled: "bg-secondary/15"
   }
-
 
   const nextStatus = status === "completed" ? "open" : "completed"
 
   const handleBadgeClick = () => {
-
     if (interactive) {
       setIsOpen(!isOpen)
     }
@@ -80,9 +77,10 @@ function StatusBadge({
         <div className="absolute left-0 top-full z-20 mt-2 w-36 rounded-2xl border border-primary/15 bg-white p-2 shadow-lg">
           <button
             type="button"
-            onClick={() => {
-              onStatusChange?.("status", nextStatus)
-              setIsOpen(false)
+            onClick={async () => {
+              const success = await onStatusChange?.("status", nextStatus)
+              if(success)
+                setIsOpen(false)
             }}
             className="w-full rounded-xl px-3 py-2 text-left font-body text-sm capitalize text-primary-font transition-colors duration-200 hover:bg-primary hover:text-white"
           >

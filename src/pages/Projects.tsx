@@ -12,15 +12,29 @@ import AddProjectModal from "../components/modals/AddProjectModal"
 import { useAuth } from "../context/useAuth"
 import useProjects from "../hooks/useProjects"
 import useTasks from "../hooks/useTasks"
+import ProjectsSkeleton from "../components/loading/skeletons/ProjectsSkeleton"
+import ErrorCard from "../components/cards/ErrorCard"
+
 function Projects() {
   const { token } = useAuth()
+  
   const [searchParams, setSearchParams] = useSearchParams()
   const order: SortOrder = searchParams.get("order") === "desc" ? "desc" : "asc"
   const filter: ProjectStatusFilter = getProjectFilter(
     searchParams.get("filter")
   )
-  const { projects, addProject } = useProjects(token, filter, order)
-  const { tasks } = useTasks(token, "all", "all", "asc")
+  const {
+    projects,
+    projectsLoading,
+    addProjectLoading,
+    addProject,
+    error: projectsError
+  } = useProjects(token, filter, order)
+  const {
+    tasks,
+    tasksLoading,
+    error: tasksError
+  } = useTasks(token, "all", "all", "asc")
 
   const [openMenu, setOpenMenu] = useState<MenuType | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -47,13 +61,18 @@ function Projects() {
       filter
     })
   }
-
+  if (projectsLoading || tasksLoading) return <ProjectsSkeleton />
   return (
-    <section className="flex flex-col gap-8">
+    <section className="animate-fade-in flex flex-col gap-8">
+      <div className="fixed right-6 top-25 z-9999 flex flex-col gap-3">
+        {projectsError && <ErrorCard message={projectsError} />}
+        {tasksError && <ErrorCard message={tasksError} />}
+      </div>
       {isModalOpen && (
         <AddProjectModal
           onClose={() => setIsModalOpen(false)}
           onSubmit={addProject}
+          addProjectLoading={addProjectLoading}
         />
       )}
       <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">

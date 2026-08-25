@@ -1,28 +1,22 @@
 import { Compass, LogIn, UserPlus } from "lucide-react"
 import { Link, useNavigate } from "react-router-dom"
 import logo from "../assets/logo2.png"
-import { useContext } from "react"
-import { AuthContext } from "../context/AuthContext"
-import { explore } from "../api/auth"
+import { useAuth } from "../context/useAuth"
+
 function Welcome() {
-
   const navigate = useNavigate()
-  const auth = useContext(AuthContext)
-
-  if(!auth) 
-    throw Error("AuthContext is missing")
-
-  const {setToken} = auth
+  const { exploreApp } = useAuth()
 
   const handleExploreMode = async () => {
-    const response = await explore()
-    setToken(response.token)
-    navigate("/home")
+    const success = await exploreApp()
+
+    if (success) {
+      navigate("/home")
+    }
   }
 
-
   return (
-    <div className="flex w-full items-center justify-center px-6 py-12 lg:w-1/2">
+    <div className="animate-fade-in flex w-full items-center justify-center px-6 py-12 lg:w-1/2">
       <div className="flex  items-center w-full max-w-md flex-col">
         {/* Heading */}
 
@@ -42,7 +36,10 @@ function Welcome() {
 
         {/* Main Actions */}
         <div className="mt-10 flex flex-col gap-4 w-80">
-          <Link to={"/register"} className="flex w-full items-center gap-2 rounded-2xl border border-primary/15 bg-primary px-4 py-3 font-body text-white shadow-sm transition-all text-center duration-300 hover:-translate-y-0.5 hover:shadow-md hover:bg-secondary ">
+          <Link
+            to={"/register"}
+            className="flex w-full items-center gap-2 rounded-2xl border border-primary/15 bg-primary px-4 py-3 font-body text-white shadow-sm transition-all text-center duration-300 hover:-translate-y-0.5 hover:shadow-md hover:bg-secondary "
+          >
             <span className="flex items-center gap-3">
               <UserPlus className="h-5 w-5" />
               Create Account
@@ -64,7 +61,10 @@ function Welcome() {
         <div className="mt-10 flex items-center justify-center gap-1.5 font-body text-sm text-primary-font/60">
           <span>Already have an account?</span>
 
-          <Link to={'/login'} className="flex items-center gap-1 font-medium text-primary transition-colors duration-300 hover:text-primary-font">
+          <Link
+            to={"/login"}
+            className="flex items-center gap-1 font-medium text-primary transition-colors duration-300 hover:text-primary-font"
+          >
             Log In
             <LogIn className="h-4 w-4" />
           </Link>

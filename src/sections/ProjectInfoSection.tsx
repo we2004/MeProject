@@ -13,24 +13,28 @@ type ProjectInfoSectionProps = {
   onUpdate: (
     field: EditInfoFields,
     data: string | boolean | string[] | TaskStatus
-  ) => Promise<void>
+  ) => Promise<boolean | undefined>
   progress: number
   onDeleteTech: (tech: string) => Promise<void>
   onAddTech: (tech: string) => Promise<void>
+  updateProjectLoading: boolean
 }
-
+ 
 function ProjectInfoSection({
   project,
   displayedProjectStatus,
   onUpdate,
   progress,
   onDeleteTech,
-  onAddTech
+  onAddTech,
+  updateProjectLoading
 }: ProjectInfoSectionProps) {
   const [isEditTechStack, setIsEditTechStack] = useState(false)
 
-  const status = displayedProjectStatus? displayedProjectStatus : project.derivedStatus
-  
+  const status = displayedProjectStatus
+    ? displayedProjectStatus
+    : project.derivedStatus
+
   return (
     <div className="rounded-3xl border border-primary/15 bg-white p-6 shadow-sm">
       <div className="flex flex-col gap-6">
@@ -39,9 +43,10 @@ function ProjectInfoSection({
             data={project.name}
             field="name"
             onUpdate={onUpdate}
+            loading={updateProjectLoading}
           />
 
-          <StatusBadge status={status}/>
+          <StatusBadge status={status} />
         </div>
 
         <div className="flex items-center gap-10">
@@ -49,6 +54,7 @@ function ProjectInfoSection({
             data={project.description}
             field="description"
             onUpdate={onUpdate}
+            loading={updateProjectLoading}
           />
         </div>
 
@@ -57,6 +63,7 @@ function ProjectInfoSection({
             data={project.dueDate}
             field="dueDate"
             onUpdate={onUpdate}
+            loading={updateProjectLoading}
           />
         </div>
 

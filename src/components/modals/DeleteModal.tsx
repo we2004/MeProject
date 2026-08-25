@@ -1,15 +1,25 @@
 import { AlertTriangle, Trash2 } from "lucide-react"
 import SecondaryButton from "../buttons/SecondaryButton"
+import Spinner from "../loading/spinners/Spinner"
 
 type DeleteModalProps = {
   onCancel: () => void
   onDelete: () => Promise<void>
   title: string
   message: string
-  btnText:string
+  btnText: string
+  loading: boolean
 }
 
-function DeleteModal({ onCancel, onDelete,title, message, btnText }: DeleteModalProps) {
+function DeleteModal({
+  onCancel,
+  onDelete,
+  title,
+  message,
+  btnText,
+  loading
+}: DeleteModalProps) {
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-primary-font/30 px-4 backdrop-blur-sm">
       <div className="w-full max-w-md rounded-3xl border border-red-900/10 bg-white p-6 shadow-xl">
@@ -21,7 +31,7 @@ function DeleteModal({ onCancel, onDelete,title, message, btnText }: DeleteModal
             </div>
 
             <h2 className="font-heading text-xl font-bold text-primary-font">
-            {title}
+              {title}
             </h2>
           </div>
         </div>
@@ -29,20 +39,33 @@ function DeleteModal({ onCancel, onDelete,title, message, btnText }: DeleteModal
         {/* Message */}
 
         <p className="mt-8 font-body text-sm leading-6 text-primary-font/60">
-         {message}
+          {message}
         </p>
 
         {/* Actions */}
         <div className="mt-7 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-          <SecondaryButton onClickFun={onCancel}>Cancel</SecondaryButton>
+          <SecondaryButton
+            onClickFun={onCancel}
+            disabled={loading}
+          >
+            Cancel
+          </SecondaryButton>
 
           <SecondaryButton
             Icon={Trash2}
             bgColor="bg-redT text-white"
             bgHoverColor="bg-redT"
             onClickFun={onDelete}
+            disabled={loading}
           >
-            {btnText}
+            {loading ? (
+              <Spinner
+                size="sm"
+                color="light"
+              />
+            ) : (
+              btnText
+            )}
           </SecondaryButton>
         </div>
       </div>

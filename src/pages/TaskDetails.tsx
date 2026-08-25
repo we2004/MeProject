@@ -1,64 +1,98 @@
-import {
-  Trash2,
-  CirclePlus,
-} from "lucide-react"
+import { Trash2, CirclePlus } from "lucide-react"
 
 import { useNavigate, useParams } from "react-router-dom"
 import NoteCard from "../components/cards/NoteCard"
 import PrimaryButton from "../components/buttons/PrimaryButton"
 import AddNoteModal from "../components/modals/AddNoteModal"
 import { useState } from "react"
-import { deleteTask } from "../api/tasks"
 import { useAuth } from "../context/useAuth"
 import useTask from "../hooks/useTask"
 import useNotes from "../hooks/useNotes"
 import useProject from "../hooks/useProject"
 import TaskInfoSection from "../sections/TaskInfoSection"
+import TaskDetailsSkeleton from "../components/loading/skeletons/TaskDetails"
+import DeleteModal from "../components/modals/DeleteModal"
+import ErrorCard from "../components/cards/ErrorCard"
 
 function TaskDetails() {
   const { token } = useAuth()
+
   const { taskId } = useParams()
   const [isNoteModalOpen, setIsNoteModalOpen] = useState(false)
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const {
     task,
-
-    updateTask
+    taskLoading,
+    removeTaskLoading,
+    updateTaskLoading,
+    removeTask,
+    updateTask,
+    error: taskError
   } = useTask(token, Number(taskId))
 
   const {
     notes,
+    notesLoading,
+    addNoteLoading,
     addNote,
-    removeNote
+    removeNote,
+    error: notesError
   } = useNotes(token, Number(taskId))
 
-  const { project } = useProject(token, task?.projectId)
+  const {
+    project,
+    projectLoading,
+    error: projectError
+  } = useProject(token, task?.projectId)
 
- 
   const navigate = useNavigate()
 
-  if (!task || !project) {
-    return <p>Task not found</p>
-  }
-
   const handleDeleteTask = async () => {
-    await deleteTask(Number(taskId), token)
-    navigate("/tasks")
+    const success = await removeTask()
+    if (success) navigate("/tasks")
   }
 
-  if (!notes) return <p>something is wrong</p>
+  if (taskLoading || notesLoading || projectLoading)
+    return <TaskDetailsSkeleton />
+
 
   return (
-    <section className="flex flex-col gap-8">
+    <section className="animate-fade-in flex flex-col gap-8">
       {/* Task Information */}
+
+      <div className="fixed right-6 top-25 z-9999 flex flex-col gap-3">
+        {taskError && <ErrorCard message={taskError} />}
+        {projectError && <ErrorCard message={projectError} />}
+        {notesError && <ErrorCard message={notesError} />}
+      </div>
 
       {isNoteModalOpen && (
         <AddNoteModal
           onClose={() => setIsNoteModalOpen(false)}
           onSubmit={addNote}
+          addNoteLoading={addNoteLoading}
         />
       )}
 
-      <TaskInfoSection onUpdate={updateTask} task={task} projectName={project.name} />
+      {isDeleteModalOpen && (
+        <DeleteModal
+          onCancel={() => setIsDeleteModalOpen(false)}
+          onDelete={handleDeleteTask}
+          btnText="Delete Task"
+          message=" This action cannot be undone. Your Task and all associated notes, and attachments will be permanently deleted."
+          title="Delete Task"
+          loading={removeTaskLoading}
+        />
+      )}
+
+      {task && project && (
+        <TaskInfoSection
+          onUpdate={updateTask}
+          task={task}
+          projectName={project.name}
+          updateTaskLoading={updateTaskLoading}
+        />
+      )}
 
       {/* Notes */}
       <div className="flex flex-col gap-5">
@@ -98,7 +132,7 @@ function TaskDetails() {
 
       <button
         className="bg-redT rounded-[15px] text-md font-body py-3 text-white transition-all duration-300 cursor-pointer hover:shadow-md hover:-translate-y-0.5"
-        onClick={handleDeleteTask}
+        onClick={() => setIsDeleteModalOpen(true)}
       >
         Delete Task{" "}
       </button>

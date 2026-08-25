@@ -10,14 +10,16 @@ type TaskInfoSectionProps = {
   onUpdate: (
     field: EditInfoFields,
     data: string | boolean | string[] | TaskStatus
-  ) => Promise<void>
+  ) => Promise<boolean>
   projectName: string
+  updateTaskLoading: boolean
 }
 
 function TaskInfoSection({
   task,
   onUpdate,
-  projectName
+  projectName,
+  updateTaskLoading
 }: TaskInfoSectionProps) {
   const displayStatus =
     task.status === "open" && dayjs(task.dueDate).isBefore(dayjs(), "day")
@@ -32,6 +34,7 @@ function TaskInfoSection({
             data={task.name}
             field="name"
             onUpdate={onUpdate}
+            loading={updateTaskLoading}
           />
 
           <StatusBadge
@@ -48,6 +51,7 @@ function TaskInfoSection({
             data={task.description}
             field="description"
             onUpdate={onUpdate}
+            loading={updateTaskLoading}
           />
         </div>
 
@@ -57,6 +61,7 @@ function TaskInfoSection({
             data={task.dueDate}
             field="dueDate"
             onUpdate={onUpdate}
+            loading={updateTaskLoading}
           />
         </div>
 

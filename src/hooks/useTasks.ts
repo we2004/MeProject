@@ -24,14 +24,18 @@ function useTasks(
   projectId?: number
 ) {
   const [tasks, setTasks] = useState<Task[]>([])
-  const [loading, setLoading] = useState(false)
+  const [tasksLoading, setTasksLoading] = useState(false)
+  const [addTaskLoading, setAddTaskLoading] = useState(false)
+  const [udpateTaskLoading, setUpdateTaskLoading] = useState(false)
+  const [removeTaskLoading, setRemoveTaskLoading] = useState(false)
   const [error, setError] = useState("")
 
   //GET
   useEffect(() => {
     const handleFetchTasks = async () => {
       try {
-        setLoading(true)
+        setError("")
+        setTasksLoading(true)
         if (projectId) {
           const response = await getTasksByProject(
             projectId,
@@ -49,32 +53,45 @@ function useTasks(
         setError("Failed to fetch tasks")
         console.log(e)
       } finally {
-        setLoading(false)
+        setTasksLoading(false)
       }
     }
     handleFetchTasks()
   }, [token, filter, priority, order, projectId])
 
   const addTask = async (newTask: CreateTask, notes: string[]) => {
-    const response = await createTask(token, newTask)
-    for (const content of notes) {
-      await createNote(token, { content: content, taskId: response.id })
-    }
+    try {
+      setError("")
+      setAddTaskLoading(true)
+      const response = await createTask(token, newTask)
+      for (const content of notes) {
+        await createNote(token, { content: content, taskId: response.id })
+      }
 
-    if (projectId) {
-      const response = await getTasksByProject(
-        Number(projectId),
-        token,
-        filter,
-        priority,
-        order
-      )
+      if (projectId) {
+        const response = await getTasksByProject(
+          Number(projectId),
+          token,
+          filter,
+          priority,
+          order
+        )
 
-      setTasks(response.data)
-    } else {
-      const response = await getTasks(token, filter, priority, order)
+        setTasks(response.data)
+      } else {
+        const response = await getTasks(token, filter, priority, order)
 
-      setTasks(response.data)
+        setTasks(response.data)
+      }
+
+      return true
+    } catch (e) {
+      setError("Failed to add task")
+      console.log(e)
+
+      return false
+    } finally {
+      setAddTaskLoading(false)
     }
   }
 
@@ -84,7 +101,8 @@ function useTasks(
     data: string | boolean | string[] | TaskStatus
   ) => {
     try {
-      setLoading(true)
+      setError("")
+      setUpdateTaskLoading(true)
 
       await updateTaskData(taskId, field, data, token)
 
@@ -93,17 +111,20 @@ function useTasks(
           task.id === taskId ? { ...task, [field]: data } : task
         )
       )
+      return true
     } catch (e) {
       setError("Failed to update task")
       console.log(e)
+      return false
     } finally {
-      setLoading(false)
+      setUpdateTaskLoading(false)
     }
   }
 
   const removeTask = async (taskId: number) => {
     try {
-      setLoading(true)
+      setError("")
+      setRemoveTaskLoading(true)
       await deleteTask(taskId, token)
 
       const updatedTasks = await getTasksByProject(
@@ -114,15 +135,28 @@ function useTasks(
         "asc"
       )
       setTasks(updatedTasks.data)
+      return true
     } catch (e) {
       setError("Failed to delete task")
       console.log(e)
+
+      return false
     } finally {
-      setLoading(false)
+      setRemoveTaskLoading(false)
     }
   }
 
-  return { tasks, loading, error, addTask, updateTask, removeTask }
+  return {
+    tasks,
+    tasksLoading,
+    addTaskLoading,
+    udpateTaskLoading,
+    removeTaskLoading,
+    error,
+    addTask,
+    updateTask,
+    removeTask
+  }
 }
 
 export default useTasks
