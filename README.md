@@ -4,10 +4,6 @@
 
 MeProject is personal project management application, it provides a simple workspace for creating and managing projects, tracking tasks, adding notes, and monitoring project progress.
 
-## Live Demo
-
-[View the live project](YOUR_LIVE_DEMO_URL)
-
 ## Features
 
 * Create, update, and delete projects
@@ -53,12 +49,6 @@ The backend REST API used by this project was fully AI-generated.
 My work on this project focused on the frontend application, including the UI, state management, API integration, authentication flow, reusable components, and overall frontend architecture.
 
 For full API details, endpoints, and request/response structures, see [backend/API_DOCUMENTATION.md](./backend/API_DOCUMENTATION.md).
-
-## Deployment
-
-The application is deployed using **Google Cloud Run**.
-
-The project is connected to its GitHub repository for continuous deployment, allowing new changes to be built and deployed when pushed to the configured branch.
 
 ## What I Learned
 
