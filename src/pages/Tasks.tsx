@@ -25,14 +25,17 @@ function Tasks() {
   const priority: TaskPriorityFilter = getTaskPriority(
     searchParams.get("priority")
   )
+  const page = Number(searchParams.get("page")) || 1
+
   const {
     tasks,
     tasksLoading,
     udpateTaskLoading,
     addTask,
     updateTask,
-    error: tasksError
-  } = useTasks(token, filter, priority, order, Number(projectId))
+    error: tasksError,
+    pagination
+  } = useTasks(token, filter, priority, order, Number(projectId), page)
   const {
     projects,
     projectsLoading,
@@ -64,54 +67,36 @@ function Tasks() {
   }, [searchParams, setSearchParams])
 
   const handleFilterSelect = (newFilter: TaskStatusFilter) => {
-    if (projectId) {
-      setSearchParams({
-        filter: newFilter,
-        order,
-        priority,
-        projectId
-      })
-    } else {
-      setSearchParams({
-        filter: newFilter,
-        order,
-        priority
-      })
-    }
+    setSearchParams((current) => {
+      const params = new URLSearchParams(current)
+
+      params.set("filter", newFilter)
+      params.set("page", "1")
+
+      return params
+    })
   }
 
   const handlePrioritySelect = (newPriority: TaskPriorityFilter) => {
-    if (projectId) {
-      setSearchParams({
-        filter,
-        order,
-        priority: newPriority,
-        projectId
-      })
-    } else {
-      setSearchParams({
-        filter,
-        order,
-        priority: newPriority
-      })
-    }
+    setSearchParams((current) => {
+      const params = new URLSearchParams(current)
+
+      params.set("priority", newPriority)
+      params.set("page", "1")
+
+      return params
+    })
   }
 
   const handleToggleOrder = () => {
-    if (projectId) {
-      setSearchParams({
-        order: nextOrder,
-        filter,
-        priority,
-        projectId
-      })
-    } else {
-      setSearchParams({
-        order: nextOrder,
-        filter,
-        priority
-      })
-    }
+    setSearchParams((current) => {
+      const params = new URLSearchParams(current)
+
+      params.set("order", nextOrder)
+      params.set("page", "1")
+
+      return params
+    })
   }
 
   if (tasksLoading || projectsLoading) return <TasksSkeleton />
@@ -188,18 +173,57 @@ function Tasks() {
       {tasks.length === 0 ? (
         <PlaceHolderCard message="No Tasks Yet" />
       ) : (
-        <div className="flex flex-col gap-4">
-          {tasks?.map((task) => (
-            <TaskCard
-              key={task.id}
-              {...task}
-              projectName={
-                projects?.find((project) => project.id == task.projectId)?.name
-              }
-              onUpdate={(field, data) => updateTask(task.id, field, data)}
-            />
-          ))}
-        </div>
+        <>
+          <div className="flex flex-col gap-4">
+            {tasks?.map((task) => (
+              <TaskCard
+                key={task.id}
+                {...task}
+                projectName={
+                  projects?.find((project) => project.id == task.projectId)
+                    ?.name
+                }
+                onUpdate={(field, data) => updateTask(task.id, field, data)}
+              />
+            ))}
+          </div>
+
+          {pagination.totalPages > 1 && (
+            <div className="flex items-center justify-center gap-5 font-heading text-primary-font ">
+              <button
+                disabled={pagination.currentPage === 1}
+                onClick={() =>
+                  setSearchParams((current) => {
+                    const params = new URLSearchParams(current)
+                    params.set("page", String(pagination.currentPage - 1))
+                    return params
+                  })
+                }
+                className="hover:text-primary cursor-pointer transition-all duration-300"
+              >
+                Previous
+              </button>
+
+              <span>
+                {pagination.currentPage} of {pagination.totalPages}
+              </span>
+
+              <button
+                disabled={pagination.currentPage === pagination.totalPages}
+                onClick={() =>
+                  setSearchParams((current) => {
+                    const params = new URLSearchParams(current)
+                    params.set("page", String(pagination.currentPage + 1))
+                    return params
+                  })
+                }
+                className="hover:text-primary cursor-pointer transition-all duration-300"
+              >
+                Next
+              </button>
+            </div>
+          )}
+        </>
       )}
     </section>
   )
