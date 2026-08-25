@@ -16,6 +16,7 @@ import useProjects from "../hooks/useProjects"
 import useTasks from "../hooks/useTasks"
 import HomeSkeleton from "../components/loading/skeletons/HomeSkeleton"
 import ErrorCard from "../components/cards/ErrorCard"
+import PlaceHolderCard from "../components/cards/PlaceHolderCard"
 
 function Home() {
   const { token } = useAuth()
@@ -78,16 +79,24 @@ function Home() {
           </Link>
         </div>
 
-        <div className="grid gap-6  md:grid-cols-4">
-          {ongoingProjects.map((project) => (
-            <ProjectCard
-              key={project.id}
-              {...project}
-              showDaysLeft={false}
-              progress={calculateProgress(project.id, tasks)}
-            />
-          ))}
-        </div>
+        {projects.length === 0 ? (
+          <PlaceHolderCard
+            message="No Projects Yet, Create Your First Project"
+            btnTitle="Create Project"
+            navigateTo="/projects?create=true"
+          />
+        ) : (
+          <div className="grid gap-6  md:grid-cols-4">
+            {ongoingProjects.map((project) => (
+              <ProjectCard
+                key={project.id}
+                {...project}
+                showDaysLeft={false}
+                progress={calculateProgress(project.id, tasks)}
+              />
+            ))}
+          </div>
+        )}
       </section>
 
       {/* Upcoming Tasks */}
@@ -106,18 +115,26 @@ function Home() {
           </Link>
         </div>
 
-        <div className="flex flex-col gap-4">
-          {ongoingTasks.map((task) => (
-            <TaskCard
-              key={task.id}
-              {...task}
-              projectName={
-                projects.find((project) => project.id == task.projectId)?.name
-              }
-              onUpdate={(field, data) => updateTask(task.id, field, data)}
-            />
-          ))}
-        </div>
+        {tasks.length === 0 ? (
+          <PlaceHolderCard
+            message="No Tasks Yet, Create Your First Task"
+            btnTitle="Create Task"
+            navigateTo="/tasks?create=true"
+          />
+        ) : (
+          <div className="flex flex-col gap-4">
+            {ongoingTasks.map((task) => (
+              <TaskCard
+                key={task.id}
+                {...task}
+                projectName={
+                  projects.find((project) => project.id == task.projectId)?.name
+                }
+                onUpdate={(field, data) => updateTask(task.id, field, data)}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </section>
   )
