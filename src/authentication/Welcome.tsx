@@ -29,11 +29,11 @@ function Welcome() {
           className="w-30 mb-4"
         />
         <div>
-          <h1 className="font-heading text-4xl font-bold tracking-tight text-primary-font sm:text-4xl">
+          <h1 className="font-heading text-4xl font-bold tracking-tight text-primary-font sm:text-4xl sm:text-left text-center">
             Welcome to MeProject
           </h1>
 
-          <p className="mt-4 font-body text-md text-primary-font/65">
+          <p className="mt-4 font-body text-md text-primary-font/65 sm:text-left text-center">
             For Effectivity, Productivity and All the Other -ivities!!
           </p>
         </div>

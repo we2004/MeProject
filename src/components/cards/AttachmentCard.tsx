@@ -15,7 +15,7 @@ function AttachmentCard({ id, name, type, onDownload }: AttachmentCardProps) {
           )}
         </div>
 
-        <span className="font-body text-primary-font">{name}</span>
+        <span className="font-body text-primary-font md:text-base text-sm">{name}</span>
       </div>
 
       <div className="flex items-center gap-2">

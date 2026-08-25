@@ -16,7 +16,7 @@ function TechStackSection({
 
   return (
     <>
-      <div className="flex gap-2">
+      <div className="flex md:flex-row flex-col gap-2">
         <input
           id="tech-stack"
           type="text"

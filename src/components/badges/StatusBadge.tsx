@@ -58,7 +58,7 @@ function StatusBadge({
         type="button"
         disabled={!interactive}
         onClick={handleBadgeClick}
-        className={`${statusStyle[status]} flex items-center gap-2 rounded-full px-4 py-2 font-body text-sm font-medium capitalize text-primary-font transition-all duration-200 ${
+        className={`${statusStyle[status]} flex items-center gap-2 rounded-full md:px-4 md:py-2 px-3 py-1 font-body text-sm font-medium capitalize text-primary-font transition-all duration-200 ${
           interactive ? "cursor-pointer hover:opacity-80" : "cursor-default"
         }`}
       >

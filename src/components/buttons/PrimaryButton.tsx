@@ -16,7 +16,7 @@ function PrimaryButton({
     <button
       disabled={disabled}
       onClick={onClickFun}
-      className="flex w-fit items-center gap-2 rounded-2xl border border-primary/15 bg-primary px-4 py-3 font-body text-white shadow-sm transition-all text-center duration-300 hover:-translate-y-0.5 hover:shadow-md hover:bg-secondary "
+      className="flex w-fit items-center gap-2 rounded-2xl border border-primary/15 bg-primary md:px-4 md:py-3 px-3 py-2 font-body text-white lg:text-md shadow-sm transition-all text-center duration-300 hover:-translate-y-0.5 hover:shadow-md hover:bg-secondary "
     >
       {Icon ? <Icon className="h-5 w-5" /> : ""}
       {children}

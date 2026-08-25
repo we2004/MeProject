@@ -115,9 +115,9 @@ function Tasks() {
           udpateTaskLoading={udpateTaskLoading}
         />
       )}
-      <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between items-center justify-center">
         <div>
-          <h1 className="font-heading text-3xl font-bold text-primary-font text-center sm:text-start">
+          <h1 className="font-heading text-3xl font-bold text-primary-font text-center md:text-start">
             My Tasks
           </h1>
 
@@ -174,7 +174,7 @@ function Tasks() {
         <PlaceHolderCard message="No Tasks" />
       ) : (
         <>
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-4 ">
             {tasks?.map((task) => (
               <TaskCard
                 key={task.id}

@@ -29,7 +29,7 @@ function TaskInfoSection({
     <div className="rounded-3xl border border-primary/15 bg-white p-6 shadow-sm">
       <div className="flex flex-col gap-3">
         {/* Task Name */}
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex md:flex-row flex-col flex-wrap items-center gap-2">
           <EditableField
             data={task.name}
             field="name"

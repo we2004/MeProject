@@ -43,7 +43,7 @@ function DeleteModal({
         </p>
 
         {/* Actions */}
-        <div className="mt-7 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+        <div className="mt-7 flex gap-3 md:flex-row md:justify-end">
           <SecondaryButton
             onClickFun={onCancel}
             disabled={loading}

@@ -34,7 +34,8 @@ function Sidebar() {
   return (
     <aside
       className="flex h-screen flex-col items-center border-r border-primary/15 bg-primary/20 p-4 shadow-md backdrop-blur-sm transition-all duration-300 fixed
-        w-24
+        lg:w-24
+        w-20
       "
     >
       

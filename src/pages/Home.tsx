@@ -66,12 +66,12 @@ function Home() {
       {/* Recent Projects */}
       <section className="flex flex-col gap-6">
         <div className="flex items-center justify-between">
-          <h2 className="font-heading text-2xl font-bold text-primary-font">
+          <h2 className="font-heading md:text-2xl font-bold text-primary-font text-xl">
             Upcoming Projects
           </h2>
 
           <Link
-            className="flex items-center gap-2 font-body font-medium text-primary transition-colors duration-300 hover:text-primary-font"
+            className="flex items-center md:gap-2 font-body font-medium text-primary transition-colors duration-300 hover:text-primary-font text-sm md:text-lg"
             to="/projects"
           >
             See All Projects
@@ -102,12 +102,12 @@ function Home() {
       {/* Upcoming Tasks */}
       <div className="flex flex-col gap-6">
         <div className="flex items-center justify-between">
-          <h2 className="font-heading text-2xl font-bold text-primary-font">
+          <h2 className="font-heading md:text-2xl font-bold text-primary-font text-xl">
             Upcoming Tasks
           </h2>
 
           <Link
-            className="flex items-center gap-2 font-body font-medium text-primary transition-colors duration-300 hover:text-primary-font"
+            className="flex items-center md:gap-2 font-body font-medium text-primary transition-colors duration-300 hover:text-primary-font text-sm md:text-lg"
             to="/tasks"
           >
             See All Tasks

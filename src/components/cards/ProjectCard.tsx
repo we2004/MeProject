@@ -22,7 +22,7 @@ function ProjectCard({
       className="group flex flex-col rounded-3xl border border-primary/15 bg-white p-6 text-left shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-primary/50 hover:shadow-lg "
       to={`/projectDetails/${id}`}
     >
-      <h2 className="font-heading text-xl font-semibold text-primary-font">
+      <h2 className="font-heading md:text-xl text font-semibold text-primary-font">
         {name}
       </h2>
 
@@ -49,7 +49,7 @@ function ProjectCard({
         </div>
       </div>
 
-      <div className="mt-6 flex flex-wrap items-center justify-between border-t border-primary/10 pt-4">
+      <div className="mt-6 flex flex-wrap items-center justify-between border-t border-primary/10 pt-4 gap-2">
         {showDaysLeft && (
           <div className="flex items-center gap-2 text-primary-font/70">
             <Clock3 className="h-4 w-4" />

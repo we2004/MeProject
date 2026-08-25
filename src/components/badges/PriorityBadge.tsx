@@ -5,7 +5,6 @@ type PriorityBadgeProps = {
   priority: TaskPriority
 }
 function PriorityBadge({ priority }: PriorityBadgeProps) {
-  
   const priorityStyles = {
     high: "bg-redT/25",
     medium: "bg-orangeT/25",
@@ -14,7 +13,7 @@ function PriorityBadge({ priority }: PriorityBadgeProps) {
 
   return (
     <div
-      className={`flex items-center gap-2 rounded-full ${priorityStyles[priority]} px-4 py-2 font-body text-sm font-medium text-primary-font`}
+      className={`flex items-center gap-2 rounded-full ${priorityStyles[priority]}  md:px-4 md:py-2 px-3 py-1 font-body text-sm font-medium text-primary-font`}
     >
       <Flag className="h-4 w-4" />
       {priority}

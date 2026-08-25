@@ -20,17 +20,17 @@ function TaskCard({
       : status
 
   return (
-    <div
-      className="group flex w-full flex-col gap-6 rounded-3xl border border-primary/15 bg-white px-5 py-3 text-left shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-lg md:flex-row md:items-center md:justify-between"
-     
-    >
-      <Link  to={`/taskDetails/${id}`} className="flex-1 flex items-center gap-4">
-        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+    <div className="group flex w-full flex-col gap-6 rounded-3xl border border-primary/15 bg-white px-5 py-3 text-left shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-lg md:flex-row md:items-center md:justify-between">
+      <Link
+        to={`/taskDetails/${id}`}
+        className="flex-1 flex items-center gap-4"
+      >
+        <div className="flex md:h-14 md:w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
           <ClipboardList className="h-7 w-7" />
         </div>
 
         <div>
-          <h2 className="font-heading text-lg font-semibold text-primary-font">
+          <h2 className="font-heading md:text-lg font-semibold text-primary-font">
             {name}
           </h2>
 
@@ -42,7 +42,7 @@ function TaskCard({
       </Link>
 
       {/* Right */}
-      <div className="flex items-center gap-3">
+      <div className="flex md:flex-row  flex-col items-center gap-3">
         <StatusBadge
           status={displayStatus}
           interactive
