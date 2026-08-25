@@ -48,8 +48,9 @@ function ProjectInfoSection({
 
           <StatusBadge
             status={status}
-            interactive
+            interactive={status !== 'completed'}
             onStatusChange={onUpdate}
+            type="project"
           />
         </div>
 
