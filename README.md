@@ -88,20 +88,20 @@ While building this project I practiced:
 
 ### Dashboard
 
-![Dashboard](screenshots/dashboard.png)
+![Dashboard](images/dashboard.png)
 
 ### Projects
 
-![Projects](screenshots/projects.png)
+![Projects](images/projects.png)
 
 ### Project Details
 
-![Project Details](screenshots/projectDetails.png)
+![Project Details](images/projectDetails.png)
 
 ### Tasks
 
-![Tasks](screenshots/tasks.png)
+![Tasks](images/tasks.png)
 
 ### Task Details
 
-![Task Details](screenshots/taskDetails.png)
+![Task Details](images/taskDetails.png)
