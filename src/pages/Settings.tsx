@@ -78,8 +78,6 @@ function Settings() {
     navigate("/forgot-password")
   }
 
-  if (!user) return null
-
   return (
     <section className="animate-fade-in flex flex-col gap-8">
       <div className="fixed right-6 top-25 z-9999 flex flex-col gap-3">
@@ -133,11 +131,13 @@ function Settings() {
               <div className=" min-w-40">
                 <p className="font-body font-medium text-primary-font">Name</p>
 
-                <p
-                  className={`mt-1 font-body text-sm text-primary-font/60 ${isEditName && "hidden"}`}
-                >
-                  {user.name}
-                </p>
+                {user && (
+                  <p
+                    className={`mt-1 font-body text-sm text-primary-font/60 ${isEditName && "hidden"}`}
+                  >
+                    {user.name}
+                  </p>
+                )}
 
                 {isEditName && (
                   <input
@@ -150,32 +150,36 @@ function Settings() {
               </div>
             </div>
 
-            {!isEditName && (
-              <SecondaryButton
-                Icon={Pencil}
-                onClickFun={() => {
-                  setName(user.name)
-                  setIsEditName(true)
-                }}
-                disabled={loading}
-              >
-                Edit Profile
-              </SecondaryButton>
-            )}
-            {isEditName && (
-              <button
-                disabled={loading}
-                onClick={async () => await handleUpdateName(name)}
-              >
-                {loading ? (
-                  <Spinner
-                    size="sm"
-                    color="dark"
-                  />
-                ) : (
-                  <Check className="h-5 w-5 mr-5 ml-1 text-primary cursor-pointer hover:text-primary/40 transition-all duration-300" />
+            {user && (
+              <>
+                {!isEditName && (
+                  <SecondaryButton
+                    Icon={Pencil}
+                    onClickFun={() => {
+                      setName(user.name)
+                      setIsEditName(true)
+                    }}
+                    disabled={loading}
+                  >
+                    Edit Profile
+                  </SecondaryButton>
                 )}
-              </button>
+                {isEditName && (
+                  <button
+                    disabled={loading}
+                    onClick={async () => await handleUpdateName(name)}
+                  >
+                    {loading ? (
+                      <Spinner
+                        size="sm"
+                        color="dark"
+                      />
+                    ) : (
+                      <Check className="h-5 w-5 mr-5 ml-1 text-primary cursor-pointer hover:text-primary/40 transition-all duration-300" />
+                    )}
+                  </button>
+                )}
+              </>
             )}
           </div>
 

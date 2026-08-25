@@ -100,19 +100,13 @@ function ProjectsDetails() {
     URL.revokeObjectURL(url)
   }
 
-
   if (tasksLoading || projectLoading || attachmentLoading)
     return <ProjectsDetailsSkeleton />
 
-  if (!project)
-    return (
-      <div className="fixed right-6 top-25 z-9999">
-        <ErrorCard message={projectError} />
-      </div>
-    )
-
   const progress = calculateProgress(Number(projectId), projectTasks)
-  const displayedStatus = getProjectStatus(project, projectTasks)
+  const displayedStatus = project
+    ? getProjectStatus(project, projectTasks)
+    : undefined
 
   return (
     <section className="animate-fade-in flex flex-col gap-15">
@@ -120,6 +114,7 @@ function ProjectsDetails() {
         {tasksError && <ErrorCard message={tasksError} />}
         {attachmentsError && <ErrorCard message={attachmentsError} />}
         {projectsError && <ErrorCard message={projectsError} />}
+        {projectError && <ErrorCard message={projectError} />}
       </div>
 
       {isDeleteModalOpen && (
@@ -135,7 +130,7 @@ function ProjectsDetails() {
       {isTaskModalOpen && (
         <AddTaskModal
           onClose={() => setIsTaskModalOpen(false)}
-          projects={projects!}
+          projects={projects}
           onSubmit={addTask}
           currentProjectId={Number(projectId)}
           udpateTaskLoading={udpateTaskLoading}
@@ -150,15 +145,17 @@ function ProjectsDetails() {
         />
       )}
 
-      <ProjectInfoSection
-        project={project}
-        displayedProjectStatus={displayedStatus}
-        onUpdate={updateProject}
-        progress={progress}
-        onDeleteTech={handleDeleteTech}
-        onAddTech={handleAddTech}
-        updateProjectLoading={updateProjectLoading}
-      />
+      {project && (
+        <ProjectInfoSection
+          project={project}
+          displayedProjectStatus={displayedStatus}
+          onUpdate={updateProject}
+          progress={progress}
+          onDeleteTech={handleDeleteTech}
+          onAddTech={handleAddTech}
+          updateProjectLoading={updateProjectLoading}
+        />
+      )}
 
       {/* Tasks */}
       <div className="flex flex-col gap-5">
@@ -176,7 +173,7 @@ function ProjectsDetails() {
         </div>
 
         <div className="flex flex-col items-center justify-center gap-5">
-          {projectTasks.slice(0, 3).map((task) => (
+          {project && projectTasks.slice(0, 3).map((task) => (
             <div
               key={task.id}
               className="flex items-center w-full gap-3"
@@ -213,7 +210,7 @@ function ProjectsDetails() {
             </div>
           ))}
 
-          {(projectTasks.length ?? 0) > 3 && (
+          {project && projectTasks.length > 3 && (
             <Link
               className="flex items-center gap-2 font-body font-medium text-primary transition-colors duration-300 hover:text-primary-font"
               to={`/tasks?projectId=${project.id}`}

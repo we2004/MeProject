@@ -12,41 +12,59 @@ import useProject from "../hooks/useProject"
 import TaskInfoSection from "../sections/TaskInfoSection"
 import TaskDetailsSkeleton from "../components/loading/skeletons/TaskDetails"
 import DeleteModal from "../components/modals/DeleteModal"
+import ErrorCard from "../components/cards/ErrorCard"
 
 function TaskDetails() {
   const { token } = useAuth()
+
   const { taskId } = useParams()
   const [isNoteModalOpen, setIsNoteModalOpen] = useState(false)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
-  const { task, taskLoading, removeTaskLoading, updateTaskLoading,removeTask, updateTask } =
-    useTask(token, Number(taskId))
+  const {
+    task,
+    taskLoading,
+    removeTaskLoading,
+    updateTaskLoading,
+    removeTask,
+    updateTask,
+    error: taskError
+  } = useTask(token, Number(taskId))
 
-  const { notes, notesLoading, addNoteLoading, addNote, removeNote } = useNotes(
-    token,
-    Number(taskId)
-  )
+  const {
+    notes,
+    notesLoading,
+    addNoteLoading,
+    addNote,
+    removeNote,
+    error: notesError
+  } = useNotes(token, Number(taskId))
 
-  const { project, projectLoading } = useProject(token, task?.projectId)
+  const {
+    project,
+    projectLoading,
+    error: projectError
+  } = useProject(token, task?.projectId)
 
   const navigate = useNavigate()
-
-  if (!task || !project) {
-    return <p>Task not found</p>
-  }
 
   const handleDeleteTask = async () => {
     const success = await removeTask()
     if (success) navigate("/tasks")
   }
 
-  if (!notes) return <p>something is wrong</p>
-
   if (taskLoading || notesLoading || projectLoading)
     return <TaskDetailsSkeleton />
+
 
   return (
     <section className="animate-fade-in flex flex-col gap-8">
       {/* Task Information */}
+
+      <div className="fixed right-6 top-25 z-9999 flex flex-col gap-3">
+        {taskError && <ErrorCard message={taskError} />}
+        {projectError && <ErrorCard message={projectError} />}
+        {notesError && <ErrorCard message={notesError} />}
+      </div>
 
       {isNoteModalOpen && (
         <AddNoteModal
@@ -67,13 +85,14 @@ function TaskDetails() {
         />
       )}
 
-      <TaskInfoSection
-        onUpdate={updateTask}
-        task={task}
-        projectName={project.name}
-        updateTaskLoading={updateTaskLoading}
-
-      />
+      {task && project && (
+        <TaskInfoSection
+          onUpdate={updateTask}
+          task={task}
+          projectName={project.name}
+          updateTaskLoading={updateTaskLoading}
+        />
+      )}
 
       {/* Notes */}
       <div className="flex flex-col gap-5">

@@ -13,6 +13,7 @@ import { useAuth } from "../context/useAuth"
 import useTasks from "../hooks/useTasks"
 import useProjects from "../hooks/useProjects"
 import TasksSkeleton from "../components/loading/skeletons/TasksSkeleton"
+import ErrorCard from "../components/cards/ErrorCard"
 
 function Tasks() {
   const { token } = useAuth()
@@ -23,9 +24,19 @@ function Tasks() {
   const priority: TaskPriorityFilter = getTaskPriority(
     searchParams.get("priority")
   )
-  const { tasks, tasksLoading, udpateTaskLoading, addTask, updateTask } =
-    useTasks(token, filter, priority, order, Number(projectId))
-  const { projects, projectsLoading } = useProjects(token, "all", "asc")
+  const {
+    tasks,
+    tasksLoading,
+    udpateTaskLoading,
+    addTask,
+    updateTask,
+    error: tasksError
+  } = useTasks(token, filter, priority, order, Number(projectId))
+  const {
+    projects,
+    projectsLoading,
+    error: projectsError
+  } = useProjects(token, "all", "asc")
 
   const [openMenu, setOpenMenu] = useState<MenuType | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -89,6 +100,10 @@ function Tasks() {
 
   return (
     <section className="animate-fade-in flex flex-col gap-8">
+      <div className="fixed right-6 top-25 z-9999 flex flex-col gap-3">
+        {tasksError && <ErrorCard message={tasksError} />}
+        {projectsError && <ErrorCard message={projectsError} />}
+      </div>
       {isModalOpen && (
         <AddTaskModal
           onClose={() => setIsModalOpen(false)}

@@ -13,6 +13,7 @@ function useTask(token: string, taskId: number) {
   useEffect(() => {
     const handleFetchTask = async () => {
       try {
+        setError("")
         setTaskLoading(true)
         const taskData = await getTaskById(taskId, token)
         setTask(taskData)
@@ -32,6 +33,7 @@ function useTask(token: string, taskId: number) {
     data: string | boolean | string[] | TaskStatus
   ) => {
     try {
+      setError("")
       setUpdateTaskLoading(true)
       await updateTaskData(Number(taskId), field, data, token)
 
@@ -55,6 +57,7 @@ function useTask(token: string, taskId: number) {
 
   const removeTask = async () => {
     try {
+      setError("")
       setRemoveTaskLoading(true)
 
       await deleteTask(taskId, token)
