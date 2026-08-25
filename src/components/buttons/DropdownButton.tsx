@@ -1,15 +1,16 @@
 import type { LucideIcon } from "lucide-react"
 import SecondaryButton from "./SecondaryButton"
 import { type MenuType } from "../../types/common"
+import { useEffect } from "react"
 
 type DropdownButton<T extends string> = {
   menuType: MenuType
   Icon: LucideIcon
   setOpenMenu: React.Dispatch<React.SetStateAction<MenuType | null>>
   showMenu: MenuType | null
-  options: T[] 
-  selectedOption: T 
-  onSelect:  (newFilter: T) => void
+  options: T[]
+  selectedOption: T
+  onSelect: (newFilter: T) => void
   children: React.ReactNode
 }
 
@@ -23,13 +24,25 @@ function DropdownButton<T extends string>({
   onSelect,
   children
 }: DropdownButton<T>) {
-
   const toggleMenu = () => {
-    setOpenMenu(c => c === menuType? null : menuType)
+    setOpenMenu((c) => (c === menuType ? null : menuType))
   }
+
+  useEffect(() => {
+    const handleClickOutside = () => {
+      setOpenMenu(null)
+    }
+
+    document.addEventListener("click", handleClickOutside)
+
+    return () => {
+      document.removeEventListener("click", handleClickOutside)
+    }
+  }, [setOpenMenu])
+
   
   return (
-    <div className="relative">
+    <div className="relative"   onClick={(e) => e.stopPropagation()} >
       <SecondaryButton
         Icon={Icon}
         onClickFun={toggleMenu}
@@ -47,7 +60,7 @@ function DropdownButton<T extends string>({
         {options.map((option) => (
           <button
             key={option}
-            onClick={()=>{
+            onClick={() => {
               onSelect(option)
               setOpenMenu(null)
             }}
