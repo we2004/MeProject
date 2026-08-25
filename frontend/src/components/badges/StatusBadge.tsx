@@ -17,12 +17,14 @@ type StatusBadgeProps = {
     field: EditInfoFields,
     data: string | boolean | string[] | TaskStatus | ProjectStatus
   ) => Promise<boolean>
+  type?: "task" | "project"
 }
 
 function StatusBadge({
   status,
   interactive = false,
-  onStatusChange
+  onStatusChange,
+  type
 }: StatusBadgeProps) {
   const [isOpen, setIsOpen] = useState(false)
 
@@ -34,17 +36,15 @@ function StatusBadge({
     cancelled: "bg-secondary/15"
   }
 
-  const nextStatus =
-    status === "active"
-      ? "cancelled"
-      : status === "cancelled"
-        ? "active"
-        : status === "completed"
-          ? "open"
-          : "completed"
+  let nextStatus: string
+  if (type === "project") {
+    nextStatus =
+      status === "active" || status === "overdue" ? "cancelled" : "active"
+  } else {
+    nextStatus = status === "completed" ? "open" : "completed"
+  }
 
-  const isCancelled = nextStatus === 'cancelled'
-  
+  const isCancelled = nextStatus === "cancelled"
 
   const handleBadgeClick = () => {
     if (interactive) {
@@ -88,7 +88,7 @@ function StatusBadge({
           <button
             type="button"
             onClick={async () => {
-              if (nextStatus === "cancelled" || nextStatus === 'active') {
+              if (nextStatus === "cancelled" || nextStatus === "active") {
                 const success = await onStatusChange?.("cancelled", isCancelled)
                 if (success) setIsOpen(false)
               } else {
