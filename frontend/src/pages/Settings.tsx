@@ -1,7 +1,5 @@
 import {
-  ChevronDown,
   LockKeyhole,
-  Sun,
   UserRound,
   LogOut,
   Check
