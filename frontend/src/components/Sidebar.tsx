@@ -8,9 +8,10 @@ import SidebarButton from "./buttons/SidebarButton"
 
 type SidebarProps = {
   isSideBarOpen: boolean
+  close: () => void
 }
 
-function Sidebar({ isSideBarOpen }: SidebarProps) {
+function Sidebar({ isSideBarOpen, close }: SidebarProps) {
   const links = [
     {
       Icon: LayoutDashboard,
@@ -47,6 +48,7 @@ function Sidebar({ isSideBarOpen }: SidebarProps) {
           <SidebarButton
             {...link}
             key={link.text}
+            close={close}
           />
         ))}
       </nav>

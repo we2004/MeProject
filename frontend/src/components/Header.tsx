@@ -36,7 +36,7 @@ function Header({ onToggleSidebar, showMenu }: HeaderProps) {
           />
 
           <div className="flex items-center justify-center ">
-            <div className="hidden sm:flex sm:flex-col ">
+            <div className="hidden md:flex md:flex-col ">
               <span className="font-heading text-lg font-semibold tracking-tight text-primary-font ">
                 MeProject
               </span>

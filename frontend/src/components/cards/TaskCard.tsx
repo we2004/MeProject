@@ -42,7 +42,7 @@ function TaskCard({
       </Link>
 
       {/* Right */}
-      <div className="flex md:flex-row  flex-col items-center gap-3">
+      <div className="flex flex-row self-end items-center gap-3">
         <StatusBadge
           status={displayStatus}
           interactive

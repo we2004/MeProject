@@ -4,12 +4,14 @@ type SidebarButtonProps = {
   Icon: LucideIcon
   text: string
   path: string
+  close: () => void
 }
 
-function SidebarButton({ Icon, text, path }: SidebarButtonProps) {
+function SidebarButton({ Icon, text, path, close }: SidebarButtonProps) {
   return (
     <NavLink
       to={path}
+      onClick={close}
       className={({ isActive }) =>
         `group flex h-15 w-17 flex-col items-center justify-center rounded-2xl text-center transition-all duration-300 ${
           isActive

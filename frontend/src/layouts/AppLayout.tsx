@@ -9,11 +9,15 @@ function AppLayout() {
   const handleToggleSidebar = () => {
     setIsSideBarOpen(c => !c)
   }
+
+  const handleCloseSidebar = () => {
+    setIsSideBarOpen(false)
+  }
   return (
     <>
       <ScrollToTop />
       <Header onToggleSidebar={handleToggleSidebar} showMenu={isSideBarOpen}/>
-      <Sidebar isSideBarOpen={isSideBarOpen}/>
+      <Sidebar isSideBarOpen={isSideBarOpen} close={handleCloseSidebar}/>
       <div className=" ml-0 md:ml-24 transition-all duration-300 p-10">
         <Outlet />
       </div>
