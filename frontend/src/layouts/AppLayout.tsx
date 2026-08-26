@@ -25,7 +25,7 @@ function AppLayout() {
         isSideBarOpen={isSideBarOpen}
         close={handleCloseSidebar}
       />
-      <div className=" ml-0 md:ml-24 transition-all duration-300 p-10 ">
+      <div className=" ml-0 md:ml-24 transition-all duration-300 md:py-10 md:px-10 py-10 px-6">
         <Outlet />
       </div>
 
