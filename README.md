@@ -60,9 +60,7 @@ This project uses an automated deployment setup where updates to GitHub instantl
 
 - **Frontend**: Hosted on **Vercel**.
 - **Backend**: Hosted on **Google Cloud Run**
-"
-Note: The database is stored within the backend environment, which may cause data to reset or not persist reliably when the application is redeployed or restarted. This setup was intentionally chosen for this portfolio project to keep the infrastructure simple and minimize costs. A persistent external database would be more appropriate for a production application.
-"
+> **Note:** The database is stored within the backend environment, which may cause data to reset or not persist reliably when the application is redeployed or restarted. This setup was intentionally chosen for this portfolio project to keep the infrastructure simple and minimize costs. A persistent external database would be more appropriate for a production application.
 
 ## What I Learned
 
