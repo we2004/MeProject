@@ -65,7 +65,7 @@ function Home() {
 
       {/* Recent Projects */}
       <section className="flex flex-col gap-6">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-2 md:gap-0">
           <h2 className="font-heading md:text-2xl font-bold text-primary-font text-xl">
             Upcoming Projects
           </h2>

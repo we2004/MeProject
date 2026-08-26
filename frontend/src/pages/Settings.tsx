@@ -128,13 +128,13 @@ function Settings() {
 
         <div className="flex flex-col gap-6 p-6">
           {/* Profile */}
-          <div className="flex justify-between items-center ">
-            <div className="flex items-center justify-center gap-4 ">
+          <div className="flex flex-wrap items-center justify-between gap-3 ">
+            <div className="flex min-w-0 flex-1 items-center gap-4">
               <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
                 <UserRound className="h-4 w-4" />
               </div>
 
-              <div className="min-w-23 flex flex-wrap gap-2 items-center md:flex-col md:gap-0 md:items-start">
+              <div className="min-w-0 flex-1 flex flex-wrap items-center gap-2 md:flex-col md:gap-0 md:items-start">
                 <p className="font-body font-medium text-primary-font">Name</p>
 
                 {user && (
@@ -148,7 +148,7 @@ function Settings() {
                 {isEditName && (
                   <input
                     type="text"
-                    className="rounded-2xl mt-1 border border-primary/45 bg-white p-2 font-body text-sm  text-primary-font outline-none transition-all duration-300 placeholder:text-primary-font/40 focus:border-primary focus:ring-2 focus:ring-primary/10"
+                    className="mt-1 min-w-0 max-w-full rounded-2xl border border-primary/45 bg-white p-2 font-body text-sm text-primary-font outline-none transition-all duration-300 placeholder:text-primary-font/40 focus:border-primary focus:ring-2 focus:ring-primary/10"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                   />
@@ -189,7 +189,7 @@ function Settings() {
             )}
           </div>
 
-          <div className="flex flex-wrap justify-between items-centern">
+          <div className="flex flex-wrap justify-between items-centern md:gap-0 gap-3">
             <div className="flex items-center justify-center gap-4">
               <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
                 <LockKeyhole className="h-4 w-4" />

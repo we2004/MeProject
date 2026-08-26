@@ -37,7 +37,7 @@ function ProjectsDetails() {
   const {
     tasks: projectTasks,
     tasksLoading,
-    udpateTaskLoading,
+    addTaskLoading,
     updateTask,
     addTask,
     error: tasksError
@@ -132,7 +132,7 @@ function ProjectsDetails() {
           projects={projects}
           onSubmit={addTask}
           currentProjectId={Number(projectId)}
-          udpateTaskLoading={udpateTaskLoading}
+          udpateTaskLoading={addTaskLoading}
         />
       )}
 

@@ -30,7 +30,7 @@ function Tasks() {
   const {
     tasks,
     tasksLoading,
-    udpateTaskLoading,
+    addTaskLoading,
     addTask,
     updateTask,
     error: tasksError,
@@ -112,7 +112,7 @@ function Tasks() {
           onClose={() => setIsModalOpen(false)}
           onSubmit={addTask}
           projects={projects!}
-          udpateTaskLoading={udpateTaskLoading}
+          udpateTaskLoading={addTaskLoading}
         />
       )}
       <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between items-center justify-center">
