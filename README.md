@@ -2,7 +2,7 @@
 
 ## Description
 
-MeProject is personal project management desktop application, it provides a simple workspace for creating and managing projects, tracking tasks, adding notes, and monitoring project progress.
+MeProject is personal project management application, it provides a simple workspace for creating and managing projects, tracking tasks, adding notes, and monitoring project progress.
 
 
 ## Live Demo
@@ -85,6 +85,7 @@ While building this project I practiced:
 * Separating API logic from UI components
 * Managing state and data flow between pages and components
 * Building reusable modals, cards, buttons, badges, and form components
+* Building responsive design using Tailwind
 * Integrating a frontend with an existing REST API
 * Deploying a backend with Google Cloud Run
 * Connecting GitHub with automatic deployment
