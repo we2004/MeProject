@@ -15,7 +15,15 @@ import ErrorCard from "../components/cards/ErrorCard"
 import Spinner from "../components/loading/spinners/Spinner"
 
 function Settings() {
-  const { user, signout, removeAccount, changeName, loading, error } = useAuth()
+  const {
+    user,
+    signout,
+    removeAccount,
+    changeName,
+    loading,
+    error,
+    logOutLoading
+  } = useAuth()
 
   const navigate = useNavigate()
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
@@ -126,7 +134,7 @@ function Settings() {
                 <UserRound className="h-4 w-4" />
               </div>
 
-              <div className="min-w-23">
+              <div className="min-w-23 flex flex-wrap gap-2 items-center md:flex-col md:gap-0 md:items-start">
                 <p className="font-body font-medium text-primary-font">Name</p>
 
                 {user && (
@@ -181,17 +189,15 @@ function Settings() {
             )}
           </div>
 
-          <div className="flex justify-between items-centern">
+          <div className="flex flex-wrap justify-between items-centern">
             <div className="flex items-center justify-center gap-4">
               <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
                 <LockKeyhole className="h-4 w-4" />
               </div>
 
-              <div>
-                <p className="font-body font-medium text-primary-font">
-                  Password
-                </p>
-              </div>
+              <p className="font-body font-medium text-primary-font">
+                Password
+              </p>
             </div>
 
             <SecondaryButton
@@ -249,14 +255,21 @@ function Settings() {
             bgHoverColor="hover:bg-redT"
             onClickFun={handleLogout}
             size="px-2 py-2 text-sm"
+            disabled={logOutLoading}
           >
-            Log out
+            {logOutLoading ? (
+              <Spinner
+                size="sm"
+                color="dark"
+              />
+            ) : (
+              "Log out"
+            )}
           </SecondaryButton>
         </div>
 
         <div className="flex md:flex-row flex-col items-center gap-5 p-6 justify-between">
           <div className="flex items-center justify-center gap-4">
-
             <div>
               <p className="font-body font-medium text-primary-font">
                 Delete Account
@@ -273,7 +286,6 @@ function Settings() {
             onClickFun={() => setIsDeleteModalOpen(true)}
             size="px-2 py-2 text-sm"
             bgColor="bg-redT text-white"
-            
           >
             Delete Account
           </SecondaryButton>

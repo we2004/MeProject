@@ -3,10 +3,11 @@ import { Link, useNavigate } from "react-router-dom"
 import logo from "../assets/logo2.png"
 import { useAuth } from "../context/useAuth"
 import ErrorCard from "../components/cards/ErrorCard"
+import Spinner from "../components/loading/spinners/Spinner"
 
 function Welcome() {
   const navigate = useNavigate()
-  const { exploreApp, error } = useAuth()
+  const { exploreApp, error, loading } = useAuth()
 
   const handleExploreMode = async () => {
     const success = await exploreApp()
@@ -55,8 +56,17 @@ function Welcome() {
             className="group flex items-center gap-2 rounded-2xl border border-primary/15 bg-white px-4 py-3 font-body text-primary-font shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/60 hover:shadow-md hover:bg-secondary hover:text-white"
           >
             <span className="flex items-center gap-3">
-              <Compass className="h-5 w-5 text-primary group-hover:text-white transition-all duration-300" />
-              Explore App
+              {loading ? (
+                <Spinner
+                  size="sm"
+                  color="dark"
+                />
+              ) : (
+                <>
+                  <Compass className="h-5 w-5 text-primary group-hover:text-white transition-all duration-300" />
+                  Explore App
+                </>
+              )}
             </span>
           </button>
         </div>

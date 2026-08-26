@@ -79,9 +79,9 @@ function Home() {
           </Link>
         </div>
 
-        {projects.length === 0 ? (
+        {ongoingProjects.length === 0 ? (
           <PlaceHolderCard
-            message="No Projects Yet, Create Your First Project"
+            message="No Upcoming Projects, Create a Project"
             btnTitle="Create Project"
             navigateTo="/projects?create=true"
           />
@@ -115,9 +115,9 @@ function Home() {
           </Link>
         </div>
 
-        {tasks.length === 0 ? (
+        {ongoingTasks.length === 0 ? (
           <PlaceHolderCard
-            message="No Tasks Yet, Create Your First Task"
+            message="No Upcoming Tasks, Create a Task"
             btnTitle="Create Task"
             navigateTo="/tasks?create=true"
           />

@@ -43,7 +43,7 @@ function IntroScreen({ onFinish }: IntroScreenProps) {
             delay: 0.25,
             ease: "easeOut"
           }}
-          className="mt-5 font-heading text-4xl font-senibold text-primary-font"
+          className="mt-5 font-heading text-4xl font-semibold text-primary-font"
         >
           MeProject
         </motion.h1>

@@ -24,8 +24,6 @@ function Header({ onToggleSidebar, showMenu }: HeaderProps) {
     start()
   }, [token])
 
-  if (!currentUser) return <p>no user found</p>
-
   return (
     <header className="border border-primary/15 px-4 py-3 shadow-sm backdrop-blur-sm sticky top-0 z-40">
       <div className="mx-auto flex items-center justify-between gap-3 ">
@@ -66,11 +64,13 @@ function Header({ onToggleSidebar, showMenu }: HeaderProps) {
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary-font">
               <UserRound className="h-5 w-5" />
             </div>
-            <div className="flex flex-col text-left">
-              <p className="font-heading text-sm font-semibold text-primary-font">
-                {currentUser.name}
-              </p>
-            </div>
+            {currentUser && (
+              <div className="flex flex-col text-left">
+                <p className="font-heading text-sm font-semibold text-primary-font">
+                  {currentUser.name}
+                </p>
+              </div>
+            )}
           </Link>
         </div>
       </div>

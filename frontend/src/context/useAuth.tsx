@@ -21,6 +21,7 @@ export function useAuth() {
   const auth = useContext(AuthContext)
   const [user, setUser] = useState<User | undefined>(undefined)
   const [loading, setLoading] = useState(false)
+  const [logOutLoading, setLogOutLoading] = useState(false)
   const [error, setError] = useState("")
 
   if (!auth) {
@@ -124,7 +125,7 @@ export function useAuth() {
   const signout = async () => {
     try {
       setError("")
-      setLoading(true)
+      setLogOutLoading(true)
       await logout(auth.token)
       localStorage.removeItem("token")
       auth.setToken("")
@@ -134,7 +135,7 @@ export function useAuth() {
       setError("Failed to log out")
       return false
     } finally {
-      setLoading(false)
+      setLogOutLoading(false)
     }
   }
 
@@ -180,6 +181,7 @@ export function useAuth() {
     user,
     exploreApp,
     loginApp,
+    logOutLoading,
     changeName,
     registerUser,
     changeUserPassword,

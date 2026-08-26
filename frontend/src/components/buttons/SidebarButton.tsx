@@ -13,14 +13,14 @@ function SidebarButton({ Icon, text, path, close }: SidebarButtonProps) {
       to={path}
       onClick={close}
       className={({ isActive }) =>
-        `group flex h-15 w-17 flex-col items-center justify-center rounded-2xl text-center transition-all duration-300 ${
+        `group flex md:h-14 md:w-17 w-25 h-10 gap-2 md:gap-0 md:flex-col items-center justify-center rounded-2xl text-center transition-all duration-300 ${
           isActive
             ? "bg-primary text-white shadow-md"
             : "text-primary-font hover:-translate-y-0.5 hover:bg-primary/80 hover:text-white hover:shadow-md"
         }`
       }
     >
-      <Icon className="h-6 w-6 shrink-0 transition-colors duration-300 group-hover:text-white" />
+      <Icon className="h-6 w-6 shrink-0 transition-colors duration-300 group-hover:text-white " />
 
       <p className="text-sm mt-1 font-heading font-semibold">{text}</p>
     </NavLink>

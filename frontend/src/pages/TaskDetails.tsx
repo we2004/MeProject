@@ -119,7 +119,7 @@ function TaskDetails() {
             {notes.map((note) => (
               <div
                 key={note.id}
-                className="flex items-center gap-3"
+                className="flex items-center flex-wrap gap-3"
               >
                 <div className="flex-1">
                   <NoteCard {...note} />

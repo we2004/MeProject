@@ -225,7 +225,7 @@ function ProjectsDetails() {
             attachments.map((attachment) => (
               <div
                 key={attachment.id}
-                className="flex items-center gap-3"
+                className="flex items-center flex-wrap gap-3"
               >
                 <div className="flex-1">
                   <AttachmentCard

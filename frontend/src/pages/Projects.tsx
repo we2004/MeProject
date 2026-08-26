@@ -86,8 +86,8 @@ function Projects() {
   }
   if (projectsLoading || tasksLoading) return <ProjectsSkeleton />
   return (
-    <section className="animate-fade-in flex flex-col items gap-8 ">
-      <div className="fixed right-6 top-25 z-9999 flex flex-col gap-3">
+    <section className="animate-fade-in flex flex-col items gap-8">
+      <div className="fixed right-6 top-25 z-9999 flex flex-col gap-3 ">
         {projectsError && <ErrorCard message={projectsError} />}
         {tasksError && <ErrorCard message={tasksError} />}
       </div>
