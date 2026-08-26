@@ -2,7 +2,7 @@ function TasksSkeleton() {
   return (
     <section className="flex animate-pulse flex-col gap-8">
       {/* Header */}
-      <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex gap-5 md:flex-row flex-col items-center justify-between">
         <div>
           {/* Page title */}
           <div className="mx-auto h-9 w-32 rounded-lg bg-primary/10 sm:mx-0" />

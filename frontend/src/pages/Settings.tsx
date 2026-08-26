@@ -1,9 +1,7 @@
 import {
   ChevronDown,
   LockKeyhole,
-  Pencil,
   Sun,
-  Trash2,
   UserRound,
   LogOut,
   Check
