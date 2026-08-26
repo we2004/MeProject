@@ -37,8 +37,9 @@ function Sidebar({ isSideBarOpen, close }: SidebarProps) {
 
   return (
     <aside
-      className={` ${isSideBarOpen ? "opacity-100" : "opacity-0"} md:opacity-100 h-screen flex-col items-center border-r border-primary/15 bg-primary/20 p-4 shadow-md backdrop-blur-sm transition-all duration-300  fixed
-        w-24
+      className={` ${isSideBarOpen ? "opacity-100" : "opacity-0 pointer-events-none"} md:opacity-100 h-screen flex flex-col items-center border-r border-primary/15 bg-primary/20 p-4 shadow-md backdrop-blur-sm transition-all duration-300  fixed
+        w-40
+        md:w-24
         z-80
       
       `}
