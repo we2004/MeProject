@@ -2,7 +2,11 @@
 
 ## Description
 
-MeProject is personal project management application, it provides a simple workspace for creating and managing projects, tracking tasks, adding notes, and monitoring project progress.
+MeProject is personal project management desktop application, it provides a simple workspace for creating and managing projects, tracking tasks, adding notes, and monitoring project progress.
+
+## Live Demo
+
+[View the live project](https://me-project99-seven.vercel.app/)
 
 ## Features
 
@@ -24,7 +28,6 @@ MeProject is personal project management application, it provides a simple works
 * Loading states with skeletons and spinners
 * Error handling with error card displays
 * Empty states for pages without data
-* Responsive design
 * Animated intro screen
 * Social media preview metadata
 
@@ -41,7 +44,8 @@ MeProject is personal project management application, it provides a simple works
 * Motion
 * REST API
 * JSON Web Tokens (JWT)
-* Google Cloud Run
+* Google Cloud Run (Backend)
+* Vercel (Frontend)
 
 ## Backend
 
@@ -49,6 +53,16 @@ The backend REST API used by this project was fully AI-generated.
 My work on this project focused on the frontend application, including the UI, state management, API integration, authentication flow, reusable components, and overall frontend architecture.
 
 For full API details, endpoints, and request/response structures, see [backend/API_DOCUMENTATION.md](./backend/API_DOCUMENTATION.md).
+
+## Deployment
+
+This project uses an automated deployment setup where updates to GitHub instantly push live to production:
+
+- **Frontend**: Hosted on **Vercel**.
+- **Backend**: Hosted on **Google Cloud Run**
+"
+Note: The database is stored within the backend environment, which may cause data to reset or not persist reliably when the application is redeployed or restarted. This setup was intentionally chosen for this portfolio project to keep the infrastructure simple and minimize costs. A persistent external database would be more appropriate for a production application.
+"
 
 ## What I Learned
 
