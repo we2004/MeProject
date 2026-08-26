@@ -16,18 +16,18 @@ function TechStackSection({
 
   return (
     <>
-      <div className="flex md:flex-row flex-col gap-2">
+      <div className="flex gap-2">
         <input
           id="tech-stack"
           type="text"
           value={tech}
           onChange={(e) => setTech(e.target.value)}
           placeholder="e.g. React, TypeScript, Tailwind CSS"
-          className="flex-1 rounded-2xl border border-primary/15 bg-white px-4 py-3 font-body text-sm text-primary-font outline-none transition-all duration-300 placeholder:text-primary-font/40 focus:border-primary focus:ring-2 focus:ring-primary/10"
+          className="flex-1 rounded-2xl border border-primary/15 bg-white md:px-4 px-1 py-3 font-body text-sm text-primary-font outline-none transition-all duration-300 placeholder:text-primary-font/40 focus:border-primary focus:ring-2 focus:ring-primary/10"
         />
 
         <button
-          className="flex items-center justify-center rounded-2xl border border-primary/15 bg-white px-4 text-primary-font shadow-sm transition-all duration-300 hover:border-primary/60 hover:bg-primary hover:text-white hover:shadow-md"
+          className="flex items-center justify-center rounded-2xl border border-primary/15 bg-white w-9 h-9 text-primary-font shadow-sm transition-all duration-300 hover:border-primary/60 hover:bg-primary hover:text-white hover:shadow-md"
           onClick={() => {
             onAddTech(tech)
             setTech("")

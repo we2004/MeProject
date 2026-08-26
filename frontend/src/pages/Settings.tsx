@@ -1,9 +1,7 @@
 import {
   ChevronDown,
   LockKeyhole,
-  Pencil,
   Sun,
-  Trash2,
   UserRound,
   LogOut,
   Check
@@ -113,7 +111,7 @@ function Settings() {
       </div>
 
       {/* Account */}
-      <div className="rounded-3xl border border-primary/15 bg-white shadow-sm">
+      <div className="rounded-3xl border border-primary/15 bg-white shadow-sm flex flex-col">
         <div className="border-b border-primary/10 px-6 py-3">
           <h2 className="font-heading text-xl font-semibold text-primary-font">
             Account
@@ -122,13 +120,13 @@ function Settings() {
 
         <div className="flex flex-col gap-6 p-6">
           {/* Profile */}
-          <div className="flex flex-col items-center gap-5 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex justify-between items-center ">
             <div className="flex items-center justify-center gap-4 ">
               <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
                 <UserRound className="h-4 w-4" />
               </div>
 
-              <div className=" min-w-40">
+              <div className="min-w-23">
                 <p className="font-body font-medium text-primary-font">Name</p>
 
                 {user && (
@@ -154,12 +152,12 @@ function Settings() {
               <>
                 {!isEditName && (
                   <SecondaryButton
-                    Icon={Pencil}
                     onClickFun={() => {
                       setName(user.name)
                       setIsEditName(true)
                     }}
                     disabled={loading}
+                    size="px-2 py-2 text-sm"
                   >
                     Edit Profile
                   </SecondaryButton>
@@ -183,7 +181,7 @@ function Settings() {
             )}
           </div>
 
-          <div className="flex flex-col items-center gap-5 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex justify-between items-centern">
             <div className="flex items-center justify-center gap-4">
               <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
                 <LockKeyhole className="h-4 w-4" />
@@ -193,16 +191,12 @@ function Settings() {
                 <p className="font-body font-medium text-primary-font">
                   Password
                 </p>
-
-                <p className="mt-1 font-body text-sm text-primary-font/60">
-                  Keep your account secure with a strong password.
-                </p>
               </div>
             </div>
 
             <SecondaryButton
-              Icon={Pencil}
               onClickFun={handleChangePassword}
+              size="px-2 py-2 text-sm"
             >
               Change Password
             </SecondaryButton>
@@ -218,7 +212,7 @@ function Settings() {
           </h2>
         </div>
 
-        <div className="flex flex-col items-center gap-5 sm:flex-row sm:items-center sm:justify-between p-6">
+        <div className="flex items-center gap-5 justify-between p-6">
           <div className="flex items-center justify-center gap-4">
             <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
               <Sun className="h-4 w-4" />
@@ -242,34 +236,26 @@ function Settings() {
           </h2>
         </div>
 
-        <div className="flex flex-col items-center gap-5 sm:flex-row sm:items-center sm:justify-between p-6">
+        <div className="flex justify-between items-center gap-5  p-6">
           <div className="flex items-center justify-center gap-4">
             <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
               <LogOut className="h-4 w-4" />
             </div>
 
-            <div>
-              <p className="font-body font-medium text-primary-font">Log out</p>
-
-              <p className="mt-1 font-body text-sm text-primary-font/60">
-                Sign out of your account. You can log in again anytime.
-              </p>
-            </div>
+            <p className="font-body font-medium text-primary-font">Log out</p>
           </div>
 
           <SecondaryButton
             bgHoverColor="hover:bg-redT"
             onClickFun={handleLogout}
+            size="px-2 py-2 text-sm"
           >
             Log out
           </SecondaryButton>
         </div>
 
-        <div className="flex flex-col items-center gap-5 sm:flex-row sm:items-center sm:justify-between p-6">
+        <div className="flex md:flex-row flex-col items-center gap-5 p-6 justify-between">
           <div className="flex items-center justify-center gap-4">
-            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
-              <Trash2 className="h-4 w-4" />
-            </div>
 
             <div>
               <p className="font-body font-medium text-primary-font">
@@ -285,6 +271,9 @@ function Settings() {
           <SecondaryButton
             bgHoverColor="hover:bg-redT"
             onClickFun={() => setIsDeleteModalOpen(true)}
+            size="px-2 py-2 text-sm"
+            bgColor="bg-redT text-white"
+            
           >
             Delete Account
           </SecondaryButton>

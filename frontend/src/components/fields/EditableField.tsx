@@ -42,7 +42,7 @@ function EditableField({ data, field, onUpdate, loading }: EditableFieldProps) {
     inputField = (
       <textarea
         rows={5}
-        className="flex-1 md:max-w-260 rounded-2xl border border-primary/45 bg-white px-2 py-3 font-body text-primary-font/70 outline-none transition-all duration-300 placeholder:text-primary-font/40 focus:border-primary focus:ring-2 focus:ring-primary/10"
+        className=" h-30 flex-1 rounded-2xl border border-primary/45 bg-white px-2 py-3 font-body text-primary-font/70 outline-none transition-all duration-300 placeholder:text-primary-font/40 focus:border-primary focus:ring-2 focus:ring-primary/10"
         value={value}
         onChange={(e) => setValue(e.target.value)}
       />
@@ -79,7 +79,9 @@ function EditableField({ data, field, onUpdate, loading }: EditableFieldProps) {
   }
 
   return (
-    <>
+    <div
+      className={`flex items-center gap-2 ${field === "description" ? "w-full" : "w-fit"}`}
+    >
       {dataDisplay}
 
       {isEditField && inputField}
@@ -109,7 +111,7 @@ function EditableField({ data, field, onUpdate, loading }: EditableFieldProps) {
           <Edit3 className="mr-5 ml-1 h-4 w-4 cursor-pointer text-primary transition-all duration-300 hover:text-primary/40" />
         </button>
       )}
-    </>
+    </div>
   )
 }
 

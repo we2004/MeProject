@@ -2,12 +2,16 @@ import {
   LayoutDashboard,
   FolderKanban,
   CheckSquare,
-  Settings,
+  Settings
 } from "lucide-react"
 import SidebarButton from "./buttons/SidebarButton"
 
+type SidebarProps = {
+  isSideBarOpen: boolean
+  close: () => void
+}
 
-function Sidebar() {
+function Sidebar({ isSideBarOpen, close }: SidebarProps) {
   const links = [
     {
       Icon: LayoutDashboard,
@@ -33,18 +37,19 @@ function Sidebar() {
 
   return (
     <aside
-      className="flex h-screen flex-col items-center border-r border-primary/15 bg-primary/20 p-4 shadow-md backdrop-blur-sm transition-all duration-300 fixed
-        lg:w-24
-        w-20
-      "
-    >
+      className={` ${isSideBarOpen ? "opacity-100 " : "opacity-0 pointer-events-none"} md:opacity-100 md:pointer-events-auto h-screen flex flex-col items-center border-r border-primary/15 bg-primary/20 p-4 shadow-md backdrop-blur-sm transition-all duration-300  fixed
+        w-40
+        md:w-24
+        z-80
       
-
+      `}
+    >
       <nav className="flex flex-1 flex-col gap-7">
         {links.map((link) => (
           <SidebarButton
             {...link}
             key={link.text}
+            close={close}
           />
         ))}
       </nav>
