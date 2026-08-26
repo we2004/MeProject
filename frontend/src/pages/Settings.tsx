@@ -108,15 +108,9 @@ function Settings() {
         />
       )}
       {/* Header */}
-      <div>
-        <h1 className="font-heading text-3xl font-bold text-primary-font">
-          Settings
-        </h1>
-
-        <p className="mt-2 font-body text-primary-font/70">
-          Manage your account and application preferences.
-        </p>
-      </div>
+      <h1 className="font-heading text-3xl font-bold text-primary-font">
+        Settings
+      </h1>
 
       {/* Account */}
       <div className="rounded-3xl border border-primary/15 bg-white shadow-sm flex flex-col">
@@ -207,30 +201,6 @@ function Settings() {
               Change Password
             </SecondaryButton>
           </div>
-        </div>
-      </div>
-
-      {/* Appearance */}
-      <div className="rounded-3xl border border-primary/15 bg-white shadow-sm">
-        <div className="border-b border-primary/10 px-6 py-3">
-          <h2 className="font-heading text-xl font-semibold text-primary-font">
-            Appearance
-          </h2>
-        </div>
-
-        <div className="flex items-center gap-5 justify-between p-6">
-          <div className="flex items-center justify-center gap-4">
-            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
-              <Sun className="h-4 w-4" />
-            </div>
-
-            <p className="font-body font-medium text-primary-font">Theme</p>
-          </div>
-
-          <button className="flex min-w-28 shrink-0 items-center justify-between gap-3 rounded-2xl border border-primary/15 bg-white px-4 py-3 font-body text-sm font-medium text-primary-font shadow-sm transition-all duration-300 hover:border-primary/60 hover:shadow-md">
-            Light
-            <ChevronDown className="h-4 w-4 text-primary-font/50" />
-          </button>
         </div>
       </div>
 
