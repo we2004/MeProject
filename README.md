@@ -4,9 +4,11 @@
 
 MeProject is personal project management desktop application, it provides a simple workspace for creating and managing projects, tracking tasks, adding notes, and monitoring project progress.
 
+
 ## Live Demo
 
 [View the live project](https://me-project99-seven.vercel.app/)
+
 
 ## Features
 
@@ -31,6 +33,7 @@ MeProject is personal project management desktop application, it provides a simp
 * Animated intro screen
 * Social media preview metadata
 
+
 ## Technologies Used
 
 * React
@@ -47,12 +50,14 @@ MeProject is personal project management desktop application, it provides a simp
 * Google Cloud Run (Backend)
 * Vercel (Frontend)
 
+
 ## Backend
 
 The backend REST API used by this project was fully AI-generated.
 My work on this project focused on the frontend application, including the UI, state management, API integration, authentication flow, reusable components, and overall frontend architecture.
 
 For full API details, endpoints, and request/response structures, see [backend/API_DOCUMENTATION.md](./backend/API_DOCUMENTATION.md).
+
 
 ## Deployment
 
@@ -61,6 +66,7 @@ This project uses an automated deployment setup where updates to GitHub instantl
 - **Frontend**: Hosted on **Vercel**.
 - **Backend**: Hosted on **Google Cloud Run**
 > **Note:** The database is stored within the backend environment, which may cause data to reset or not persist reliably when the application is redeployed or restarted. This setup was intentionally chosen for this portfolio project to keep the infrastructure simple and minimize costs. A persistent external database would be more appropriate for a production application.
+
 
 ## What I Learned
 
@@ -79,12 +85,12 @@ While building this project I practiced:
 * Separating API logic from UI components
 * Managing state and data flow between pages and components
 * Building reusable modals, cards, buttons, badges, and form components
-* Creating responsive layouts with Tailwind CSS
 * Integrating a frontend with an existing REST API
-* Deploying a frontend application with Google Cloud Run
+* Deploying a backend with Google Cloud Run
 * Connecting GitHub with automatic deployment
 * Understanding frontend and backend responsibilities
 * Making engineering decisions around component reuse, state management, and separation of concerns
+  
 
 ## Screenshots
 
