@@ -49,23 +49,29 @@ MeProject is personal project management application, it provides a simple works
 * JSON Web Tokens (JWT)
 * Google Cloud Run (Backend)
 * Vercel (Frontend)
+* Supabase
 
 
 ## Backend
 
 The backend REST API used by this project was fully AI-generated.
-My work on this project focused on the frontend application, including the UI, state management, API integration, authentication flow, reusable components, and overall frontend architecture.
 
-For full API details, endpoints, and request/response structures, see [backend/API_DOCUMENTATION.md](./backend/API_DOCUMENTATION.md).
+My work on this project focused primarily on the frontend application, including the UI, state management, API integration, authentication flow, reusable components, and overall frontend architecture.
 
+The backend was later migrated from a local SQLite database to PostgreSQL hosted on Supabase. File attachments are stored using Supabase Storage, while the backend is deployed separately on Google Cloud Run.
+
+For full API details, endpoints, and request/response structures, see backend2/API_DOCUMENTATION.md.
 
 ## Deployment
 
-This project uses an automated deployment setup where updates to GitHub instantly push live to production:
+The application uses separate services for the frontend, backend, database, and file storage:
 
-- **Frontend**: Hosted on **Vercel**.
-- **Backend**: Hosted on **Google Cloud Run**
-> **Note:** The database is stored within the backend environment, which may cause data to reset or not persist reliably when the application is redeployed or restarted. This setup was intentionally chosen for this portfolio project to keep the infrastructure simple and minimize costs. A persistent external database would be more appropriate for a production application.
+Frontend: Hosted on Vercel
+Backend: Hosted on Google Cloud Run
+Database: PostgreSQL hosted on Supabase
+File Storage: Supabase Storage
+
+The source code is maintained on GitHub and connected to the deployment platforms for automated deployments.
 
 
 ## What I Learned
