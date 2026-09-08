@@ -67,8 +67,11 @@ For full API details, endpoints, and request/response structures, see backend2/A
 The application uses separate services for the frontend, backend, database, and file storage:
 
 Frontend: Hosted on Vercel
+
 Backend: Hosted on Google Cloud Run
+
 Database: PostgreSQL hosted on Supabase
+
 File Storage: Supabase Storage
 
 The source code is maintained on GitHub and connected to the deployment platforms for automated deployments.
