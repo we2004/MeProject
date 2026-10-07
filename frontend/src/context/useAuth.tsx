@@ -23,6 +23,8 @@ export function useAuth() {
   const [loading, setLoading] = useState(false)
   const [logOutLoading, setLogOutLoading] = useState(false)
   const [error, setError] = useState("")
+  const [sessionLoading, setSessionLoading] = useState(false)
+  const [sessionError, setSessionError] = useState("")
 
   if (!auth) {
     throw new Error("useAuth must be used inside AuthContextProvider")
@@ -35,15 +37,15 @@ export function useAuth() {
 
     const fetchUser = async () => {
       try {
-        setError("")
-        setLoading(true)
+        setSessionError("")
+        setSessionLoading(true)
         const user = await getUser(auth.token)
         setUser(user)
       } catch (e) {
         console.log(e)
-        setError("Failed to get user data")
+        setSessionError("Failed to get user data")
       } finally {
-        setLoading(false)
+        setSessionLoading(false)
       }
     }
 
@@ -188,6 +190,8 @@ export function useAuth() {
     removeAccount,
     signout,
     loading,
-    error
+    error,
+    sessionLoading,
+    sessionError
   }
 }

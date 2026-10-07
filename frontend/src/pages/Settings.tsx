@@ -20,6 +20,7 @@ function Settings() {
     changeName,
     loading,
     error,
+    sessionError,
     logOutLoading
   } = useAuth()
 
@@ -85,7 +86,9 @@ function Settings() {
   return (
     <section className="animate-fade-in flex flex-col gap-8">
       <div className="fixed right-6 top-25 z-9999 flex flex-col gap-3">
-        {error && <ErrorCard message={error} />}
+        {(error || sessionError) && (
+          <ErrorCard message={error || sessionError} />
+        )}
         {actionError && (
           <ErrorCard
             message={actionError.message}
