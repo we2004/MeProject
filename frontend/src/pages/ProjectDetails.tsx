@@ -8,6 +8,7 @@ import { useState } from "react"
 import { calculateProgress, getProjectStatus } from "../utils/projects"
 import AddTaskModal from "../components/modals/AddTaskModal"
 import AddAttachmentModal from "../components/modals/AddAttachmentModal"
+import AttachmentPreviewModal from "../components/modals/AttachmentPreviewModal"
 import { downloadAttachment } from "../api/attachments"
 import { useAuth } from "../context/useAuth"
 import DeleteModal from "../components/modals/DeleteModal"
@@ -62,6 +63,9 @@ function ProjectsDetails() {
     number | null
   >(null)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+  const [viewingAttachmentId, setViewingAttachmentId] = useState<number | null>(
+    null
+  )
 
   const handleDeleteTech = async (tech: string) => {
     if (!project) return
@@ -102,6 +106,10 @@ function ProjectsDetails() {
   if (tasksLoading || projectLoading || attachmentLoading)
     return <ProjectsDetailsSkeleton />
 
+  const viewingAttachment = attachments.find(
+    (attachment) => attachment.id === viewingAttachmentId
+  )
+
   const progress = calculateProgress(Number(projectId), projectTasks)
   const displayedStatus = project
     ? getProjectStatus(project, projectTasks)
@@ -141,6 +149,17 @@ function ProjectsDetails() {
           onClose={() => setIsAttachmentModalOpen(false)}
           onSubmit={addAttachment}
           addAttachmentLoading={addAttachmentLoading}
+        />
+      )}
+
+      {viewingAttachment && (
+        <AttachmentPreviewModal
+          token={token}
+          id={viewingAttachment.id}
+          name={viewingAttachment.name}
+          type={viewingAttachment.type}
+          onClose={() => setViewingAttachmentId(null)}
+          onDownload={handleDownloadAttachment}
         />
       )}
 
@@ -231,6 +250,7 @@ function ProjectsDetails() {
                   <AttachmentCard
                     {...attachment}
                     onDownload={handleDownloadAttachment}
+                    onView={setViewingAttachmentId}
                   />
                 </div>
 

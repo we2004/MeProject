@@ -7,6 +7,7 @@ export type AttachmentCardProps = {
   name: string
   onDownload: (attachmentId: number,
     fileName: string) => void
+  onView: (attachmentId: number) => void
 }
 
 export type AttachmentApiResponse = {
