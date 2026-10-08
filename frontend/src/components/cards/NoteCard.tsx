@@ -1,11 +1,12 @@
 import type { NoteCardProps } from "../../types/notes"
 import dayjs from "dayjs"
+import LinkifiedText from "../LinkifiedText"
 
 function NoteCard({ content, createdAt }: NoteCardProps) {
   return (
     <div className="flex justify-between rounded-2xl border border-primary/15 bg-white p-3 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-md md:p-5">
-      <p className="mr-4 font-body leading-7 text-primary-font/70 md:mr-0">
-        {content}
+      <p className="mr-4 min-w-0 break-words font-body leading-7 text-primary-font/70 md:mr-0">
+        <LinkifiedText text={content} />
       </p>
 
       <div className="flex items-center justify-center gap-2 text-sm text-primary-font/70 md:text-base">
