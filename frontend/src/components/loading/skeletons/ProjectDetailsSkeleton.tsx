@@ -87,27 +87,19 @@ function ProjectsDetailsSkeleton() {
           <div className="h-11 w-40 rounded-2xl bg-primary/10" />
         </div>
 
-        {/* Attachment cards */}
-        <div className="flex flex-col gap-3">
-          {[1, 2, 3].map((item) => (
+        {/* Attachment tiles */}
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
+          {[1, 2, 3, 4].map((item) => (
             <div
               key={item}
-              className="flex items-center gap-3"
+              className="overflow-hidden rounded-2xl border border-primary/10 bg-white shadow-sm"
             >
-              {/* Attachment card */}
-              <div className="flex h-20 flex-1 items-center gap-4 rounded-3xl border border-primary/10 bg-white px-5 shadow-sm">
-                <div className="h-11 w-11 shrink-0 rounded-xl bg-primary/10" />
+              <div className="aspect-square bg-primary/10" />
 
-                <div className="flex flex-1 flex-col gap-2">
-                  <div className="h-4 w-1/3 rounded bg-primary/10" />
-                  <div className="h-3 w-1/5 rounded bg-primary/10" />
-                </div>
-
-                <div className="hidden h-9 w-20 rounded-xl bg-primary/10 sm:block" />
+              <div className="flex items-center justify-between gap-2 p-3">
+                <div className="h-4 w-2/3 rounded bg-primary/10" />
+                <div className="h-9 w-9 shrink-0 rounded-xl bg-primary/10" />
               </div>
-
-              {/* Delete button */}
-              <div className="h-12 w-12 shrink-0 rounded-2xl bg-primary/10" />
             </div>
           ))}
         </div>
