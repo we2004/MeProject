@@ -1,9 +1,6 @@
-import { UserRound, MenuIcon, X } from "lucide-react"
+﻿import { UserRound, MenuIcon, X } from "lucide-react"
 import logo from "../assets/logo2.png"
 import { useAuth } from "../context/useAuth"
-import { getUser } from "../api/auth"
-import { useState, useEffect } from "react"
-import { type User } from "../types/auth"
 import { Link } from "react-router-dom"
 
 type HeaderProps = {
@@ -11,18 +8,7 @@ type HeaderProps = {
   showMenu: boolean
 }
 function Header({ onToggleSidebar, showMenu }: HeaderProps) {
-  const { token } = useAuth()
-  const [currentUser, setCurrentUser] = useState<User | undefined>(undefined)
-
-  useEffect(() => {
-    const start = async () => {
-      const user = await getUser(token)
-
-      setCurrentUser(user)
-    }
-
-    start()
-  }, [token])
+  const { user } = useAuth()
 
   return (
     <header className="border border-primary/15 px-4 py-3 shadow-sm backdrop-blur-sm sticky top-0 z-40">
@@ -64,10 +50,10 @@ function Header({ onToggleSidebar, showMenu }: HeaderProps) {
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary-font">
               <UserRound className="h-5 w-5" />
             </div>
-            {currentUser && (
+            {user && (
               <div className="flex flex-col text-left">
                 <p className="font-heading text-sm font-semibold text-primary-font">
-                  {currentUser.name}
+                  {user.name}
                 </p>
               </div>
             )}
