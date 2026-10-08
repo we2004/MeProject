@@ -5,17 +5,17 @@ import LinkifiedText from "../LinkifiedText"
 function NoteCard({ content, createdAt }: NoteCardProps) {
   return (
     <div className="flex justify-between rounded-2xl border border-primary/15 bg-white p-3 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-md md:p-5">
-      <p className="mr-4 min-w-0 break-words font-body leading-7 text-primary-font/70 md:mr-0">
+      <p className="mr-4 min-w-0 max-w-195 whitespace-pre-wrap break-words font-body leading-7 text-primary-font/70 md:mr-4">
         <LinkifiedText text={content} />
       </p>
 
-      <div className="flex items-center justify-center gap-2 text-sm text-primary-font/70 md:text-base">
+      <div className="flex shrink-0 items-center justify-center gap-2 self-start whitespace-nowrap text-sm text-primary-font/70 md:text-base">
         {/* Mobile */}
         <span className="md:hidden">{dayjs(createdAt).format("MMM D")}</span>
 
         {/* Desktop */}
         <span className="hidden md:block">
-          {dayjs(createdAt).format("MMM D • h:mm A")}
+          {dayjs(createdAt).format("MMM D • h:mm A  ")}
         </span>
       </div>
     </div>
