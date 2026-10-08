@@ -1,4 +1,4 @@
-import { Trash2, CirclePlus, ArrowRight } from "lucide-react"
+import { CirclePlus, ArrowRight } from "lucide-react"
 
 import TaskCard from "../components/cards/TaskCard"
 import PrimaryButton from "../components/buttons/PrimaryButton"
@@ -14,11 +14,11 @@ import { useAuth } from "../context/useAuth"
 import DeleteModal from "../components/modals/DeleteModal"
 import useProject from "../hooks/useProject"
 import useAttachments from "../hooks/useAttachments"
+import useAttachmentFiles from "../hooks/useAttachmentFiles"
 import ProjectInfoSection from "../sections/ProjectInfoSection"
 import useProjects from "../hooks/useProjects"
 import useTasks from "../hooks/useTasks"
 import ProjectsDetailsSkeleton from "../components/loading/skeletons/ProjectDetailsSkeleton"
-import Spinner from "../components/loading/spinners/Spinner"
 import ErrorCard from "../components/cards/ErrorCard"
 import PlaceHolderCard from "../components/cards/PlaceHolderCard"
 
@@ -55,11 +55,21 @@ function ProjectsDetails() {
     error: attachmentsError
   } = useAttachments(token, Number(projectId))
 
+  const {
+    files: attachmentFiles,
+    request: requestAttachmentFile,
+    cancel: cancelAttachmentFile,
+    removeFile: removeAttachmentFile
+  } = useAttachmentFiles(token, Number(projectId))
+
   const navigate = useNavigate()
 
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false)
   const [isAttachmentModalOpen, setIsAttachmentModalOpen] = useState(false)
   const [deletingAttachmentId, setDeletingAttachmentId] = useState<
+    number | null
+  >(null)
+  const [confirmDeleteAttachmentId, setConfirmDeleteAttachmentId] = useState<
     number | null
   >(null)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
@@ -103,11 +113,30 @@ function ProjectsDetails() {
     URL.revokeObjectURL(url)
   }
 
+  const handleDeleteAttachment = async () => {
+    if (confirmDeleteAttachmentId === null) return
+    const attachmentId = confirmDeleteAttachmentId
+
+    setDeletingAttachmentId(attachmentId)
+
+    try {
+      const success = await removeAttachment(attachmentId)
+      if (success) removeAttachmentFile(attachmentId)
+    } finally {
+      setDeletingAttachmentId(null)
+      setConfirmDeleteAttachmentId(null)
+    }
+  }
+
   if (tasksLoading || projectLoading || attachmentLoading)
     return <ProjectsDetailsSkeleton />
 
   const viewingAttachment = attachments.find(
     (attachment) => attachment.id === viewingAttachmentId
+  )
+
+  const confirmDeleteAttachment = attachments.find(
+    (attachment) => attachment.id === confirmDeleteAttachmentId
   )
 
   const progress = calculateProgress(Number(projectId), projectTasks)
@@ -154,12 +183,24 @@ function ProjectsDetails() {
 
       {viewingAttachment && (
         <AttachmentPreviewModal
-          token={token}
           id={viewingAttachment.id}
           name={viewingAttachment.name}
           type={viewingAttachment.type}
+          file={attachmentFiles[viewingAttachment.id]}
+          onRequest={requestAttachmentFile}
           onClose={() => setViewingAttachmentId(null)}
           onDownload={handleDownloadAttachment}
+        />
+      )}
+
+      {confirmDeleteAttachment && (
+        <DeleteModal
+          onCancel={() => setConfirmDeleteAttachmentId(null)}
+          onDelete={handleDeleteAttachment}
+          btnText="Delete Attachment"
+          message={`"${confirmDeleteAttachment.name}" will be permanently deleted. This action cannot be undone.`}
+          title="Delete Attachment"
+          loading={deletingAttachmentId === confirmDeleteAttachment.id}
         />
       )}
 
@@ -237,48 +278,27 @@ function ProjectsDetails() {
           </PrimaryButton>
         </div>
 
-        <div className="flex flex-col gap-3">
-          {attachments.length === 0 ? (
-            <PlaceHolderCard message="No Attachments Yet" />
-          ) : (
-            attachments.map((attachment) => (
-              <div
+        {attachments.length === 0 ? (
+          <PlaceHolderCard message="No Attachments Yet" />
+        ) : (
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
+            {attachments.map((attachment) => (
+              <AttachmentCard
                 key={attachment.id}
-                className="flex items-center flex-wrap gap-3"
-              >
-                <div className="flex-1">
-                  <AttachmentCard
-                    {...attachment}
-                    onDownload={handleDownloadAttachment}
-                    onView={setViewingAttachmentId}
-                  />
-                </div>
-
-                <button
-                  onClick={async () => {
-                    setDeletingAttachmentId(attachment.id)
-
-                    try {
-                      await removeAttachment(attachment.id)
-                    } finally {
-                      setDeletingAttachmentId(null)
-                    }
-                  }}
-                  className="flex h-12 w-12 items-center justify-center rounded-2xl border border-primary/15 bg-white text-primary-font shadow-sm transition-all duration-300 hover:bg-redT hover:text-white"
-                >
-                  {deletingAttachmentId === attachment.id ? (
-                    <Spinner
-                      size="sm"
-                      color="dark"
-                    />
-                  ) : (
-                    <Trash2 className="h-5 w-5" />
-                  )}
-                </button>
-              </div>
-            ))
-          )}
-        </div>
+                id={attachment.id}
+                name={attachment.name}
+                type={attachment.type}
+                file={attachmentFiles[attachment.id]}
+                deleting={deletingAttachmentId === attachment.id}
+                onDownload={handleDownloadAttachment}
+                onView={setViewingAttachmentId}
+                onDelete={setConfirmDeleteAttachmentId}
+                onRequest={requestAttachmentFile}
+                onCancel={cancelAttachmentFile}
+              />
+            ))}
+          </div>
+        )}
       </div>
 
       <button
