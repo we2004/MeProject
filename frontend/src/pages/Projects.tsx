@@ -11,7 +11,7 @@ import SortByDateButton from "../components/buttons/SortByDateButton"
 import AddProjectModal from "../components/modals/AddProjectModal"
 import { useAuth } from "../context/useAuth"
 import useProjects from "../hooks/useProjects"
-import useTasks from "../hooks/useTasks"
+import useAllTasks from "../hooks/useAllTasks"
 import ProjectsSkeleton from "../components/loading/skeletons/ProjectsSkeleton"
 import ErrorCard from "../components/cards/ErrorCard"
 import PlaceHolderCard from "../components/cards/PlaceHolderCard"
@@ -38,7 +38,7 @@ function Projects() {
     tasks,
     tasksLoading,
     error: tasksError
-  } = useTasks(token, "all", "all", "asc")
+  } = useAllTasks(token)
   const { isActionFetching, startAction } =
     useActionFetchIndicator(projectsFetching)
 

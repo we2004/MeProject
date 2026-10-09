@@ -18,6 +18,7 @@ import useAttachmentFiles from "../hooks/useAttachmentFiles"
 import ProjectInfoSection from "../sections/ProjectInfoSection"
 import useProjects from "../hooks/useProjects"
 import useTasks from "../hooks/useTasks"
+import useAllTasks from "../hooks/useAllTasks"
 import ProjectsDetailsSkeleton from "../components/loading/skeletons/ProjectDetailsSkeleton"
 import ErrorCard from "../components/cards/ErrorCard"
 import PlaceHolderCard from "../components/cards/PlaceHolderCard"
@@ -46,6 +47,11 @@ function ProjectsDetails() {
     addTask,
     error: tasksError
   } = useTasks(token, "all", "all", "asc", Number(projectId))
+  const {
+    tasks: allProjectTasks,
+    tasksHasData: allProjectTasksHasData,
+    error: allProjectTasksError
+  } = useAllTasks(token, Number(projectId))
 
   const { projects, error: projectsError } = useProjects(token, "all", "asc")
 
@@ -155,16 +161,14 @@ function ProjectsDetails() {
     (attachment) => attachment.id === confirmDeleteAttachmentId
   )
 
-  const hasCompleteProjectTasks =
-    tasksHasData && taskPagination.totalItems <= projectTasks.length
-  const progress = hasCompleteProjectTasks
-    ? calculateProgress(Number(projectId), projectTasks)
-    : undefined
+  const progress = calculateProgress(Number(projectId), allProjectTasks)
+  const displayedProgress = allProjectTasksHasData ? progress : undefined
 
   return (
     <section className="animate-fade-in flex flex-col gap-15">
       <div className="fixed right-6 top-25 z-9999 flex flex-col gap-3">
         {tasksError && <ErrorCard message={tasksError} />}
+        {allProjectTasksError && <ErrorCard message={allProjectTasksError} />}
         {attachmentsError && <ErrorCard message={attachmentsError} />}
         {projectsError && <ErrorCard message={projectsError} />}
         {projectError && <ErrorCard message={projectError} />}
@@ -225,7 +229,7 @@ function ProjectsDetails() {
         <ProjectInfoSection
           project={project}
           onUpdate={updateProject}
-          progress={progress}
+          progress={displayedProgress}
           onDeleteTech={handleDeleteTech}
           onAddTech={handleAddTech}
           updateProjectLoading={updateProjectLoading}

@@ -14,6 +14,7 @@ import {
 import { useAuth } from "../context/useAuth"
 import useProjects from "../hooks/useProjects"
 import useTasks from "../hooks/useTasks"
+import useAllTasks from "../hooks/useAllTasks"
 import HomeSkeleton from "../components/loading/skeletons/HomeSkeleton"
 import ErrorCard from "../components/cards/ErrorCard"
 import PlaceHolderCard from "../components/cards/PlaceHolderCard"
@@ -26,11 +27,14 @@ function Home() {
     error: projectsError
   } = useProjects(token, "all", "asc")
   const {
-    tasks,
-    tasksLoading,
     updateTask,
     error: tasksError
   } = useTasks(token, "all", "all", "asc")
+  const {
+    tasks,
+    tasksLoading,
+    error: allTasksError
+  } = useAllTasks(token)
 
   const ongoingProjects = getOngoingProjects(projects, tasks).slice(0, 4)
   const ongoingTasks = getOngoingTasks(tasks).slice(0, 3)
@@ -41,7 +45,9 @@ function Home() {
     <section className="animate-fade-in flex flex-col gap-7">
       <div className="fixed right-6 top-25 z-9999 flex flex-col gap-3">
         {projectsError && <ErrorCard message={projectsError} />}
-        {tasksError && <ErrorCard message={tasksError} />}
+        {(tasksError || allTasksError) && (
+          <ErrorCard message={tasksError || allTasksError} />
+        )}
       </div>
 
       {/* Overview */}
