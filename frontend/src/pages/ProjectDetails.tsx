@@ -1,25 +1,28 @@
-import { Trash2, CirclePlus, ArrowRight } from "lucide-react"
+import { CirclePlus, ArrowRight } from "lucide-react"
 
 import TaskCard from "../components/cards/TaskCard"
 import PrimaryButton from "../components/buttons/PrimaryButton"
 import AttachmentCard from "../components/cards/AttachmentCard"
 import { useParams, Link, useNavigate } from "react-router-dom"
 import { useState } from "react"
-import { calculateProgress, getProjectStatus } from "../utils/projects"
+import { calculateProgress } from "../utils/projects"
 import AddTaskModal from "../components/modals/AddTaskModal"
 import AddAttachmentModal from "../components/modals/AddAttachmentModal"
+import AttachmentPreviewModal from "../components/modals/AttachmentPreviewModal"
 import { downloadAttachment } from "../api/attachments"
 import { useAuth } from "../context/useAuth"
 import DeleteModal from "../components/modals/DeleteModal"
 import useProject from "../hooks/useProject"
 import useAttachments from "../hooks/useAttachments"
+import useAttachmentFiles from "../hooks/useAttachmentFiles"
 import ProjectInfoSection from "../sections/ProjectInfoSection"
 import useProjects from "../hooks/useProjects"
 import useTasks from "../hooks/useTasks"
+import useAllTasks from "../hooks/useAllTasks"
 import ProjectsDetailsSkeleton from "../components/loading/skeletons/ProjectDetailsSkeleton"
-import Spinner from "../components/loading/spinners/Spinner"
 import ErrorCard from "../components/cards/ErrorCard"
 import PlaceHolderCard from "../components/cards/PlaceHolderCard"
+import UpdatingIndicator from "../components/UpdatingIndicator"
 
 function ProjectsDetails() {
   const { token } = useAuth()
@@ -37,22 +40,39 @@ function ProjectsDetails() {
   const {
     tasks: projectTasks,
     tasksLoading,
+    tasksHasData,
+    pagination: taskPagination,
     addTaskLoading,
     updateTask,
     addTask,
     error: tasksError
   } = useTasks(token, "all", "all", "asc", Number(projectId))
+  const {
+    tasks: allProjectTasks,
+    tasksHasData: allProjectTasksHasData,
+    error: allProjectTasksError
+  } = useAllTasks(token, Number(projectId))
 
   const { projects, error: projectsError } = useProjects(token, "all", "asc")
 
   const {
     attachments,
     attachmentLoading,
+    attachmentsHasData,
     addAttachmentLoading,
     addAttachment,
     removeAttachment,
     error: attachmentsError
   } = useAttachments(token, Number(projectId))
+
+  const {
+    files: attachmentFiles,
+    request: requestAttachmentFile,
+    cancel: cancelAttachmentFile,
+    removeFile: removeAttachmentFile,
+    getCachedFile,
+    cacheDownloadedFile
+  } = useAttachmentFiles(token, Number(projectId))
 
   const navigate = useNavigate()
 
@@ -61,7 +81,13 @@ function ProjectsDetails() {
   const [deletingAttachmentId, setDeletingAttachmentId] = useState<
     number | null
   >(null)
+  const [confirmDeleteAttachmentId, setConfirmDeleteAttachmentId] = useState<
+    number | null
+  >(null)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+  const [viewingAttachmentId, setViewingAttachmentId] = useState<number | null>(
+    null
+  )
 
   const handleDeleteTech = async (tech: string) => {
     if (!project) return
@@ -87,7 +113,18 @@ function ProjectsDetails() {
     attachmentId: number,
     fileName: string
   ) => {
-    const file = await downloadAttachment(token, attachmentId)
+    const cachedFile = getCachedFile(attachmentId)?.blob
+    const previewFile = attachmentFiles[attachmentId]?.blob
+    const attachment = attachments.find((item) => item.id === attachmentId)
+    if (!attachment) throw new Error(`Attachment ${attachmentId} was not found`)
+
+    const file =
+      cachedFile ??
+      previewFile ??
+      (await downloadAttachment(token, attachmentId))
+    if (!cachedFile && !previewFile) {
+      await cacheDownloadedFile(attachmentId, attachment.type, file)
+    }
 
     const url = URL.createObjectURL(file)
 
@@ -99,18 +136,39 @@ function ProjectsDetails() {
     URL.revokeObjectURL(url)
   }
 
-  if (tasksLoading || projectLoading || attachmentLoading)
-    return <ProjectsDetailsSkeleton />
+  const handleDeleteAttachment = async () => {
+    if (confirmDeleteAttachmentId === null) return
+    const attachmentId = confirmDeleteAttachmentId
 
-  const progress = calculateProgress(Number(projectId), projectTasks)
-  const displayedStatus = project
-    ? getProjectStatus(project, projectTasks)
-    : undefined
+    setDeletingAttachmentId(attachmentId)
+
+    try {
+      const success = await removeAttachment(attachmentId)
+      if (success) removeAttachmentFile(attachmentId)
+    } finally {
+      setDeletingAttachmentId(null)
+      setConfirmDeleteAttachmentId(null)
+    }
+  }
+
+  if (projectLoading) return <ProjectsDetailsSkeleton />
+
+  const viewingAttachment = attachments.find(
+    (attachment) => attachment.id === viewingAttachmentId
+  )
+
+  const confirmDeleteAttachment = attachments.find(
+    (attachment) => attachment.id === confirmDeleteAttachmentId
+  )
+
+  const progress = calculateProgress(Number(projectId), allProjectTasks)
+  const displayedProgress = allProjectTasksHasData ? progress : undefined
 
   return (
     <section className="animate-fade-in flex flex-col gap-15">
       <div className="fixed right-6 top-25 z-9999 flex flex-col gap-3">
         {tasksError && <ErrorCard message={tasksError} />}
+        {allProjectTasksError && <ErrorCard message={allProjectTasksError} />}
         {attachmentsError && <ErrorCard message={attachmentsError} />}
         {projectsError && <ErrorCard message={projectsError} />}
         {projectError && <ErrorCard message={projectError} />}
@@ -144,12 +202,34 @@ function ProjectsDetails() {
         />
       )}
 
+      {viewingAttachment && (
+        <AttachmentPreviewModal
+          id={viewingAttachment.id}
+          name={viewingAttachment.name}
+          type={viewingAttachment.type}
+          file={attachmentFiles[viewingAttachment.id]}
+          onRequest={requestAttachmentFile}
+          onClose={() => setViewingAttachmentId(null)}
+          onDownload={handleDownloadAttachment}
+        />
+      )}
+
+      {confirmDeleteAttachment && (
+        <DeleteModal
+          onCancel={() => setConfirmDeleteAttachmentId(null)}
+          onDelete={handleDeleteAttachment}
+          btnText="Delete Attachment"
+          message={`"${confirmDeleteAttachment.name}" will be permanently deleted. This action cannot be undone.`}
+          title="Delete Attachment"
+          loading={deletingAttachmentId === confirmDeleteAttachment.id}
+        />
+      )}
+
       {project && (
         <ProjectInfoSection
           project={project}
-          displayedProjectStatus={displayedStatus}
           onUpdate={updateProject}
-          progress={progress}
+          progress={displayedProgress}
           onDeleteTech={handleDeleteTech}
           onAddTech={handleAddTech}
           updateProjectLoading={updateProjectLoading}
@@ -172,7 +252,9 @@ function ProjectsDetails() {
         </div>
 
         <div className="flex flex-col items-center justify-center gap-5">
-          {project && projectTasks.length !== 0 ? (
+          {!tasksHasData && tasksLoading ? (
+            <UpdatingIndicator active message="Loading project tasks" />
+          ) : tasksHasData && project && projectTasks.length !== 0 ? (
             projectTasks.slice(0, 3).map((task) => (
               <div
                 key={task.id}
@@ -187,16 +269,16 @@ function ProjectsDetails() {
                 </div>
               </div>
             ))
-          ) : (
+          ) : tasksHasData ? (
             <PlaceHolderCard message="No Tasks Yet" />
-          )}
+          ) : null}
 
-          {project && projectTasks.length > 3 && (
+          {project && taskPagination.totalItems > 3 && (
             <Link
               className="flex items-center gap-2 font-body font-medium text-primary transition-colors duration-300 hover:text-primary-font"
               to={`/tasks?projectId=${project.id}`}
             >
-              See All {projectTasks.length} Tasks
+              See All {taskPagination.totalItems} Tasks
               <ArrowRight className="h-4 w-4" />
             </Link>
           )}
@@ -218,47 +300,29 @@ function ProjectsDetails() {
           </PrimaryButton>
         </div>
 
-        <div className="flex flex-col gap-3">
-          {attachments.length === 0 ? (
-            <PlaceHolderCard message="No Attachments Yet" />
-          ) : (
-            attachments.map((attachment) => (
-              <div
+        {!attachmentsHasData && attachmentLoading ? (
+          <UpdatingIndicator active message="Loading attachments" />
+        ) : attachmentsHasData && attachments.length === 0 ? (
+          <PlaceHolderCard message="No Attachments Yet" />
+        ) : attachmentsHasData ? (
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
+            {attachments.map((attachment) => (
+              <AttachmentCard
                 key={attachment.id}
-                className="flex items-center flex-wrap gap-3"
-              >
-                <div className="flex-1">
-                  <AttachmentCard
-                    {...attachment}
-                    onDownload={handleDownloadAttachment}
-                  />
-                </div>
-
-                <button
-                  onClick={async () => {
-                    setDeletingAttachmentId(attachment.id)
-
-                    try {
-                      await removeAttachment(attachment.id)
-                    } finally {
-                      setDeletingAttachmentId(null)
-                    }
-                  }}
-                  className="flex h-12 w-12 items-center justify-center rounded-2xl border border-primary/15 bg-white text-primary-font shadow-sm transition-all duration-300 hover:bg-redT hover:text-white"
-                >
-                  {deletingAttachmentId === attachment.id ? (
-                    <Spinner
-                      size="sm"
-                      color="dark"
-                    />
-                  ) : (
-                    <Trash2 className="h-5 w-5" />
-                  )}
-                </button>
-              </div>
-            ))
-          )}
-        </div>
+                id={attachment.id}
+                name={attachment.name}
+                type={attachment.type}
+                file={attachmentFiles[attachment.id]}
+                deleting={deletingAttachmentId === attachment.id}
+                onDownload={handleDownloadAttachment}
+                onView={setViewingAttachmentId}
+                onDelete={setConfirmDeleteAttachmentId}
+                onRequest={requestAttachmentFile}
+                onCancel={cancelAttachmentFile}
+              />
+            ))}
+          </div>
+        ) : null}
       </div>
 
       <button

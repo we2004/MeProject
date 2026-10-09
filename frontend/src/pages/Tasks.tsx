@@ -15,6 +15,8 @@ import useProjects from "../hooks/useProjects"
 import TasksSkeleton from "../components/loading/skeletons/TasksSkeleton"
 import ErrorCard from "../components/cards/ErrorCard"
 import PlaceHolderCard from "../components/cards/PlaceHolderCard"
+import useActionFetchIndicator from "../hooks/useActionFetchIndicator"
+import UpdatingIndicator from "../components/UpdatingIndicator"
 
 function Tasks() {
   const { token } = useAuth()
@@ -30,6 +32,7 @@ function Tasks() {
   const {
     tasks,
     tasksLoading,
+    tasksFetching,
     addTaskLoading,
     addTask,
     updateTask,
@@ -41,6 +44,8 @@ function Tasks() {
     projectsLoading,
     error: projectsError
   } = useProjects(token, "all", "asc")
+  const { isActionFetching, startAction } =
+    useActionFetchIndicator(tasksFetching)
 
   const [openMenu, setOpenMenu] = useState<MenuType | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -67,6 +72,7 @@ function Tasks() {
   }, [searchParams, setSearchParams])
 
   const handleFilterSelect = (newFilter: TaskStatusFilter) => {
+    startAction()
     setSearchParams((current) => {
       const params = new URLSearchParams(current)
 
@@ -78,6 +84,7 @@ function Tasks() {
   }
 
   const handlePrioritySelect = (newPriority: TaskPriorityFilter) => {
+    startAction()
     setSearchParams((current) => {
       const params = new URLSearchParams(current)
 
@@ -89,6 +96,7 @@ function Tasks() {
   }
 
   const handleToggleOrder = () => {
+    startAction()
     setSearchParams((current) => {
       const params = new URLSearchParams(current)
 
@@ -168,6 +176,10 @@ function Tasks() {
         </DropdownButton>
 
         <SortByDateButton onToggle={handleToggleOrder} />
+        <UpdatingIndicator
+          active={isActionFetching}
+          message="Updating tasks"
+        />
       </div>
 
       {tasks.length === 0 ? (
@@ -193,11 +205,14 @@ function Tasks() {
               <button
                 disabled={pagination.currentPage === 1}
                 onClick={() =>
-                  setSearchParams((current) => {
-                    const params = new URLSearchParams(current)
-                    params.set("page", String(pagination.currentPage - 1))
-                    return params
-                  })
+                  {
+                    startAction()
+                    setSearchParams((current) => {
+                      const params = new URLSearchParams(current)
+                      params.set("page", String(pagination.currentPage - 1))
+                      return params
+                    })
+                  }
                 }
                 className="hover:text-primary cursor-pointer transition-all duration-300"
               >
@@ -211,11 +226,14 @@ function Tasks() {
               <button
                 disabled={pagination.currentPage === pagination.totalPages}
                 onClick={() =>
-                  setSearchParams((current) => {
-                    const params = new URLSearchParams(current)
-                    params.set("page", String(pagination.currentPage + 1))
-                    return params
-                  })
+                  {
+                    startAction()
+                    setSearchParams((current) => {
+                      const params = new URLSearchParams(current)
+                      params.set("page", String(pagination.currentPage + 1))
+                      return params
+                    })
+                  }
                 }
                 className="hover:text-primary cursor-pointer transition-all duration-300"
               >

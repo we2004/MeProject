@@ -1,25 +1,22 @@
-import { useContext } from "react"
+﻿import { useContext } from "react"
 import { AuthContext } from "./AuthContext"
 import {
   changePassword,
   deleteAccount,
   explore,
-  getUser,
   login,
   logout,
   register,
   updateName
 } from "../api/auth"
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import {
-  type User,
   type ChangePassword,
   type LogUser,
   type NewUser
 } from "../types/auth"
 export function useAuth() {
   const auth = useContext(AuthContext)
-  const [user, setUser] = useState<User | undefined>(undefined)
   const [loading, setLoading] = useState(false)
   const [logOutLoading, setLogOutLoading] = useState(false)
   const [error, setError] = useState("")
@@ -27,28 +24,6 @@ export function useAuth() {
   if (!auth) {
     throw new Error("useAuth must be used inside AuthContextProvider")
   }
-
-  useEffect(() => {
-    if (!auth.token) {
-      return
-    }
-
-    const fetchUser = async () => {
-      try {
-        setError("")
-        setLoading(true)
-        const user = await getUser(auth.token)
-        setUser(user)
-      } catch (e) {
-        console.log(e)
-        setError("Failed to get user data")
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchUser()
-  }, [auth.token])
 
   const exploreApp = async () => {
     try {
@@ -127,16 +102,16 @@ export function useAuth() {
       setError("")
       setLogOutLoading(true)
       await logout(auth.token)
-      localStorage.removeItem("token")
-      auth.setToken("")
-      return true
     } catch (e) {
       console.log(e)
       setError("Failed to log out")
-      return false
     } finally {
+      auth.setToken("")
+      auth.setUser(undefined)
       setLogOutLoading(false)
     }
+
+    return true
   }
 
   const removeAccount = async () => {
@@ -145,9 +120,8 @@ export function useAuth() {
       setLoading(true)
       await deleteAccount(auth.token)
 
-      localStorage.removeItem("token")
       auth.setToken("")
-      setUser(undefined)
+      auth.setUser(undefined)
 
       return true
     } catch (e) {
@@ -164,7 +138,7 @@ export function useAuth() {
       setLoading(true)
       const response = await updateName(auth.token, newName)
 
-      setUser((prev) => (prev ? { ...prev, name: response.name } : prev))
+      auth.setUser((prev) => (prev ? { ...prev, name: response.name } : prev))
 
       return true
     } catch (e) {
@@ -177,8 +151,9 @@ export function useAuth() {
   }
 
   return {
-    ...auth,
-    user,
+    token: auth.token,
+    setToken: auth.setToken,
+    user: auth.user,
     exploreApp,
     loginApp,
     logOutLoading,
@@ -188,6 +163,8 @@ export function useAuth() {
     removeAccount,
     signout,
     loading,
-    error
+    error,
+    sessionLoading: auth.sessionLoading,
+    sessionError: auth.sessionError
   }
 }

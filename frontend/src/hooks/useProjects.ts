@@ -4,41 +4,30 @@ import {
   type ProjectStatusFilter,
   type Project
 } from "../types/projects"
-import { useState, useEffect } from "react"
+import { useState } from "react"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { getProjects, createProject } from "../api/projects"
 import { createAttachment } from "../api/attachments"
+
 function useProjects(
   token: string,
   filter: ProjectStatusFilter,
   order: SortOrder
 ) {
-  const [projects, setProjects] = useState<ProjectApiResponse[]>([])
-  const [projectsLoading, setprojectsLoading] = useState(false)
+  const queryClient = useQueryClient()
   const [addProjectLoading, setAddProjectLoading] = useState(false)
-  const [error, setError] = useState("")
+  const [mutationError, setMutationError] = useState("")
 
-  //GET
-  useEffect(() => {
-    const handleFetchProjects = async () => {
-      try {
-        setError("")
-        setprojectsLoading(true)
-        const projectsData = await getProjects(token, filter, order)
-        setProjects(projectsData)
-      } catch (e) {
-        setError("Failed to fetch projects")
-        console.log(e)
-      } finally {
-        setprojectsLoading(false)
-      }
-    }
-
-    handleFetchProjects()
-  }, [token, filter, order])
+  const projectsQuery = useQuery<ProjectApiResponse[]>({
+    queryKey: ["projects", token, filter, order],
+    queryFn: () => getProjects(token, filter, order),
+    placeholderData: (previousData, previousQuery) =>
+      previousQuery?.queryKey[1] === token ? previousData : undefined
+  })
 
   const addProject = async (newProject: Project, files: File[]) => {
     try {
-      setError("")
+      setMutationError("")
       setAddProjectLoading(true)
       const response = await createProject(token, newProject)
 
@@ -48,21 +37,28 @@ function useProjects(
           projectId: Number(response.id)
         })
       }
-      const projectsData = await getProjects(token, filter, order)
-      setProjects(projectsData)
-      return true
 
+      await queryClient.invalidateQueries({ queryKey: ["projects", token] })
+      return true
     } catch (e) {
-      setError("Faild to add project")
+      await queryClient.invalidateQueries({ queryKey: ["projects", token] })
+      setMutationError("Failed to add project")
       console.log(e)
       return false
-
     } finally {
       setAddProjectLoading(false)
     }
   }
 
-  return { projects, projectsLoading, addProjectLoading, error, addProject }
+  return {
+    projects: projectsQuery.data ?? [],
+    projectsLoading: projectsQuery.isLoading,
+    projectsFetching: projectsQuery.isFetching,
+    projectsHasData: projectsQuery.data !== undefined,
+    addProjectLoading,
+    error: projectsQuery.isError ? "Failed to fetch projects" : mutationError,
+    addProject
+  }
 }
 
 export default useProjects
