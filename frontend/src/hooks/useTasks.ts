@@ -9,12 +9,16 @@ import type { EditInfoFields, SortOrder } from "../types/common"
 import type {
   TaskPriorityFilter,
   TaskStatusFilter,
-  Task,
+  TaskApiResponse,
   CreateTask,
   TaskStatus
 } from "../types/tasks"
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { createNote } from "../api/notes"
+import {
+  useQuery,
+  useQueryClient
+} from "@tanstack/react-query"
 
 function useTasks(
   token: string,
@@ -24,84 +28,48 @@ function useTasks(
   projectId?: number,
   page = 1
 ) {
-  const [tasks, setTasks] = useState<Task[]>([])
-  const [pagination, setPagination] = useState({
-    currentPage: 1,
-    limit: 10,
-    totalItems: 0,
-    totalPages: 0
-  })
-  const [tasksLoading, setTasksLoading] = useState(false)
+  const queryClient = useQueryClient()
   const [addTaskLoading, setAddTaskLoading] = useState(false)
   const [udpateTaskLoading, setUpdateTaskLoading] = useState(false)
   const [removeTaskLoading, setRemoveTaskLoading] = useState(false)
-  const [error, setError] = useState("")
+  const [mutationError, setMutationError] = useState("")
 
-  //GET
-  useEffect(() => {
-    const handleFetchTasks = async () => {
-      try {
-        setError("")
-        setTasksLoading(true)
-        if (projectId) {
-          const response = await getTasksByProject(
-            projectId,
-            token,
-            filter,
-            priority,
-            order,
-            page
-          )
-          setTasks(response.data)
-          setPagination(response.pagination)
-        } else {
-          const response = await getTasks(token, filter, priority, order, page)
-          setTasks(response.data)
-          setPagination(response.pagination)
-        }
-      } catch (e) {
-        setError("Failed to fetch tasks")
-        console.log(e)
-      } finally {
-        setTasksLoading(false)
-      }
-    }
-    handleFetchTasks()
-  }, [token, filter, priority, order, page, projectId])
+  const tasksQuery = useQuery<TaskApiResponse>({
+    queryKey: ["tasks", token, filter, priority, order, projectId, page],
+    queryFn: () =>
+      projectId
+        ? getTasksByProject(projectId, token, filter, priority, order, page)
+        : getTasks(token, filter, priority, order, page),
+    placeholderData: (previousData, previousQuery) =>
+      previousQuery?.queryKey[1] === token &&
+      previousQuery?.queryKey[5] === projectId
+        ? previousData
+        : undefined
+  })
+
+  const invalidateTaskAndProjectLists = async () => {
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: ["tasks", token] }),
+      queryClient.invalidateQueries({ queryKey: ["projects", token] }),
+      queryClient.invalidateQueries({ queryKey: ["project", token] })
+    ])
+  }
 
   const addTask = async (newTask: CreateTask, notes: string[]) => {
     try {
-      setError("")
+      setMutationError("")
       setAddTaskLoading(true)
       const response = await createTask(token, newTask)
       for (const content of notes) {
         await createNote(token, { content: content, taskId: response.id })
       }
 
-      if (projectId) {
-        const response = await getTasksByProject(
-          Number(projectId),
-          token,
-          filter,
-          priority,
-          order,
-          page
-        )
-
-        setTasks(response.data)
-        setPagination(response.pagination)
-      } else {
-        const response = await getTasks(token, filter, priority, order, page)
-
-        setTasks(response.data)
-        setPagination(response.pagination)
-      }
-
+      await invalidateTaskAndProjectLists()
       return true
     } catch (e) {
-      setError("Failed to add task")
+      await invalidateTaskAndProjectLists()
+      setMutationError("Failed to add task")
       console.log(e)
-
       return false
     } finally {
       setAddTaskLoading(false)
@@ -114,19 +82,25 @@ function useTasks(
     data: string | boolean | string[] | TaskStatus
   ) => {
     try {
-      setError("")
+      setMutationError("")
       setUpdateTaskLoading(true)
 
       await updateTaskData(taskId, field, data, token)
 
-      setTasks((current) =>
-        current.map((task) =>
-          task.id === taskId ? { ...task, [field]: data } : task
-        )
+      queryClient.setQueriesData<TaskApiResponse>(
+        { queryKey: ["tasks", token] },
+        (current) =>
+          current && {
+            ...current,
+            data: current.data.map((task) =>
+              task.id === taskId ? { ...task, [field]: data } : task
+            )
+          }
       )
+      await invalidateTaskAndProjectLists()
       return true
     } catch (e) {
-      setError("Failed to update task")
+      setMutationError("Failed to update task")
       console.log(e)
       return false
     } finally {
@@ -136,23 +110,14 @@ function useTasks(
 
   const removeTask = async (taskId: number) => {
     try {
-      setError("")
+      setMutationError("")
       setRemoveTaskLoading(true)
       await deleteTask(taskId, token)
-
-      const updatedTasks = await getTasksByProject(
-        Number(projectId),
-        token,
-        "all",
-        "all",
-        "asc"
-      )
-      setTasks(updatedTasks.data)
+      await invalidateTaskAndProjectLists()
       return true
     } catch (e) {
-      setError("Failed to delete task")
+      setMutationError("Failed to delete task")
       console.log(e)
-
       return false
     } finally {
       setRemoveTaskLoading(false)
@@ -160,13 +125,20 @@ function useTasks(
   }
 
   return {
-    tasks,
-    pagination,
-    tasksLoading,
+    tasks: tasksQuery.data?.data ?? [],
+    pagination: tasksQuery.data?.pagination ?? {
+      currentPage: 1,
+      limit: 10,
+      totalItems: 0,
+      totalPages: 0
+    },
+    tasksLoading: tasksQuery.isLoading,
+    tasksFetching: tasksQuery.isFetching,
+    tasksHasData: tasksQuery.data !== undefined,
     addTaskLoading,
     udpateTaskLoading,
     removeTaskLoading,
-    error,
+    error: tasksQuery.isError ? "Failed to fetch tasks" : mutationError,
     addTask,
     updateTask,
     removeTask

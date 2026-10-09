@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react"
+import { useState } from "react"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
 import type { ProjectApiResponse } from "../types/projects"
 import {
   getProjectById,
@@ -6,37 +7,28 @@ import {
   deleteProject
 } from "../api/projects"
 import type { EditInfoFields } from "../types/common"
+
 function useProject(token: string, projectId?: number) {
-  const [project, setProject] = useState<ProjectApiResponse | undefined>(
-    undefined
-  )
-  const [projectLoading, setProjectLoading] = useState(false)
+  const queryClient = useQueryClient()
   const [updateProjectLoading, setUpdateProjectLoading] = useState(false)
   const [deleteProjectLoading, setDeleteProjectLoading] = useState(false)
-  const [error, setError] = useState("")
+  const [mutationError, setMutationError] = useState("")
 
-  //GET project
-  useEffect(() => {
-    if (!projectId) return
-
-    const handleFetchProject = async () => {
-      try {
-        setError("")
-        setProjectLoading(true)
-
-        const projectData = await getProjectById(projectId, token)
-
-        setProject(projectData)
-      } catch (e) {
-        setError("Failed to fetch project")
-        console.log(e)
-      } finally {
-        setProjectLoading(false)
-      }
-    }
-
-    handleFetchProject()
-  }, [token, projectId])
+  const projectQuery = useQuery<ProjectApiResponse>({
+    queryKey: ["project", token, projectId],
+    queryFn: () => getProjectById(projectId!, token),
+    enabled: Boolean(token && projectId),
+    initialData: () =>
+      projectId
+        ? queryClient
+            .getQueriesData<ProjectApiResponse[]>({
+              queryKey: ["projects", token]
+            })
+            .flatMap(([, projects]) => projects ?? [])
+            .find((project) => project.id === projectId)
+        : undefined,
+    initialDataUpdatedAt: 0
+  })
 
   const updateProject = async (
     field: EditInfoFields,
@@ -44,39 +36,56 @@ function useProject(token: string, projectId?: number) {
   ) => {
     if (!projectId) return false
     try {
-      setError("")
+      setMutationError("")
       setUpdateProjectLoading(true)
       await updateProjectData(projectId, field, data, token)
 
-      setProject((currentProject) => {
-        if (!currentProject) return currentProject
-
-        return {
-          ...currentProject,
-          [field]: data
-        }
-      })
+      queryClient.setQueryData<ProjectApiResponse>(
+        ["project", token, projectId],
+        (currentProject) =>
+          currentProject ? { ...currentProject, [field]: data } : currentProject
+      )
+      queryClient.setQueriesData<ProjectApiResponse[]>(
+        { queryKey: ["projects", token] },
+        (projects) =>
+          projects?.map((project) =>
+            project.id === projectId ? { ...project, [field]: data } : project
+          )
+      )
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["project", token, projectId] }),
+        queryClient.invalidateQueries({ queryKey: ["projects", token] })
+      ])
 
       return true
     } catch (e) {
-      setError("Failed to update project")
+      setMutationError("Failed to update project")
       console.log(e)
       return false
     } finally {
       setUpdateProjectLoading(false)
-      
     }
   }
 
   const deleteCurrentProject = async () => {
     if (!projectId) return
     try {
-      setError("")
+      setMutationError("")
       setDeleteProjectLoading(true)
       await deleteProject(projectId, token)
+
+      queryClient.removeQueries({ queryKey: ["attachments", token, projectId] })
+      queryClient.removeQueries({
+        queryKey: ["attachmentFile", token, projectId]
+      })
+      queryClient.removeQueries({ queryKey: ["project", token, projectId] })
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["projects", token] }),
+        queryClient.invalidateQueries({ queryKey: ["tasks", token] })
+      ])
       return true
     } catch (e) {
-      setError("Failed to delete project")
+      setMutationError("Failed to delete project")
       console.log(e)
       return false
     } finally {
@@ -85,11 +94,13 @@ function useProject(token: string, projectId?: number) {
   }
 
   return {
-    project,
-    projectLoading,
+    project: projectQuery.data,
+    projectLoading: projectQuery.isLoading,
     updateProjectLoading,
     deleteProjectLoading,
-    error,
+    error: projectQuery.isError
+      ? "Failed to fetch project"
+      : mutationError,
     updateProject,
     deleteCurrentProject
   }

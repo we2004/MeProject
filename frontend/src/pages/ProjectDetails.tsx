@@ -5,7 +5,7 @@ import PrimaryButton from "../components/buttons/PrimaryButton"
 import AttachmentCard from "../components/cards/AttachmentCard"
 import { useParams, Link, useNavigate } from "react-router-dom"
 import { useState } from "react"
-import { calculateProgress, getProjectStatus } from "../utils/projects"
+import { calculateProgress } from "../utils/projects"
 import AddTaskModal from "../components/modals/AddTaskModal"
 import AddAttachmentModal from "../components/modals/AddAttachmentModal"
 import AttachmentPreviewModal from "../components/modals/AttachmentPreviewModal"
@@ -21,6 +21,7 @@ import useTasks from "../hooks/useTasks"
 import ProjectsDetailsSkeleton from "../components/loading/skeletons/ProjectDetailsSkeleton"
 import ErrorCard from "../components/cards/ErrorCard"
 import PlaceHolderCard from "../components/cards/PlaceHolderCard"
+import UpdatingIndicator from "../components/UpdatingIndicator"
 
 function ProjectsDetails() {
   const { token } = useAuth()
@@ -38,6 +39,8 @@ function ProjectsDetails() {
   const {
     tasks: projectTasks,
     tasksLoading,
+    tasksHasData,
+    pagination: taskPagination,
     addTaskLoading,
     updateTask,
     addTask,
@@ -49,6 +52,7 @@ function ProjectsDetails() {
   const {
     attachments,
     attachmentLoading,
+    attachmentsHasData,
     addAttachmentLoading,
     addAttachment,
     removeAttachment,
@@ -59,7 +63,9 @@ function ProjectsDetails() {
     files: attachmentFiles,
     request: requestAttachmentFile,
     cancel: cancelAttachmentFile,
-    removeFile: removeAttachmentFile
+    removeFile: removeAttachmentFile,
+    getCachedFile,
+    cacheDownloadedFile
   } = useAttachmentFiles(token, Number(projectId))
 
   const navigate = useNavigate()
@@ -101,7 +107,18 @@ function ProjectsDetails() {
     attachmentId: number,
     fileName: string
   ) => {
-    const file = await downloadAttachment(token, attachmentId)
+    const cachedFile = getCachedFile(attachmentId)?.blob
+    const previewFile = attachmentFiles[attachmentId]?.blob
+    const attachment = attachments.find((item) => item.id === attachmentId)
+    if (!attachment) throw new Error(`Attachment ${attachmentId} was not found`)
+
+    const file =
+      cachedFile ??
+      previewFile ??
+      (await downloadAttachment(token, attachmentId))
+    if (!cachedFile && !previewFile) {
+      await cacheDownloadedFile(attachmentId, attachment.type, file)
+    }
 
     const url = URL.createObjectURL(file)
 
@@ -128,8 +145,7 @@ function ProjectsDetails() {
     }
   }
 
-  if (tasksLoading || projectLoading || attachmentLoading)
-    return <ProjectsDetailsSkeleton />
+  if (projectLoading) return <ProjectsDetailsSkeleton />
 
   const viewingAttachment = attachments.find(
     (attachment) => attachment.id === viewingAttachmentId
@@ -139,9 +155,10 @@ function ProjectsDetails() {
     (attachment) => attachment.id === confirmDeleteAttachmentId
   )
 
-  const progress = calculateProgress(Number(projectId), projectTasks)
-  const displayedStatus = project
-    ? getProjectStatus(project, projectTasks)
+  const hasCompleteProjectTasks =
+    tasksHasData && taskPagination.totalItems <= projectTasks.length
+  const progress = hasCompleteProjectTasks
+    ? calculateProgress(Number(projectId), projectTasks)
     : undefined
 
   return (
@@ -207,7 +224,6 @@ function ProjectsDetails() {
       {project && (
         <ProjectInfoSection
           project={project}
-          displayedProjectStatus={displayedStatus}
           onUpdate={updateProject}
           progress={progress}
           onDeleteTech={handleDeleteTech}
@@ -232,7 +248,9 @@ function ProjectsDetails() {
         </div>
 
         <div className="flex flex-col items-center justify-center gap-5">
-          {project && projectTasks.length !== 0 ? (
+          {!tasksHasData && tasksLoading ? (
+            <UpdatingIndicator active message="Loading project tasks" />
+          ) : tasksHasData && project && projectTasks.length !== 0 ? (
             projectTasks.slice(0, 3).map((task) => (
               <div
                 key={task.id}
@@ -247,16 +265,16 @@ function ProjectsDetails() {
                 </div>
               </div>
             ))
-          ) : (
+          ) : tasksHasData ? (
             <PlaceHolderCard message="No Tasks Yet" />
-          )}
+          ) : null}
 
-          {project && projectTasks.length > 3 && (
+          {project && taskPagination.totalItems > 3 && (
             <Link
               className="flex items-center gap-2 font-body font-medium text-primary transition-colors duration-300 hover:text-primary-font"
               to={`/tasks?projectId=${project.id}`}
             >
-              See All {projectTasks.length} Tasks
+              See All {taskPagination.totalItems} Tasks
               <ArrowRight className="h-4 w-4" />
             </Link>
           )}
@@ -278,9 +296,11 @@ function ProjectsDetails() {
           </PrimaryButton>
         </div>
 
-        {attachments.length === 0 ? (
+        {!attachmentsHasData && attachmentLoading ? (
+          <UpdatingIndicator active message="Loading attachments" />
+        ) : attachmentsHasData && attachments.length === 0 ? (
           <PlaceHolderCard message="No Attachments Yet" />
-        ) : (
+        ) : attachmentsHasData ? (
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
             {attachments.map((attachment) => (
               <AttachmentCard
@@ -298,7 +318,7 @@ function ProjectsDetails() {
               />
             ))}
           </div>
-        )}
+        ) : null}
       </div>
 
       <button

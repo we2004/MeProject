@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react"
+import { useState } from "react"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
 import type { AttachmentApiResponse } from "../types/attachments"
 import {
   getAttachments,
@@ -7,47 +8,34 @@ import {
 } from "../api/attachments"
 
 function useAttachments(token: string, projectId: number) {
-  const [attachments, setAttachments] = useState<AttachmentApiResponse[]>([])
-  const [attachmentLoading, setAttachmentLoading] = useState(false)
+  const queryClient = useQueryClient()
   const [addAttachmentLoading, setAddAttachmentLoading] = useState(false)
   const [removeAttachmentLoading, setRemoveAttachmentLoading] = useState(false)
-  const [error, setError] = useState("")
+  const [mutationError, setMutationError] = useState("")
 
-  //GET attachments
-  useEffect(() => {
-    const handleFetchAttachments = async () => {
-      try {
-        setError("")
-        setAttachmentLoading(true)
-        const attachmentsData = await getAttachments(projectId, token)
-        setAttachments(attachmentsData)
-      } catch (e) {
-        setError("Failed to fetch attachments")
-        console.log(e)
-      } finally {
-        setAttachmentLoading(false)
-      }
-    }
-    handleFetchAttachments()
-  }, [token, projectId])
+  const attachmentsQuery = useQuery<AttachmentApiResponse[]>({
+    queryKey: ["attachments", token, projectId],
+    queryFn: () => getAttachments(projectId, token),
+    enabled: Boolean(token && projectId)
+  })
 
   const addAttachment = async (files: File[]) => {
     try {
-      setError("")
+      setMutationError("")
       setAddAttachmentLoading(true)
       for (const file of files) {
-        await createAttachment(token, {
-          file: file,
-          projectId: projectId
-        })
+        await createAttachment(token, { file, projectId })
       }
 
-      const updatedAttachments = await getAttachments(projectId, token)
-
-      setAttachments(updatedAttachments)
+      await queryClient.invalidateQueries({
+        queryKey: ["attachments", token, projectId]
+      })
       return true
     } catch (e) {
-      setError("Failed to add attachment")
+      await queryClient.invalidateQueries({
+        queryKey: ["attachments", token, projectId]
+      })
+      setMutationError("Failed to add attachment")
       console.log(e)
       return false
     } finally {
@@ -57,18 +45,20 @@ function useAttachments(token: string, projectId: number) {
 
   const removeAttachment = async (fileId: number) => {
     try {
-      setError("")
+      setMutationError("")
       setRemoveAttachmentLoading(true)
       await deleteAttachment(token, fileId)
 
-      const updatedAttachments = await getAttachments(projectId, token)
-      setAttachments(updatedAttachments)
+      queryClient.removeQueries({
+        queryKey: ["attachmentFile", token, projectId, fileId]
+      })
+      await queryClient.invalidateQueries({
+        queryKey: ["attachments", token, projectId]
+      })
       return true
-
     } catch (e) {
+      setMutationError("Failed to delete attachment")
       console.log(e)
-      setError("Failed to delete attachment")
-
       return false
     } finally {
       setRemoveAttachmentLoading(false)
@@ -76,11 +66,14 @@ function useAttachments(token: string, projectId: number) {
   }
 
   return {
-    attachments,
-    attachmentLoading,
+    attachments: attachmentsQuery.data ?? [],
+    attachmentLoading: attachmentsQuery.isLoading,
+    attachmentsHasData: attachmentsQuery.data !== undefined,
     addAttachmentLoading,
     removeAttachmentLoading,
-    error,
+    error: attachmentsQuery.isError
+      ? "Failed to fetch attachments"
+      : mutationError,
     addAttachment,
     removeAttachment
   }

@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState } from "react"
 import axios from "axios"
 import { getUser } from "../api/auth"
 import type { User } from "../types/auth"
+import { useQueryClient } from "@tanstack/react-query"
 
 type SessionRequest = {
   token: string
@@ -10,6 +11,7 @@ type SessionRequest = {
 }
 
 function AuthContextProvider({ children }: { children: React.ReactNode }) {
+  const queryClient = useQueryClient()
   const [token, setTokenState] = useState(
     () => localStorage.getItem("token") ?? ""
   )
@@ -20,6 +22,9 @@ function AuthContextProvider({ children }: { children: React.ReactNode }) {
   const currentToken = useRef(token)
 
   const setToken = useCallback((newToken: string) => {
+    if (currentToken.current !== newToken) {
+      queryClient.clear()
+    }
     currentToken.current = newToken
     if (newToken) {
       localStorage.setItem("token", newToken)
@@ -30,7 +35,7 @@ function AuthContextProvider({ children }: { children: React.ReactNode }) {
     setSessionError("")
     setSessionLoading(Boolean(newToken))
     setTokenState(newToken)
-  }, [])
+  }, [queryClient])
 
   useEffect(() => {
     if (!token) return

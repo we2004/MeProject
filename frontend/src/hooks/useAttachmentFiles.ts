@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react"
+import { useQueryClient } from "@tanstack/react-query"
 import { downloadAttachment } from "../api/attachments"
 import type { AttachemntsTypes, AttachmentFile } from "../types/attachments"
 
@@ -15,8 +16,15 @@ const MIME_TYPES: Record<AttachemntsTypes, string> = {
 
 const MAX_CONCURRENT = 3
 const MAX_TEXT_CHARS = 200000
+const FILE_CACHE_GC_TIME = 3 * 60 * 1000
+const fileCacheGcTimers = new Map<string, ReturnType<typeof setTimeout>>()
 
 type Job = { id: number; type: AttachemntsTypes }
+type CachedAttachment = {
+  blob: Blob
+  text?: string
+  truncated?: boolean
+}
 
 function withoutFile(files: Record<number, AttachmentFile>, id: number) {
   const next = { ...files }
@@ -25,11 +33,41 @@ function withoutFile(files: Record<number, AttachmentFile>, id: number) {
 }
 
 function useAttachmentFiles(token: string, projectId: number) {
+  const queryClient = useQueryClient()
   const [files, setFiles] = useState<Record<number, AttachmentFile>>({})
   const queue = useRef<Job[]>([])
   const activeCount = useRef(0)
   const requested = useRef(new Set<number>())
   const urls = useRef(new Map<number, string>())
+  const cacheScope = JSON.stringify([token, projectId])
+
+  const showCachedFile = useCallback(
+    (id: number, type: AttachemntsTypes, cached: CachedAttachment) => {
+      if (type === "md" || type === "txt") {
+        setFiles((prev) => ({
+          ...prev,
+          [id]: {
+            status: "ready",
+            blob: cached.blob,
+            text: cached.text,
+            truncated: cached.truncated
+          }
+        }))
+        return
+      }
+
+      let url = urls.current.get(id)
+      if (!url) {
+        url = URL.createObjectURL(cached.blob)
+        urls.current.set(id, url)
+      }
+      setFiles((prev) => ({
+        ...prev,
+        [id]: { status: "ready", blob: cached.blob, url }
+      }))
+    },
+    []
+  )
 
   const load = useCallback(
     async ({ id, type }: Job) => {
@@ -43,23 +81,23 @@ function useAttachmentFiles(token: string, projectId: number) {
           const content = await blob.text()
           if (!requested.current.has(id)) return
 
-          setFiles((prev) => ({
-            ...prev,
-            [id]: {
-              status: "ready",
-              blob,
-              text: content.slice(0, MAX_TEXT_CHARS),
-              truncated: content.length > MAX_TEXT_CHARS
-            }
-          }))
+          const cached = {
+            blob,
+            text: content.slice(0, MAX_TEXT_CHARS),
+            truncated: content.length > MAX_TEXT_CHARS
+          }
+          queryClient.setQueryData<CachedAttachment>(
+            ["attachmentFile", token, projectId, id],
+            cached
+          )
+          showCachedFile(id, type, cached)
         } else {
-          const url = URL.createObjectURL(blob)
-          urls.current.set(id, url)
-
-          setFiles((prev) => ({
-            ...prev,
-            [id]: { status: "ready", blob, url }
-          }))
+          const cached = { blob }
+          queryClient.setQueryData<CachedAttachment>(
+            ["attachmentFile", token, projectId, id],
+            cached
+          )
+          showCachedFile(id, type, cached)
         }
       } catch {
         if (!requested.current.has(id)) return
@@ -68,7 +106,7 @@ function useAttachmentFiles(token: string, projectId: number) {
         setFiles((prev) => ({ ...prev, [id]: { status: "error" } }))
       }
     },
-    [token]
+    [projectId, queryClient, showCachedFile, token]
   )
 
   // A worker keeps taking queued jobs until the concurrency limit is exceeded
@@ -105,6 +143,17 @@ function useAttachmentFiles(token: string, projectId: number) {
       }
 
       requested.current.add(id)
+      const cached = queryClient.getQueryData<CachedAttachment>([
+        "attachmentFile",
+        token,
+        projectId,
+        id
+      ])
+      if (cached) {
+        showCachedFile(id, type, cached)
+        return
+      }
+
       setFiles((prev) => ({ ...prev, [id]: { status: "loading" } }))
 
       if (priority || activeCount.current < MAX_CONCURRENT) {
@@ -113,7 +162,7 @@ function useAttachmentFiles(token: string, projectId: number) {
         queue.current.push(job)
       }
     },
-    [runJob]
+    [projectId, queryClient, runJob, showCachedFile, token]
   )
 
   // Only requests that haven't started yet are dropped
@@ -139,7 +188,44 @@ function useAttachmentFiles(token: string, projectId: number) {
     setFiles((prev) => withoutFile(prev, id))
   }, [])
 
+  const getCachedFile = useCallback(
+    (id: number) =>
+      queryClient.getQueryData<CachedAttachment>([
+        "attachmentFile",
+        token,
+        projectId,
+        id
+      ]),
+    [projectId, queryClient, token]
+  )
+
+  const cacheDownloadedFile = useCallback(
+    async (id: number, type: AttachemntsTypes, blob: Blob) => {
+      let cached: CachedAttachment = { blob }
+      if (type === "md" || type === "txt") {
+        const content = await blob.text()
+        cached = {
+          blob,
+          text: content.slice(0, MAX_TEXT_CHARS),
+          truncated: content.length > MAX_TEXT_CHARS
+        }
+      }
+
+      queryClient.setQueryData<CachedAttachment>(
+        ["attachmentFile", token, projectId, id],
+        cached
+      )
+    },
+    [projectId, queryClient, token]
+  )
+
   useEffect(() => {
+    const existingTimer = fileCacheGcTimers.get(cacheScope)
+    if (existingTimer) {
+      clearTimeout(existingTimer)
+      fileCacheGcTimers.delete(cacheScope)
+    }
+
     const pendingRequests = requested.current
     const pendingUrls = urls.current
 
@@ -149,10 +235,25 @@ function useAttachmentFiles(token: string, projectId: number) {
       pendingUrls.forEach((url) => URL.revokeObjectURL(url))
       pendingUrls.clear()
       setFiles({})
-    }
-  }, [token, projectId])
 
-  return { files, request, cancel, removeFile }
+      const timer = setTimeout(() => {
+        queryClient.removeQueries({
+          queryKey: ["attachmentFile", token, projectId]
+        })
+        fileCacheGcTimers.delete(cacheScope)
+      }, FILE_CACHE_GC_TIME)
+      fileCacheGcTimers.set(cacheScope, timer)
+    }
+  }, [cacheScope, projectId, queryClient, token])
+
+  return {
+    files,
+    request,
+    cancel,
+    removeFile,
+    getCachedFile,
+    cacheDownloadedFile
+  }
 }
 
 export default useAttachmentFiles

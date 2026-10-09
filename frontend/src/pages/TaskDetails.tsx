@@ -15,6 +15,7 @@ import DeleteModal from "../components/modals/DeleteModal"
 import ErrorCard from "../components/cards/ErrorCard"
 import Spinner from "../components/loading/spinners/Spinner"
 import PlaceHolderCard from "../components/cards/PlaceHolderCard"
+import UpdatingIndicator from "../components/UpdatingIndicator"
 
 function TaskDetails() {
   const { token } = useAuth()
@@ -37,6 +38,7 @@ function TaskDetails() {
   const {
     notes,
     notesLoading,
+    notesHasData,
     addNoteLoading,
     addNote,
     removeNote,
@@ -56,8 +58,7 @@ function TaskDetails() {
     if (success) navigate("/tasks")
   }
 
-  if (taskLoading || notesLoading || projectLoading)
-    return <TaskDetailsSkeleton />
+  if (taskLoading || projectLoading) return <TaskDetailsSkeleton />
 
   return (
     <section className="animate-fade-in flex flex-col gap-8">
@@ -112,9 +113,11 @@ function TaskDetails() {
           </PrimaryButton>
         </div>
 
-        {notes.length === 0 ? (
+        {!notesHasData && notesLoading ? (
+          <UpdatingIndicator active message="Loading notes" />
+        ) : notesHasData && notes.length === 0 ? (
           <PlaceHolderCard message="No Notes Yet" />
-        ) : (
+        ) : notesHasData ? (
           <div className="flex flex-col gap-4">
             {notes.map((note) => (
               <div
@@ -148,7 +151,7 @@ function TaskDetails() {
               </div>
             ))}
           </div>
-        )}
+        ) : null}
       </div>
 
       <button

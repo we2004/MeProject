@@ -15,6 +15,8 @@ import useTasks from "../hooks/useTasks"
 import ProjectsSkeleton from "../components/loading/skeletons/ProjectsSkeleton"
 import ErrorCard from "../components/cards/ErrorCard"
 import PlaceHolderCard from "../components/cards/PlaceHolderCard"
+import useActionFetchIndicator from "../hooks/useActionFetchIndicator"
+import UpdatingIndicator from "../components/UpdatingIndicator"
 
 function Projects() {
   const { token } = useAuth()
@@ -27,6 +29,7 @@ function Projects() {
   const {
     projects,
     projectsLoading,
+    projectsFetching,
     addProjectLoading,
     addProject,
     error: projectsError
@@ -36,6 +39,8 @@ function Projects() {
     tasksLoading,
     error: tasksError
   } = useTasks(token, "all", "all", "asc")
+  const { isActionFetching, startAction } =
+    useActionFetchIndicator(projectsFetching)
 
   const [openMenu, setOpenMenu] = useState<MenuType | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -67,6 +72,7 @@ function Projects() {
   }, [searchParams, setSearchParams])
 
   const handleFilterSelect = (newFilter: ProjectStatusFilter) => {
+    startAction()
     setSearchParams((current) => {
       const params = new URLSearchParams(current)
       params.set("filter", newFilter)
@@ -76,6 +82,7 @@ function Projects() {
   }
 
   const handleToggleOrder = () => {
+    startAction()
     setSearchParams((current) => {
       const params = new URLSearchParams(current)
 
@@ -125,6 +132,10 @@ function Projects() {
         </DropdownButton>
 
         <SortByDateButton onToggle={handleToggleOrder} />
+        <UpdatingIndicator
+          active={isActionFetching}
+          message="Updating projects"
+        />
       </div>
 
       {projects.length === 0 ? (

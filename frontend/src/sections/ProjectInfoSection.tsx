@@ -14,7 +14,7 @@ type ProjectInfoSectionProps = {
     field: EditInfoFields,
     data: string | boolean | string[] | TaskStatus
   ) => Promise<boolean>
-  progress: number
+  progress?: number
   onDeleteTech: (tech: string) => Promise<void>
   onAddTech: (tech: string) => Promise<void>
   updateProjectLoading: boolean
@@ -75,13 +75,13 @@ function ProjectInfoSection({
         <div>
           <div className="mb-2 flex justify-between font-body text-sm text-primary-font/70">
             <span>Progress</span>
-            <span>{progress}%</span>
+            <span>{progress === undefined ? "—" : `${progress}%`}</span>
           </div>
 
           <div className="h-3 overflow-hidden rounded-full bg-primary/10">
             <div
               className={`h-full rounded-full bg-primary`}
-              style={{ width: `${progress}%` }}
+              style={{ width: `${progress ?? 0}%` }}
             />
           </div>
         </div>
