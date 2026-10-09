@@ -201,11 +201,15 @@ function useAttachmentFiles(token: string, projectId: number) {
 
   const cacheDownloadedFile = useCallback(
     async (id: number, type: AttachemntsTypes, blob: Blob) => {
-      let cached: CachedAttachment = { blob }
+      const normalizedBlob =
+        blob.type === MIME_TYPES[type]
+          ? blob
+          : new Blob([blob], { type: MIME_TYPES[type] })
+      let cached: CachedAttachment = { blob: normalizedBlob }
       if (type === "md" || type === "txt") {
-        const content = await blob.text()
+        const content = await normalizedBlob.text()
         cached = {
-          blob,
+          blob: normalizedBlob,
           text: content.slice(0, MAX_TEXT_CHARS),
           truncated: content.length > MAX_TEXT_CHARS
         }
