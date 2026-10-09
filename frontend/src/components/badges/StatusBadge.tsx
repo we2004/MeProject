@@ -10,6 +10,7 @@ import { useState } from "react"
 import type { TaskStatus } from "../../types/tasks"
 import type { ProjectStatus } from "../../types/projects"
 import type { EditInfoFields } from "../../types/common"
+import Spinner from "../loading/spinners/Spinner"
 type StatusBadgeProps = {
   status: TaskStatus | ProjectStatus
   interactive?: boolean
@@ -27,6 +28,7 @@ function StatusBadge({
   type
 }: StatusBadgeProps) {
   const [isOpen, setIsOpen] = useState(false)
+  const [isUpdating, setIsUpdating] = useState(false)
 
   const statusStyle = {
     active: "bg-blueT/25",
@@ -56,7 +58,7 @@ function StatusBadge({
     <div className="relative">
       <button
         type="button"
-        disabled={!interactive}
+        disabled={!interactive || isUpdating}
         onClick={handleBadgeClick}
         className={`${statusStyle[status]} flex items-center gap-2 rounded-full md:px-4 md:py-2 px-3 py-1 font-body text-sm font-medium capitalize text-primary-font transition-all duration-200 ${
           interactive ? "cursor-pointer hover:opacity-80" : "cursor-default"
@@ -74,26 +76,33 @@ function StatusBadge({
 
         {status}
 
-        {interactive && (
+        {isUpdating ? (
+          <Spinner size="sm" color="dark" />
+        ) : interactive ? (
           <ChevronDown
             className={`h-4 w-4 transition-transform duration-200 ${
               isOpen ? "rotate-180" : ""
             }`}
           />
-        )}
+        ) : null}
       </button>
 
       {interactive && isOpen && (
         <div className="absolute left-0 top-full z-20 mt-2 w-36 rounded-2xl border border-primary/15 bg-white p-2 shadow-lg">
           <button
             type="button"
+            disabled={isUpdating}
             onClick={async () => {
-              if (nextStatus === "cancelled" || nextStatus === "active") {
-                const success = await onStatusChange?.("cancelled", isCancelled)
-                if (success) setIsOpen(false)
-              } else {
-                const success = await onStatusChange?.("status", nextStatus)
-                if (success) setIsOpen(false)
+              setIsOpen(false)
+              setIsUpdating(true)
+              try {
+                if (nextStatus === "cancelled" || nextStatus === "active") {
+                  await onStatusChange?.("cancelled", isCancelled)
+                } else {
+                  await onStatusChange?.("status", nextStatus)
+                }
+              } finally {
+                setIsUpdating(false)
               }
             }}
             className="w-full rounded-xl px-3 py-2 text-left font-body text-sm capitalize text-primary-font transition-colors duration-200 hover:bg-primary hover:text-white"

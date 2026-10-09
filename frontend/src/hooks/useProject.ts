@@ -8,6 +8,44 @@ import {
 } from "../api/projects"
 import type { EditInfoFields } from "../types/common"
 
+function isProjectResponse(value: unknown): value is ProjectApiResponse {
+  if (!value || typeof value !== "object") return false
+  const project = value as Record<string, unknown>
+  return (
+    typeof project.id === "number" &&
+    typeof project.name === "string" &&
+    typeof project.description === "string" &&
+    typeof project.dueDate === "string" &&
+    typeof project.cancelled === "boolean" &&
+    Array.isArray(project.techStack) &&
+    (project.derivedStatus === "cancelled" ||
+      project.derivedStatus === "overdue" ||
+      project.derivedStatus === "active" ||
+      project.derivedStatus === "completed")
+  )
+}
+
+function updateCachedProjectStatus(
+  current: unknown,
+  projectId: number,
+  cancelled: boolean
+): unknown {
+  const update = (project: ProjectApiResponse) =>
+    project.id === projectId
+      ? {
+          ...project,
+          cancelled,
+          derivedStatus: cancelled ? "cancelled" : "active"
+        }
+      : project
+
+  if (isProjectResponse(current)) return update(current)
+  if (Array.isArray(current) && current.every(isProjectResponse)) {
+    return current.map(update)
+  }
+  return current
+}
+
 function useProject(token: string, projectId?: number) {
   const queryClient = useQueryClient()
   const [updateProjectLoading, setUpdateProjectLoading] = useState(false)
@@ -35,30 +73,94 @@ function useProject(token: string, projectId?: number) {
     data: string | boolean | string[]
   ) => {
     if (!projectId) return false
+    let projectSnapshots: [readonly unknown[], unknown][] | undefined
+    let projectSnapshot: ProjectApiResponse | undefined
+
     try {
       setMutationError("")
       setUpdateProjectLoading(true)
+
+      if (field === "cancelled" && typeof data === "boolean") {
+        await Promise.all([
+          queryClient.cancelQueries({ queryKey: ["projects", token] }),
+          queryClient.cancelQueries({
+            queryKey: ["project", token, projectId]
+          })
+        ])
+        projectSnapshots = queryClient.getQueriesData<unknown>({
+          queryKey: ["projects", token]
+        })
+        projectSnapshot = queryClient.getQueryData<ProjectApiResponse>([
+          "project",
+          token,
+          projectId
+        ])
+
+        queryClient.setQueryData<unknown>(
+          ["project", token, projectId],
+          (current: unknown) =>
+            updateCachedProjectStatus(current, projectId, data)
+        )
+        queryClient.setQueriesData<unknown>(
+          { queryKey: ["projects", token] },
+          (current: unknown) =>
+            updateCachedProjectStatus(current, projectId, data)
+        )
+      }
+
       await updateProjectData(projectId, field, data, token)
 
-      queryClient.setQueryData<ProjectApiResponse>(
-        ["project", token, projectId],
-        (currentProject) =>
-          currentProject ? { ...currentProject, [field]: data } : currentProject
-      )
-      queryClient.setQueriesData<ProjectApiResponse[]>(
-        { queryKey: ["projects", token] },
-        (projects) =>
-          projects?.map((project) =>
-            project.id === projectId ? { ...project, [field]: data } : project
-          )
-      )
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: ["project", token, projectId] }),
-        queryClient.invalidateQueries({ queryKey: ["projects", token] })
-      ])
+      if (field === "cancelled" && typeof data === "boolean") {
+        void queryClient.invalidateQueries({
+          queryKey: ["project", token, projectId]
+        })
+        void queryClient.invalidateQueries({
+          queryKey: ["projects", token]
+        })
+      } else {
+        queryClient.setQueryData<ProjectApiResponse>(
+          ["project", token, projectId],
+          (currentProject) =>
+            currentProject
+              ? { ...currentProject, [field]: data }
+              : currentProject
+        )
+        queryClient.setQueriesData<ProjectApiResponse[]>(
+          { queryKey: ["projects", token] },
+          (projects) =>
+            projects?.map((project) =>
+              project.id === projectId
+                ? { ...project, [field]: data }
+                : project
+            )
+        )
+        await Promise.all([
+          queryClient.invalidateQueries({
+            queryKey: ["project", token, projectId]
+          }),
+          queryClient.invalidateQueries({ queryKey: ["projects", token] })
+        ])
+      }
 
       return true
     } catch (e) {
+      if (field === "cancelled" && projectSnapshots) {
+        for (const [queryKey, previousData] of projectSnapshots) {
+          if (previousData !== undefined) {
+            queryClient.setQueryData(queryKey, previousData)
+          }
+        }
+        if (projectSnapshot !== undefined) {
+          queryClient.setQueryData(
+            ["project", token, projectId],
+            projectSnapshot
+          )
+        }
+        void queryClient.invalidateQueries({
+          queryKey: ["project", token, projectId]
+        })
+        void queryClient.invalidateQueries({ queryKey: ["projects", token] })
+      }
       setMutationError("Failed to update project")
       console.log(e)
       return false

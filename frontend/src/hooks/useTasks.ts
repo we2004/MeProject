@@ -41,6 +41,10 @@ function isTaskArray(value: unknown): value is Task[] {
   return Array.isArray(value) && value.every(isTask)
 }
 
+function isTaskStatus(value: unknown): value is TaskStatus {
+  return value === "open" || value === "completed"
+}
+
 function isTaskPageResponse(value: unknown): value is TaskApiResponse {
   if (!value || typeof value !== "object") return false
   const response = value as Record<string, unknown>
@@ -145,22 +149,69 @@ function useTasks(
     field: EditInfoFields,
     data: string | boolean | string[] | TaskStatus
   ) => {
+    let taskSnapshots: [readonly unknown[], unknown][] | undefined
+    let taskSnapshot: Task | undefined
+
     try {
       setMutationError("")
       setUpdateTaskLoading(true)
 
+      if (field === "status" && isTaskStatus(data)) {
+        await Promise.all([
+          queryClient.cancelQueries({ queryKey: ["tasks", token] }),
+          queryClient.cancelQueries({ queryKey: ["task", token, taskId] })
+        ])
+        taskSnapshots = queryClient.getQueriesData<unknown>({
+          queryKey: ["tasks", token]
+        })
+        taskSnapshot = queryClient.getQueryData<Task>([
+          "task",
+          token,
+          taskId
+        ])
+
+        queryClient.setQueriesData<unknown>(
+          { queryKey: ["tasks", token] },
+          (current: unknown) => updateCachedTasks(current, taskId, field, data)
+        )
+        queryClient.setQueryData<Task>(
+          ["task", token, taskId],
+          (current) =>
+            current ? { ...current, [field]: data } : current
+        )
+      }
+
       await updateTaskData(taskId, field, data, token)
 
-      queryClient.setQueriesData<unknown>(
-        { queryKey: ["tasks", token] },
-        (current: unknown) => updateCachedTasks(current, taskId, field, data)
-      )
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: ["task", token, taskId] }),
-        invalidateTaskAndProjectLists()
-      ])
+      if (field === "status" && isTaskStatus(data)) {
+        void queryClient.invalidateQueries({
+          queryKey: ["task", token, taskId]
+        })
+        void invalidateTaskAndProjectLists()
+      } else {
+        queryClient.setQueriesData<unknown>(
+          { queryKey: ["tasks", token] },
+          (current: unknown) => updateCachedTasks(current, taskId, field, data)
+        )
+        await Promise.all([
+          queryClient.invalidateQueries({ queryKey: ["task", token, taskId] }),
+          invalidateTaskAndProjectLists()
+        ])
+      }
       return true
     } catch (e) {
+      if (field === "status" && isTaskStatus(data) && taskSnapshots) {
+        for (const [queryKey, previousData] of taskSnapshots) {
+          if (previousData !== undefined) {
+            queryClient.setQueryData(queryKey, previousData)
+          }
+        }
+        if (taskSnapshot !== undefined) {
+          queryClient.setQueryData(["task", token, taskId], taskSnapshot)
+        }
+        void queryClient.invalidateQueries({ queryKey: ["task", token, taskId] })
+        void invalidateTaskAndProjectLists()
+      }
       setMutationError("Failed to update task")
       console.log(e)
       return false
