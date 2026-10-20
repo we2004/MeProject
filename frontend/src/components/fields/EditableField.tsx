@@ -12,11 +12,21 @@ type EditableFieldProps = {
     data: string | boolean | string[] | TaskStatus
   ) => Promise<boolean | undefined>
   loading?: boolean
+  maxDate?: string
+  dateError?: string
 }
 
-function EditableField({ data, field, onUpdate, loading }: EditableFieldProps) {
+function EditableField({
+  data,
+  field,
+  onUpdate,
+  loading,
+  maxDate,
+  dateError
+}: EditableFieldProps) {
   const [isEditField, setIsEditField] = useState(false)
   const [value, setValue] = useState("")
+  const [validationError, setValidationError] = useState("")
 
   let inputField: React.JSX.Element
   let dataDisplay: React.JSX.Element
@@ -59,9 +69,13 @@ function EditableField({ data, field, onUpdate, loading }: EditableFieldProps) {
     inputField = (
       <input
         type="date"
+        max={field === "dueDate" ? maxDate : undefined}
         className="rounded-2xl border border-primary/45 bg-white px-2 py-2 font-body text-primary-font outline-none transition-all duration-300 placeholder:text-primary-font/40 focus:border-primary focus:ring-2 focus:ring-primary/10"
         value={value}
-        onChange={(e) => setValue(e.target.value)}
+        onChange={(e) => {
+          setValue(e.target.value)
+          setValidationError("")
+        }}
       />
     )
 
@@ -79,37 +93,53 @@ function EditableField({ data, field, onUpdate, loading }: EditableFieldProps) {
   }
 
   return (
-    <div
-      className={`flex items-center gap-2 ${field === "description" ? "w-full" : "w-fit"}`}
-    >
-      {dataDisplay}
+    <div className={field === "description" || field === "dueDate" ? "w-full" : "w-fit"}>
+      <div className="flex items-center gap-2">
+        {dataDisplay}
 
-      {isEditField && inputField}
+        {isEditField && inputField}
 
-      {isEditField ? (
-        <button
-          disabled={loading}
-          onClick={async () => {
-            const success = await onUpdate(field, value)
-            if (success) setIsEditField(false)
-          }}
-        >
-          {loading ? (
-            <Spinner size="sm" />
-          ) : (
-            <Check className="mr-5 ml-1 h-5 w-5 cursor-pointer text-primary transition-all duration-300 hover:text-primary/40" />
-          )}
-        </button>
-      ) : (
-        <button
-          disabled={loading}
-          onClick={() => {
-            setValue(data)
-            setIsEditField(true)
-          }}
-        >
-          <Edit3 className="mr-5 ml-1 h-4 w-4 cursor-pointer text-primary transition-all duration-300 hover:text-primary/40" />
-        </button>
+        {isEditField ? (
+          <button
+            disabled={loading}
+            onClick={async () => {
+              if (
+                field === "dueDate" &&
+                maxDate &&
+                value > maxDate
+              ) {
+                setValidationError(
+                  `Task due date must be on or before the project due date (${dayjs(maxDate).format("MMMM D, YYYY")}).`
+                )
+                return
+              }
+              const success = await onUpdate(field, value)
+              if (success) setIsEditField(false)
+            }}
+          >
+            {loading ? (
+              <Spinner size="sm" />
+            ) : (
+              <Check className="me-5 ms-1 h-5 w-5 cursor-pointer text-primary transition-all duration-300 hover:text-primary/40" />
+            )}
+          </button>
+        ) : (
+          <button
+            disabled={loading}
+            onClick={() => {
+              setValue(data)
+              setValidationError("")
+              setIsEditField(true)
+            }}
+          >
+            <Edit3 className="me-5 ms-1 h-4 w-4 cursor-pointer text-primary transition-all duration-300 hover:text-primary/40" />
+          </button>
+        )}
+      </div>
+      {(validationError || dateError) && field === "dueDate" && (
+        <p className="mt-2 font-body text-sm text-redT" role="alert">
+          {validationError || dateError}
+        </p>
       )}
     </div>
   )

@@ -7,6 +7,7 @@ import {
   deleteProject
 } from "../api/projects"
 import type { EditInfoFields } from "../types/common"
+import { getApiErrorMessage } from "../utils/apiErrors"
 
 function isProjectResponse(value: unknown): value is ProjectApiResponse {
   if (!value || typeof value !== "object") return false
@@ -161,7 +162,7 @@ function useProject(token: string, projectId?: number) {
         })
         void queryClient.invalidateQueries({ queryKey: ["projects", token] })
       }
-      setMutationError("Failed to update project")
+      setMutationError(getApiErrorMessage(e, "Failed to update project"))
       console.log(e)
       return false
     } finally {
@@ -187,7 +188,7 @@ function useProject(token: string, projectId?: number) {
       ])
       return true
     } catch (e) {
-      setMutationError("Failed to delete project")
+      setMutationError(getApiErrorMessage(e, "Failed to delete project"))
       console.log(e)
       return false
     } finally {

@@ -4,12 +4,14 @@ import NoteSection from "../../sections/NoteSection"
 import { useState } from "react"
 import type { ProjectApiResponse } from "../../types/projects"
 import type { CreateTask, TaskStatus, TaskPriority } from "../../types/tasks"
+import { formatDateOnly, isDateAfter } from "../../utils/dateOnly"
 
 type AddTaskModalProps = {
   onClose: () => void
   projects: ProjectApiResponse[]
   onSubmit: (newItem: CreateTask, notes: string[]) => Promise<boolean>
   currentProjectId?: number
+  currentProjectDueDate?: string
   udpateTaskLoading: boolean
 }
 
@@ -18,6 +20,7 @@ function AddTaskModal({
   projects,
   onSubmit,
   currentProjectId,
+  currentProjectDueDate,
   udpateTaskLoading
 }: AddTaskModalProps) {
   const [taskTitle, setTaskTitle] = useState("")
@@ -26,7 +29,13 @@ function AddTaskModal({
   const [priority, setPriority] = useState<TaskPriority | "">("")
   const [description, setDescription] = useState("")
   const [notes, setNotes] = useState<string[]>([])
+  const [dueDateError, setDueDateError] = useState("")
   const status: TaskStatus = "open"
+  const selectedProjectId = currentProjectId ?? projectOption
+  const selectedProject = projects.find(
+    (project) => project.id === selectedProjectId
+  )
+  const projectDueDate = currentProjectDueDate ?? selectedProject?.dueDate
 
   const handleAddNote = (note: string) => {
     if (!note.trim()) return
@@ -45,14 +54,18 @@ function AddTaskModal({
       modalDescription="Add the details of the new Task."
       onClose={onClose}
       onSubmit={async () => {
-        let selectedProjectId = currentProjectId ?? projectOption
+        if (projectDueDate && isDateAfter(dueDate, projectDueDate)) {
+          setDueDateError(
+            `Task due date must be on or before the project due date (${formatDateOnly(projectDueDate)}).`
+          )
+          return
+        }
 
-        if (selectedProjectId === "") 
-          selectedProjectId = -1
+        const taskProjectId = selectedProjectId === "" ? -1 : selectedProjectId
 
         const newTask: CreateTask = {
           name: taskTitle,
-          projectId: selectedProjectId,
+          projectId: taskProjectId,
           status,
           priority: priority ?? "low",
           dueDate,
@@ -160,16 +173,25 @@ function AddTaskModal({
           </label>
 
           <div className="relative">
-            <CalendarDays className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-primary-font/50" />
+            <CalendarDays className="pointer-events-none absolute start-4 top-1/2 h-5 w-5 -translate-y-1/2 text-primary-font/50" />
 
             <input
               id="task-due-date"
               value={dueDate}
-              onChange={(e) => setDueDate(e.target.value)}
+              onChange={(e) => {
+                setDueDate(e.target.value)
+                setDueDateError("")
+              }}
               type="date"
-              className="w-full rounded-2xl border border-primary/15 bg-white py-3 pl-12 pr-4 font-body text-sm text-primary-font outline-none transition-all duration-300 focus:border-primary focus:ring-2 focus:ring-primary/10"
+              max={projectDueDate}
+              className="w-full rounded-2xl border border-primary/15 bg-white py-3 ps-12 pe-4 font-body text-sm text-primary-font outline-none transition-all duration-300 focus:border-primary focus:ring-2 focus:ring-primary/10"
             />
           </div>
+          {dueDateError && (
+            <p className="font-body text-sm text-redT" role="alert">
+              {dueDateError}
+            </p>
+          )}
         </div>
 
         {/* Priority */}

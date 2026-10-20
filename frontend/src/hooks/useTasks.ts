@@ -20,6 +20,7 @@ import {
   useQuery,
   useQueryClient
 } from "@tanstack/react-query"
+import { getApiErrorMessage } from "../utils/apiErrors"
 
 function isTask(value: unknown): value is Task {
   if (!value || typeof value !== "object") return false
@@ -136,7 +137,7 @@ function useTasks(
       return true
     } catch (e) {
       await invalidateTaskAndProjectLists()
-      setMutationError("Failed to add task")
+      setMutationError(getApiErrorMessage(e, "Failed to add task"))
       console.log(e)
       return false
     } finally {
@@ -212,7 +213,7 @@ function useTasks(
         void queryClient.invalidateQueries({ queryKey: ["task", token, taskId] })
         void invalidateTaskAndProjectLists()
       }
-      setMutationError("Failed to update task")
+      setMutationError(getApiErrorMessage(e, "Failed to update task"))
       console.log(e)
       return false
     } finally {
@@ -228,7 +229,7 @@ function useTasks(
       await invalidateTaskAndProjectLists()
       return true
     } catch (e) {
-      setMutationError("Failed to delete task")
+      setMutationError(getApiErrorMessage(e, "Failed to delete task"))
       console.log(e)
       return false
     } finally {

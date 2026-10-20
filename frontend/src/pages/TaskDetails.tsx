@@ -94,6 +94,7 @@ function TaskDetails() {
           onUpdate={updateTask}
           task={task}
           projectName={project.name}
+          projectDueDate={project.dueDate}
           updateTaskLoading={updateTaskLoading}
         />
       )}

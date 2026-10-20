@@ -18,6 +18,7 @@ type ProjectInfoSectionProps = {
   onDeleteTech: (tech: string) => Promise<void>
   onAddTech: (tech: string) => Promise<void>
   updateProjectLoading: boolean
+  dueDateError?: string
 }
 
 function ProjectInfoSection({
@@ -27,7 +28,8 @@ function ProjectInfoSection({
   progress,
   onDeleteTech,
   onAddTech,
-  updateProjectLoading
+  updateProjectLoading,
+  dueDateError
 }: ProjectInfoSectionProps) {
   const [isEditTechStack, setIsEditTechStack] = useState(false)
 
@@ -69,6 +71,7 @@ function ProjectInfoSection({
             field="dueDate"
             onUpdate={onUpdate}
             loading={updateProjectLoading}
+            dateError={dueDateError}
           />
         </div>
 

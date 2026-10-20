@@ -4,6 +4,7 @@ import { type TaskStatus } from "../types/tasks"
 import { deleteTask, getTaskById, updateTaskData } from "../api/tasks"
 import type { EditInfoFields } from "../types/common"
 import type { Task, TaskApiResponse } from "../types/tasks"
+import { getApiErrorMessage } from "../utils/apiErrors"
 
 function isTask(value: unknown): value is Task {
   if (!value || typeof value !== "object") return false
@@ -172,7 +173,7 @@ function useTask(token: string, taskId: number) {
         void queryClient.invalidateQueries({ queryKey: ["projects", token] })
         void queryClient.invalidateQueries({ queryKey: ["project", token] })
       }
-      setMutationError("Failed to update task")
+      setMutationError(getApiErrorMessage(e, "Failed to update task"))
       console.log(e)
       return false
     } finally {
@@ -195,7 +196,7 @@ function useTask(token: string, taskId: number) {
       ])
       return true
     } catch (e) {
-      setMutationError("Failed to delete task")
+      setMutationError(getApiErrorMessage(e, "Failed to delete task"))
       console.log(e)
       return false
     } finally {

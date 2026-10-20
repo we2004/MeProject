@@ -1,6 +1,8 @@
 import { Router, Response } from 'express';
+import { type PoolClient } from 'pg';
 import { getDb } from '../database/db';
 import { authenticate, AuthRequest } from '../middleware/auth';
+import { isDateOnly } from '../utils/dateOnly';
 
 const router = Router();
 router.use(authenticate);
@@ -135,13 +137,44 @@ router.put('/:id', async (req: AuthRequest, res: Response) => {
   const projectId = req.params.id;
   const { name, description, dueDate, cancelled, techStack } = req.body;
 
+  if (dueDate !== undefined && dueDate !== null && !isDateOnly(dueDate)) {
+    return res.status(400).json({ error: 'Due date must be a valid calendar date.' });
+  }
+
+  let client: PoolClient | undefined;
+  let transactionStarted = false;
+
   try {
-    const existingRes = await pool.query('SELECT id FROM projects WHERE id = $1 AND userId = $2', [projectId, userId]);
+    client = await pool.connect();
+    await client.query('BEGIN');
+    transactionStarted = true;
+    const existingRes = await client.query(
+      'SELECT id FROM projects WHERE id = $1 AND userId = $2 FOR UPDATE',
+      [projectId, userId]
+    );
     if (existingRes.rows.length === 0) {
+      await client.query('COMMIT');
       return res.status(404).json({ error: 'Project not found' });
     }
 
-    await pool.query(
+    if (dueDate !== undefined && dueDate !== null) {
+      const conflictsRes = await client.query(
+        'SELECT name, dueDate FROM tasks WHERE projectId = $1 AND userId = $2 AND dueDate > $3::date ORDER BY dueDate, name',
+        [projectId, userId, dueDate]
+      );
+
+      if (conflictsRes.rows.length > 0) {
+        const conflicts = conflictsRes.rows
+          .map((task) => `"${task.name}" (${task.duedate})`)
+          .join(', ');
+        await client.query('COMMIT');
+        return res.status(400).json({
+          error: `Project due date cannot be earlier than these task due dates: ${conflicts}.`
+        });
+      }
+    }
+
+    await client.query(
       'UPDATE projects SET name = COALESCE($1, name), description = COALESCE($2, description), dueDate = COALESCE($3, dueDate), cancelled = COALESCE($4, cancelled), techStack = COALESCE($5, techStack) WHERE id = $6 AND userId = $7',
       [
         name,
@@ -154,10 +187,20 @@ router.put('/:id', async (req: AuthRequest, res: Response) => {
       ]
     );
 
+    await client.query('COMMIT');
     res.json({ message: 'Project updated' });
   } catch (error) {
+    if (transactionStarted && client) {
+      try {
+        await client.query('ROLLBACK');
+      } catch (rollbackError) {
+        console.error(rollbackError);
+      }
+    }
     console.error(error);
     res.status(500).json({ error: 'Internal server error' });
+  } finally {
+    client?.release();
   }
 });
 

@@ -1,6 +1,8 @@
 import { Router, Response } from 'express';
+import { type PoolClient } from 'pg';
 import { getDb } from '../database/db';
 import { authenticate, AuthRequest } from '../middleware/auth';
+import { isDateOnly } from '../utils/dateOnly';
 
 const router = Router();
 router.use(authenticate);
@@ -122,6 +124,10 @@ router.post('/', async (req: AuthRequest, res: Response) => {
     return res.status(400).json({ error: 'Missing required fields' });
   }
 
+  if (!isDateOnly(dueDate)) {
+    return res.status(400).json({ error: 'Due date must be a valid calendar date.' });
+  }
+
   if (status !== 'open' && status !== 'completed') {
     return res.status(400).json({ error: 'Invalid status' });
   }
@@ -130,21 +136,48 @@ router.post('/', async (req: AuthRequest, res: Response) => {
     return res.status(400).json({ error: 'Invalid priority' });
   }
 
+  let client: PoolClient | undefined;
+  let transactionStarted = false;
+
   try {
-    const projectRes = await pool.query('SELECT id FROM projects WHERE id = $1 AND userId = $2', [projectId, userId]);
+    client = await pool.connect();
+    await client.query('BEGIN');
+    transactionStarted = true;
+    const projectRes = await client.query(
+      'SELECT id, dueDate FROM projects WHERE id = $1 AND userId = $2 FOR UPDATE',
+      [projectId, userId]
+    );
     if (projectRes.rows.length === 0) {
+      await client.query('COMMIT');
       return res.status(404).json({ error: 'Project not found or unauthorized' });
     }
 
-    const result = await pool.query(
+    if (dueDate > projectRes.rows[0].duedate) {
+      await client.query('COMMIT');
+      return res.status(400).json({
+        error: `Task due date must be on or before the project due date (${projectRes.rows[0].duedate}).`
+      });
+    }
+
+    const result = await client.query(
       'INSERT INTO tasks (name, projectId, status, priority, dueDate, description, userId) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id',
       [name, projectId, status, priority, dueDate, description, userId]
     );
 
+    await client.query('COMMIT');
     res.status(201).json({ id: result.rows[0].id, message: 'Task created' });
   } catch (error) {
+    if (transactionStarted && client) {
+      try {
+        await client.query('ROLLBACK');
+      } catch (rollbackError) {
+        console.error(rollbackError);
+      }
+    }
     console.error(error);
     res.status(500).json({ error: 'Internal server error' });
+  } finally {
+    client?.release();
   }
 });
 
@@ -162,28 +195,78 @@ router.put('/:id', async (req: AuthRequest, res: Response) => {
     return res.status(400).json({ error: 'Invalid priority' });
   }
 
+  if (dueDate !== undefined && dueDate !== null && !isDateOnly(dueDate)) {
+    return res.status(400).json({ error: 'Due date must be a valid calendar date.' });
+  }
+
+  if (projectId !== undefined && projectId !== null &&
+      (!Number.isInteger(Number(projectId)) || Number(projectId) < 1)) {
+    return res.status(400).json({ error: 'Invalid project' });
+  }
+
+  let client: PoolClient | undefined;
+  let transactionStarted = false;
+
   try {
-    const existingRes = await pool.query('SELECT id, projectId FROM tasks WHERE id = $1 AND userId = $2', [taskId, userId]);
+    client = await pool.connect();
+    await client.query('BEGIN');
+    transactionStarted = true;
+    const existingRes = await client.query(
+      'SELECT id, projectId, dueDate FROM tasks WHERE id = $1 AND userId = $2 FOR UPDATE',
+      [taskId, userId]
+    );
     if (existingRes.rows.length === 0) {
+      await client.query('COMMIT');
       return res.status(404).json({ error: 'Task not found' });
     }
 
-    if (projectId && projectId !== existingRes.rows[0].projectid) {
-      const projectRes = await pool.query('SELECT id FROM projects WHERE id = $1 AND userId = $2', [projectId, userId]);
-      if (projectRes.rows.length === 0) {
-        return res.status(404).json({ error: 'Target project not found or unauthorized' });
-      }
+    const existingTask = existingRes.rows[0];
+    const targetProjectId = Number(projectId ?? existingTask.projectid);
+    const projectIds = [...new Set([Number(existingTask.projectid), targetProjectId])]
+      .sort((a, b) => a - b);
+    const projectRes = await client.query(
+      'SELECT id, dueDate FROM projects WHERE id = ANY($1::int[]) AND userId = $2 ORDER BY id FOR UPDATE',
+      [projectIds, userId]
+    );
+    if (projectRes.rows.length !== projectIds.length) {
+      await client.query('COMMIT');
+      return res.status(404).json({ error: 'Target project not found or unauthorized' });
     }
 
-    await pool.query(
+    const targetProject = projectRes.rows.find(
+      (project) => Number(project.id) === targetProjectId
+    );
+    if (!targetProject) {
+      await client.query('COMMIT');
+      return res.status(404).json({ error: 'Target project not found or unauthorized' });
+    }
+    const effectiveDueDate = dueDate ?? existingTask.duedate;
+    if (effectiveDueDate > targetProject.duedate) {
+      await client.query('COMMIT');
+      return res.status(400).json({
+        error: `Task due date must be on or before the project due date (${targetProject.duedate}).`
+      });
+    }
+
+    await client.query(
       'UPDATE tasks SET name = COALESCE($1, name), projectId = COALESCE($2, projectId), status = COALESCE($3, status), priority = COALESCE($4, priority), dueDate = COALESCE($5, dueDate), description = COALESCE($6, description) WHERE id = $7 AND userId = $8',
       [name, projectId, status, priority, dueDate, description, taskId, userId]
     );
 
+    await client.query('COMMIT');
     res.json({ message: 'Task updated' });
   } catch (error) {
+    if (transactionStarted && client) {
+      try {
+        await client.query('ROLLBACK');
+      } catch (rollbackError) {
+        console.error(rollbackError);
+      }
+    }
     console.error(error);
     res.status(500).json({ error: 'Internal server error' });
+  } finally {
+    client?.release();
   }
 });
 

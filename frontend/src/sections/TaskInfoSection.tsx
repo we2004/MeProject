@@ -12,6 +12,7 @@ type TaskInfoSectionProps = {
     data: string | boolean | string[] | TaskStatus
   ) => Promise<boolean>
   projectName: string
+  projectDueDate: string
   updateTaskLoading: boolean
 }
 
@@ -19,6 +20,7 @@ function TaskInfoSection({
   task,
   onUpdate,
   projectName,
+  projectDueDate,
   updateTaskLoading
 }: TaskInfoSectionProps) {
   const displayStatus =
@@ -62,6 +64,7 @@ function TaskInfoSection({
             field="dueDate"
             onUpdate={onUpdate}
             loading={updateTaskLoading}
+            maxDate={projectDueDate}
           />
         </div>
 

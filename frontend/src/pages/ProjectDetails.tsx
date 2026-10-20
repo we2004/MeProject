@@ -19,6 +19,9 @@ import ProjectInfoSection from "../sections/ProjectInfoSection"
 import useProjects from "../hooks/useProjects"
 import useTasks from "../hooks/useTasks"
 import useAllTasks from "../hooks/useAllTasks"
+import type { EditInfoFields } from "../types/common"
+import type { TaskStatus } from "../types/tasks"
+import { formatDateOnly, isDateAfter } from "../utils/dateOnly"
 import ProjectsDetailsSkeleton from "../components/loading/skeletons/ProjectDetailsSkeleton"
 import ErrorCard from "../components/cards/ErrorCard"
 import PlaceHolderCard from "../components/cards/PlaceHolderCard"
@@ -49,11 +52,47 @@ function ProjectsDetails() {
   } = useTasks(token, "all", "all", "asc", Number(projectId))
   const {
     tasks: allProjectTasks,
+    tasksLoading: allProjectTasksLoading,
     tasksHasData: allProjectTasksHasData,
     error: allProjectTasksError
   } = useAllTasks(token, Number(projectId))
+  const [projectDueDateError, setProjectDueDateError] = useState("")
 
   const { projects, error: projectsError } = useProjects(token, "all", "asc")
+
+  const handleProjectUpdate = async (
+    field: EditInfoFields,
+    data: string | boolean | string[] | TaskStatus
+  ) => {
+    setProjectDueDateError("")
+
+    if (field === "dueDate" && typeof data === "string") {
+      if (allProjectTasksLoading || !allProjectTasksHasData || allProjectTasksError) {
+        setProjectDueDateError(
+          "The task due-date check could not be completed yet. Please wait for the task list to load and try again."
+        )
+        return false
+      }
+
+      const conflictingTasks = allProjectTasks.filter((task) =>
+        isDateAfter(task.dueDate, data)
+      )
+      if (conflictingTasks.length > 0) {
+        const details = conflictingTasks
+          .map(
+            (task) =>
+              `${task.name} (${formatDateOnly(task.dueDate)})`
+          )
+          .join(", ")
+        setProjectDueDateError(
+          `The project cannot end before these tasks: ${details}. Move their due dates first or choose a later project due date.`
+        )
+        return false
+      }
+    }
+
+    return updateProject(field, data)
+  }
 
   const {
     attachments,
@@ -190,6 +229,7 @@ function ProjectsDetails() {
           projects={projects}
           onSubmit={addTask}
           currentProjectId={Number(projectId)}
+          currentProjectDueDate={project?.dueDate}
           udpateTaskLoading={addTaskLoading}
         />
       )}
@@ -228,7 +268,8 @@ function ProjectsDetails() {
       {project && (
         <ProjectInfoSection
           project={project}
-          onUpdate={updateProject}
+          onUpdate={handleProjectUpdate}
+          dueDateError={projectDueDateError}
           progress={displayedProgress}
           onDeleteTech={handleDeleteTech}
           onAddTech={handleAddTech}
