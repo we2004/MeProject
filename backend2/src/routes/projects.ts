@@ -2,7 +2,7 @@ import { Router, Response } from 'express';
 import { type PoolClient } from 'pg';
 import { getDb } from '../database/db';
 import { authenticate, AuthRequest } from '../middleware/auth';
-import { isDateOnly } from '../utils/dateOnly';
+import { getLocalDateOnly, isDateOnly } from '../utils/dateOnly';
 
 const router = Router();
 router.use(authenticate);
@@ -10,7 +10,7 @@ router.use(authenticate);
 function computeProjectStatus(project: any) {
   if (project.cancelled) return 'cancelled';
   if (parseInt(project.totaltasks) > 0 && parseInt(project.totaltasks) === parseInt(project.completedtasks)) return 'completed';
-  if (new Date(project.duedate) < new Date(new Date().toDateString())) return 'overdue';
+  if (project.dueDateOnly < getLocalDateOnly()) return 'overdue';
   return 'active';
 }
 
@@ -22,7 +22,7 @@ router.get('/', async (req: AuthRequest, res: Response) => {
 
   try {
     const query = `
-      SELECT p.*,
+      SELECT p.*, TO_CHAR(p.dueDate, 'YYYY-MM-DD') AS "dueDateOnly",
         (SELECT COUNT(*) FROM tasks WHERE projectId = p.id) as totaltasks,
         (SELECT COUNT(*) FROM tasks WHERE projectId = p.id AND status = 'completed') as completedtasks
       FROM projects p
@@ -39,7 +39,7 @@ router.get('/', async (req: AuthRequest, res: Response) => {
         id: p.id,
         name: p.name,
         description: p.description,
-        dueDate: p.duedate,
+        dueDate: p.dueDateOnly,
         cancelled: Boolean(p.cancelled),
         techStack: typeof p.techstack === 'string' ? JSON.parse(p.techstack) : p.techstack,
         derivedStatus
@@ -51,9 +51,9 @@ router.get('/', async (req: AuthRequest, res: Response) => {
     }
 
     processed.sort((a, b) => {
-      const dateA = new Date(a.dueDate).getTime();
-      const dateB = new Date(b.dueDate).getTime();
-      return sortOrder === 'asc' ? dateA - dateB : dateB - dateA;
+      return sortOrder === 'asc'
+        ? a.dueDate.localeCompare(b.dueDate)
+        : b.dueDate.localeCompare(a.dueDate);
     });
 
     res.json(processed);
@@ -69,7 +69,7 @@ router.get('/:id', async (req: AuthRequest, res: Response) => {
 
   try {
     const query = `
-      SELECT p.*,
+      SELECT p.*, TO_CHAR(p.dueDate, 'YYYY-MM-DD') AS "dueDateOnly",
         (SELECT COUNT(*) FROM tasks WHERE projectId = p.id) as totaltasks,
         (SELECT COUNT(*) FROM tasks WHERE projectId = p.id AND status = 'completed') as completedtasks
       FROM projects p
@@ -87,7 +87,7 @@ router.get('/:id', async (req: AuthRequest, res: Response) => {
       id: p.id,
       name: p.name,
       description: p.description,
-      dueDate: p.duedate,
+      dueDate: p.dueDateOnly,
       cancelled: Boolean(p.cancelled),
       techStack: typeof p.techstack === 'string' ? JSON.parse(p.techstack) : p.techstack,
       derivedStatus: computeProjectStatus(p)
@@ -105,6 +105,10 @@ router.post('/', async (req: AuthRequest, res: Response) => {
 
   if (!name || !description || !dueDate) {
     return res.status(400).json({ error: 'Missing required fields' });
+  }
+
+  if (!isDateOnly(dueDate)) {
+    return res.status(400).json({ error: 'Due date must be a valid calendar date.' });
   }
 
   if (techStack && !Array.isArray(techStack)) {
@@ -159,13 +163,15 @@ router.put('/:id', async (req: AuthRequest, res: Response) => {
 
     if (dueDate !== undefined && dueDate !== null) {
       const conflictsRes = await client.query(
-        'SELECT name, dueDate FROM tasks WHERE projectId = $1 AND userId = $2 AND dueDate > $3::date ORDER BY dueDate, name',
+        `SELECT name, TO_CHAR(dueDate, 'YYYY-MM-DD') AS "dueDateOnly"
+         FROM tasks WHERE projectId = $1 AND userId = $2 AND dueDate > $3::date
+         ORDER BY dueDate, name`,
         [projectId, userId, dueDate]
       );
 
       if (conflictsRes.rows.length > 0) {
         const conflicts = conflictsRes.rows
-          .map((task) => `"${task.name}" (${task.duedate})`)
+          .map((task) => `"${task.name}" (${task.dueDateOnly})`)
           .join(', ');
         await client.query('COMMIT');
         return res.status(400).json({

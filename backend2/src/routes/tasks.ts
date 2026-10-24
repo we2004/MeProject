@@ -2,7 +2,12 @@ import { Router, Response } from 'express';
 import { type PoolClient } from 'pg';
 import { getDb } from '../database/db';
 import { authenticate, AuthRequest } from '../middleware/auth';
-import { isDateOnly } from '../utils/dateOnly';
+import {
+  getLocalDateOnly,
+  isDateOnly,
+  isDateOnOrBefore,
+  shouldValidateTaskProjectDeadline
+} from '../utils/dateOnly';
 
 const router = Router();
 router.use(authenticate);
@@ -20,7 +25,8 @@ router.get('/', async (req: AuthRequest, res: Response) => {
   const offset = (page - 1) * limit;
 
   try {
-    let query = 'SELECT * FROM tasks WHERE userId = $1';
+    let query = `SELECT *, TO_CHAR(dueDate, 'YYYY-MM-DD') AS "dueDateOnly"
+      FROM tasks WHERE userId = $1`;
     const params: any[] = [userId];
     let paramIndex = 2;
 
@@ -45,27 +51,27 @@ router.get('/', async (req: AuthRequest, res: Response) => {
       projectId: r.projectid,
       status: r.status,
       priority: r.priority,
-      dueDate: r.duedate,
+      dueDate: r.dueDateOnly,
       description: r.description,
       userId: r.userid
     }));
 
     // In-memory filter for status derived from dates
     let filtered = tasks;
-    const today = new Date(new Date().toDateString());
+    const today = getLocalDateOnly();
 
     if (status === 'completed') {
       filtered = tasks.filter(t => t.status === 'completed');
     } else if (status === 'overdue') {
-      filtered = tasks.filter(t => t.status === 'open' && new Date(t.dueDate) < today);
+      filtered = tasks.filter(t => t.status === 'open' && t.dueDate < today);
     } else if (status === 'open') {
-      filtered = tasks.filter(t => t.status === 'open' && new Date(t.dueDate) >= today);
+      filtered = tasks.filter(t => t.status === 'open' && t.dueDate >= today);
     }
 
     filtered.sort((a, b) => {
-      const dateA = new Date(a.dueDate).getTime();
-      const dateB = new Date(b.dueDate).getTime();
-      return sortOrder === 'asc' ? dateA - dateB : dateB - dateA;
+      return sortOrder === 'asc'
+        ? a.dueDate.localeCompare(b.dueDate)
+        : b.dueDate.localeCompare(a.dueDate);
     });
 
     const totalItems = filtered.length;
@@ -92,7 +98,11 @@ router.get('/:id', async (req: AuthRequest, res: Response) => {
   const userId = req.user!.id;
 
   try {
-    const result = await pool.query('SELECT * FROM tasks WHERE id = $1 AND userId = $2', [req.params.id, userId]);
+    const result = await pool.query(
+      `SELECT *, TO_CHAR(dueDate, 'YYYY-MM-DD') AS "dueDateOnly"
+       FROM tasks WHERE id = $1 AND userId = $2`,
+      [req.params.id, userId]
+    );
     const task = result.rows[0];
 
     if (!task) {
@@ -105,7 +115,7 @@ router.get('/:id', async (req: AuthRequest, res: Response) => {
       projectId: task.projectid,
       status: task.status,
       priority: task.priority,
-      dueDate: task.duedate,
+      dueDate: task.dueDateOnly,
       description: task.description,
       userId: task.userid
     });
@@ -144,7 +154,8 @@ router.post('/', async (req: AuthRequest, res: Response) => {
     await client.query('BEGIN');
     transactionStarted = true;
     const projectRes = await client.query(
-      'SELECT id, dueDate FROM projects WHERE id = $1 AND userId = $2 FOR UPDATE',
+      `SELECT id, TO_CHAR(dueDate, 'YYYY-MM-DD') AS "dueDateOnly"
+       FROM projects WHERE id = $1 AND userId = $2 FOR UPDATE`,
       [projectId, userId]
     );
     if (projectRes.rows.length === 0) {
@@ -152,10 +163,11 @@ router.post('/', async (req: AuthRequest, res: Response) => {
       return res.status(404).json({ error: 'Project not found or unauthorized' });
     }
 
-    if (dueDate > projectRes.rows[0].duedate) {
+    const projectDueDate = projectRes.rows[0].dueDateOnly;
+    if (!isDateOnOrBefore(dueDate, projectDueDate)) {
       await client.query('COMMIT');
       return res.status(400).json({
-        error: `Task due date must be on or before the project due date (${projectRes.rows[0].duedate}).`
+        error: `Task due date must be on or before the project due date (${projectDueDate}).`
       });
     }
 
@@ -212,7 +224,8 @@ router.put('/:id', async (req: AuthRequest, res: Response) => {
     await client.query('BEGIN');
     transactionStarted = true;
     const existingRes = await client.query(
-      'SELECT id, projectId, dueDate FROM tasks WHERE id = $1 AND userId = $2 FOR UPDATE',
+      `SELECT id, projectId, TO_CHAR(dueDate, 'YYYY-MM-DD') AS "dueDateOnly"
+       FROM tasks WHERE id = $1 AND userId = $2 FOR UPDATE`,
       [taskId, userId]
     );
     if (existingRes.rows.length === 0) {
@@ -225,7 +238,8 @@ router.put('/:id', async (req: AuthRequest, res: Response) => {
     const projectIds = [...new Set([Number(existingTask.projectid), targetProjectId])]
       .sort((a, b) => a - b);
     const projectRes = await client.query(
-      'SELECT id, dueDate FROM projects WHERE id = ANY($1::int[]) AND userId = $2 ORDER BY id FOR UPDATE',
+      `SELECT id, TO_CHAR(dueDate, 'YYYY-MM-DD') AS "dueDateOnly"
+       FROM projects WHERE id = ANY($1::int[]) AND userId = $2 ORDER BY id FOR UPDATE`,
       [projectIds, userId]
     );
     if (projectRes.rows.length !== projectIds.length) {
@@ -240,11 +254,15 @@ router.put('/:id', async (req: AuthRequest, res: Response) => {
       await client.query('COMMIT');
       return res.status(404).json({ error: 'Target project not found or unauthorized' });
     }
-    const effectiveDueDate = dueDate ?? existingTask.duedate;
-    if (effectiveDueDate > targetProject.duedate) {
+    const effectiveDueDate = dueDate ?? existingTask.dueDateOnly;
+    const targetProjectDueDate = targetProject.dueDateOnly;
+    if (
+      shouldValidateTaskProjectDeadline(dueDate, projectId) &&
+      !isDateOnOrBefore(effectiveDueDate, targetProjectDueDate)
+    ) {
       await client.query('COMMIT');
       return res.status(400).json({
-        error: `Task due date must be on or before the project due date (${targetProject.duedate}).`
+        error: `Task due date must be on or before the project due date (${targetProjectDueDate}).`
       });
     }
 
