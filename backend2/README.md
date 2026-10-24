@@ -50,27 +50,57 @@ SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
 
 ## Local Development
 
-1. Install dependencies:
+1. Install dependencies if needed:
    ```bash
    npm install
    ```
 
-2. Configure `.env` with your PostgreSQL database URL (from Supabase).
+2. Create `backend2/.env.development.local` using the existing `DATABASE_URL`,
+   `SUPABASE_URL`, and `SUPABASE_SERVICE_ROLE_KEY` values from `.env`. Set
+   `NODE_ENV=development`, `PORT=3000`, and a separate development-only
+   `JWT_SECRET`. Do not change `.env` or commit either environment file.
 
-3. Setup the database schema:
-   Run the SQL commands from `database/schema.sql` in your Supabase SQL Editor.
+   This development configuration deliberately uses the existing Supabase
+   database and Storage bucket. Local API activity therefore shares data with
+   the deployed    application: records you create or edit, deletions of existing records, and
+   uploaded files affect the same data and may remain or be visible in the
+   deployed application. Use a test account and avoid destructive tests. Do not
+   run the migration or demo seed scripts against this shared database.
 
-4. (Optional) Migrate SQLite data:
-   ```bash
-   npx ts-node scripts/migrate-sqlite-to-postgres.ts
-   ```
-
-5. Start the backend:
-   ```bash
+3. Start the backend in this directory:
+   ```powershell
    npm run dev
    ```
 
+   The development script loads only `.env.development.local`; it does not fall
+   back to `.env`. The separate development JWT secret keeps development login
+   tokens distinct. Check that the server responds before starting the frontend:
+   ```powershell
+   Invoke-RestMethod http://localhost:3000/health
+   ```
+
+4. In another terminal, start the frontend:
+   ```powershell
+   Set-Location ..\frontend
+   npm run dev -- --host 127.0.0.1
+   ```
+
+   Vite development mode loads `frontend/.env.development`, which directs API
+   requests to `http://localhost:3000`. This file contains no credentials and
+   is not used for production builds. Verify requests in
+   browser developer tools under Network; their host should be `localhost:3000`,
+   not the Cloud Run hostname.
+
+5. Stop each server with `Ctrl+C` in its terminal. To return to the deployed
+   configuration, stop the local servers and use the deployed Vercel site.
+   The local overrides are only used by development commands; production builds
+   and the existing `frontend/.env` and `backend2/.env` files remain unchanged.
+   No feature changes need to be reverted.
+
 ## SQLite Migration
+
+Do not run this migration against the shared Supabase database unless you
+explicitly intend to copy the legacy SQLite records into it.
 
 You can migrate data from the old `backend/database.sqlite` without modifying it.
 Ensure the `.env` has a valid `DATABASE_URL`, then run the migration script:

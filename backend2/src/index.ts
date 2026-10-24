@@ -9,7 +9,12 @@ import tasksRoutes from './routes/tasks';
 import notesRoutes from './routes/notes';
 import attachmentsRoutes from './routes/attachments';
 
-dotenv.config();
+dotenv.config({
+  path: path.resolve(
+    process.cwd(),
+    process.env.NODE_ENV === 'development' ? '.env.development.local' : '.env'
+  ),
+});
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -54,4 +59,3 @@ async function startServer() {
 }
 
 startServer();
-
